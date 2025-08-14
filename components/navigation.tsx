@@ -36,11 +36,11 @@ function ShoppingCartNavItem() {
 
 export function Navigation() {
   return (
-    <header className="relative bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-40">
+    <header className="relative bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-40" suppressHydrationWarning>
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
+        <div className="flex h-20 items-center justify-between" suppressHydrationWarning>
           {/* Mobile menu button */}
-          <div className="flex flex-1 items-center lg:hidden">
+          <div className="flex flex-1 items-center lg:hidden" suppressHydrationWarning>
             <button type="button" className="-ml-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 p-3 shadow-lg">
               <Link
                 href="/"
@@ -52,20 +52,20 @@ export function Navigation() {
           </div>
 
           {/* Logo */}
-          <div className="hidden lg:flex">
+          <div className="hidden lg:flex" suppressHydrationWarning>
             <Link
               href="/"
               className="flex items-center justify-center group"
             >
-              <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+              <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105" suppressHydrationWarning>
                 <ShoppingBagIcon className="h-8 w-8 text-white" />
               </div>
             </Link>
           </div>
 
           {/* Centered Navigation */}
-          <div className="hidden lg:flex flex-1 justify-center">
-            <div className="flex space-x-2">
+          <div className="hidden lg:flex flex-1 justify-center" suppressHydrationWarning>
+            <div className="flex space-x-2" suppressHydrationWarning>
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -80,10 +80,10 @@ export function Navigation() {
           </div>
 
           {/* Search and Cart */}
-          <div className="flex flex-1 items-center justify-end space-x-4">
+          <div className="flex flex-1 items-center justify-end space-x-4" suppressHydrationWarning>
             {/* Search Bar */}
-            <div className="hidden lg:flex items-center">
-              <div className="relative">
+            <div className="hidden lg:flex items-center" suppressHydrationWarning>
+              <div className="relative" suppressHydrationWarning>
                 <input
                   type="text"
                   placeholder="البحث..."
@@ -94,7 +94,7 @@ export function Navigation() {
             </div>
 
             {/* Cart */}
-            <div className="ml-4 flow-root lg:ml-6">
+            <div className="ml-4 flow-root lg:ml-6" suppressHydrationWarning>
               <Suspense fallback={<ShoppingCartNavItemFallback />}>
                 <ShoppingCartNavItem />
               </Suspense>

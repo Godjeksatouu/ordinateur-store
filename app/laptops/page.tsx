@@ -5,6 +5,7 @@ import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';
 import { fetchProducts, Product } from '@/lib/products';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function LaptopsPage() {
@@ -62,10 +63,24 @@ export default function LaptopsPage() {
               >
                 {/* Product Image */}
                 <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <ShoppingBagIcon className="h-20 w-20 text-gray-400 group-hover:text-gray-600 transition-colors duration-300" />
-                  </div>
-                  
+                  {product.images && product.images.length > 0 ? (
+                    <Image
+                      src={`http://localhost:5000${product.images[0]}`}
+                      alt={product.name_ar}
+                      fill
+                      className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      onError={(e) => {
+                        // Fallback to placeholder if image fails to load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <ShoppingBagIcon className="h-20 w-20 text-gray-400 group-hover:text-gray-600 transition-colors duration-300" />
+                    </div>
+                  )}
+
                   {/* Overlay on hover */}
                   <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${
                     hoveredProduct === product.id ? 'opacity-100' : 'opacity-0'
@@ -79,6 +94,13 @@ export default function LaptopsPage() {
                       </Link>
                     </div>
                   </div>
+
+                  {/* Fallback icon for failed images */}
+                  {product.images && product.images.length > 0 && (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <ShoppingBagIcon className="h-12 w-12 text-white/80" />
+                    </div>
+                  )}
                 </div>
 
                 {/* Product Info */}

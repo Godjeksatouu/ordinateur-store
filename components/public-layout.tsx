@@ -2,18 +2,24 @@ import { Footer } from '@/components/footer';
 import { Navigation } from '@/components/navigation';
 import { WhatsAppButton } from '@/components/whatsapp-button';
 import { FreeDelivery } from '@/app/free-delivery';
-import { ClientOnly } from '@/components/client-only';
+import { HydrationSafe } from '@/components/hydration-safe';
 
 export function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white">
-      <FreeDelivery show={true} />
-      <Navigation />
+    <div className="bg-white" suppressHydrationWarning>
+      <HydrationSafe>
+        <FreeDelivery show={true} />
+      </HydrationSafe>
+      <HydrationSafe>
+        <Navigation />
+      </HydrationSafe>
       {children}
-      <Footer />
-      <ClientOnly>
+      <HydrationSafe>
+        <Footer />
+      </HydrationSafe>
+      <HydrationSafe>
         <WhatsAppButton />
-      </ClientOnly>
+      </HydrationSafe>
     </div>
   );
 }

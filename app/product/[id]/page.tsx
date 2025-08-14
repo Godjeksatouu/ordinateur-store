@@ -246,24 +246,7 @@ export default function ProductDetailsPage() {
                       <span className="text-lg font-semibold text-gray-900">{product.os}</span>
                     </div>
                   )}
-                  {product.specifications.processor && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-amber-50 transition-colors duration-300 md:col-span-2">
-                      <span className="text-sm text-gray-600 block">المعالج</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.specifications.processor}</span>
-                    </div>
-                  )}
-                  {product.specifications.display && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-amber-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">الشاشة</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.specifications.display}</span>
-                    </div>
-                  )}
-                  {product.specifications.graphics && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-amber-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">كرت الشاشة</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.specifications.graphics}</span>
-                    </div>
-                  )}
+
                 </div>
               </div>
 
@@ -272,7 +255,7 @@ export default function ProductDetailsPage() {
                   <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
                   الوصف
                 </h2>
-                <p className="text-gray-700 leading-relaxed text-lg">{product.descriptionArabic}</p>
+                <p className="text-gray-700 leading-relaxed text-lg">{product.description_ar}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">

@@ -2,6 +2,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Prevent hydration mismatches from browser extensions */
+[bis_skin_checked] {
+  /* This rule helps prevent hydration mismatches caused by browser extensions */
+}
+
 @theme {
   --color-link: rgb(0 112 243 / 1);
   --color-success: rgb(0 112 243 / 1);

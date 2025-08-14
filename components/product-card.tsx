@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Product } from '@/lib/products';
 import { ShoppingBagIcon, StarIcon } from '@heroicons/react/24/outline';
 
@@ -28,14 +29,35 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
 
       {/* Product Image */}
       <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <ShoppingBagIcon className="h-20 w-20 text-gray-300 group-hover:text-amber-500 transition-all duration-300 transform group-hover:scale-110" />
-        </div>
+        {product.images && product.images.length > 0 ? (
+          <Image
+            src={`http://localhost:5000${product.images[0]}`}
+            alt={product.name_ar}
+            fill
+            className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={(e) => {
+              // Fallback to placeholder if image fails to load
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ShoppingBagIcon className="h-20 w-20 text-gray-300 group-hover:text-amber-500 transition-all duration-300 transform group-hover:scale-110" />
+          </div>
+        )}
 
         {/* Gradient Overlay */}
         <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent transition-opacity duration-300 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`} />
+
+        {/* Fallback icon for failed images */}
+        {product.images && product.images.length > 0 && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <ShoppingBagIcon className="h-12 w-12 text-white/80" />
+          </div>
+        )}
       </div>
 
       <div className="p-6">

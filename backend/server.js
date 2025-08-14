@@ -291,7 +291,23 @@ app.put('/api/orders/:id/status', authenticateToken, requireRole(['gestion_comma
 app.get('/api/products', async (req, res) => {
   try {
     const [products] = await db.execute('SELECT * FROM products ORDER BY created_at DESC');
-    res.json(products);
+
+    // Parse JSON images for each product
+    const productsWithParsedImages = products.map(product => {
+      if (product.images) {
+        try {
+          product.images = JSON.parse(product.images);
+        } catch (e) {
+          console.error('Error parsing images for product', product.id, e);
+          product.images = [];
+        }
+      } else {
+        product.images = [];
+      }
+      return product;
+    });
+
+    res.json(productsWithParsedImages);
   } catch (error) {
     console.error('Get products error:', error);
     res.status(500).json({ error: 'Failed to fetch products' });
