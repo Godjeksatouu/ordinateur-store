@@ -59,7 +59,7 @@ export default function LaptopsPage() {
               {products.map((product) => (
               <div
                 key={product.id}
-                className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden"
+                className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden flex flex-col h-full"
                 onMouseEnter={() => setHoveredProduct(product.id)}
                 onMouseLeave={() => setHoveredProduct(null)}
               >
@@ -106,14 +106,14 @@ export default function LaptopsPage() {
                 </div>
 
                 {/* Product Info */}
-                <div className="p-6 flex flex-col h-full">
-                  <div className="flex-grow">
+                <div className="p-6 flex flex-col flex-1">
+                  <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 line-clamp-2">
                       {product.name}
                     </h3>
 
-                    {/* Specifications Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
+                    {/* Specifications Grid - clean and consistent */}
+                    <div className="grid grid-cols-2 gap-3 mb-6">
                       {product.ram && (
                         <div className="bg-gray-50 rounded-lg p-2">
                           <div className="text-xs text-gray-500 mb-1">{t('ram')}</div>
@@ -126,11 +126,16 @@ export default function LaptopsPage() {
                           <div className="text-sm font-semibold text-gray-900">{product.storage}</div>
                         </div>
                       )}
-
-                      {product.graphics && (
+                      {product.processor && (
                         <div className="bg-gray-50 rounded-lg p-2">
-                          <div className="text-xs text-gray-500 mb-1">{t('graphics')}</div>
-                          <div className="text-sm font-semibold text-gray-900 line-clamp-1">{product.graphics}</div>
+                          <div className="text-xs text-gray-500 mb-1">{t('processor')}</div>
+                          <div className="text-sm font-semibold text-gray-900 line-clamp-1">{product.processor}</div>
+                        </div>
+                      )}
+                      {product.os && (
+                        <div className="bg-gray-50 rounded-lg p-2">
+                          <div className="text-xs text-gray-500 mb-1">{t('os')}</div>
+                          <div className="text-sm font-semibold text-gray-900 line-clamp-1">{product.os}</div>
                         </div>
                       )}
                     </div>

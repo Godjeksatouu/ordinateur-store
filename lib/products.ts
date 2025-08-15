@@ -26,7 +26,16 @@ export async function fetchProducts(): Promise<Product[]> {
     if (!response.ok) {
       throw new Error('Failed to fetch products');
     }
-    return await response.json();
+    const data = await response.json();
+    // Normalize numeric fields and arrays
+    return (data || []).map((p: any) => ({
+      ...p,
+      old_price: p?.old_price != null ? Number(p.old_price) : 0,
+      new_price: p?.new_price != null ? Number(p.new_price) : 0,
+      images: Array.isArray(p?.images) ? p.images : [],
+      main_images: Array.isArray(p?.main_images) ? p.main_images : undefined,
+      optional_images: Array.isArray(p?.optional_images) ? p.optional_images : undefined,
+    })) as Product[];
   } catch (error) {
     console.error('Error fetching products:', error);
     return [];
@@ -39,7 +48,16 @@ export async function getProductById(id: string): Promise<Product | undefined> {
     if (!response.ok) {
       throw new Error('Failed to fetch product');
     }
-    return await response.json();
+    const p = await response.json();
+    if (!p) return undefined;
+    return {
+      ...p,
+      old_price: p?.old_price != null ? Number(p.old_price) : 0,
+      new_price: p?.new_price != null ? Number(p.new_price) : 0,
+      images: Array.isArray(p?.images) ? p.images : [],
+      main_images: Array.isArray(p?.main_images) ? p.main_images : undefined,
+      optional_images: Array.isArray(p?.optional_images) ? p.optional_images : undefined,
+    } as Product;
   } catch (error) {
     console.error('Error fetching product:', error);
     return undefined;
