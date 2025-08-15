@@ -145,7 +145,7 @@ function ProductsManager() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: '', ram: '', storage: '', screen: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+    name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
   });
   const [images, setImages] = useState<FileList | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -196,7 +196,7 @@ function ProductsManager() {
       if (response.ok) {
         fetchProducts();
         setFormData({
-          name: '', ram: '', storage: '', screen: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+          name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
         });
         setImages(null);
         setEditingId(null);
@@ -211,7 +211,6 @@ function ProductsManager() {
       name: product.name,
       ram: product.ram,
       storage: product.storage,
-      screen: product.screen,
       graphics: product.graphics,
       os: product.os,
       processor: product.processor || '',
@@ -280,15 +279,7 @@ function ProductsManager() {
             onChange={(e) => setFormData({...formData, storage: e.target.value})}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">الشاشة</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="مثال: 15.6 inch FHD"
-            value={formData.screen}
-            onChange={(e) => setFormData({...formData, screen: e.target.value})}
-          />
-        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">كرت الشاشة</label>
           <input
@@ -397,7 +388,7 @@ function ProductsManager() {
               onClick={() => {
                 setEditingId(null);
                 setFormData({
-                  name: '', ram: '', storage: '', screen: '', graphics: '', os: '', old_price: '', new_price: '', description: ''
+                  name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
                 });
               }}
               className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold"
