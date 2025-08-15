@@ -145,7 +145,7 @@ function ProductsManager() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: '', name_ar: '', ram: '', storage: '', screen: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+    name: '', ram: '', storage: '', screen: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
   });
   const [images, setImages] = useState<FileList | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -196,7 +196,7 @@ function ProductsManager() {
       if (response.ok) {
         fetchProducts();
         setFormData({
-          name: '', name_ar: '', ram: '', storage: '', screen: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+          name: '', ram: '', storage: '', screen: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
         });
         setImages(null);
         setEditingId(null);
@@ -209,7 +209,6 @@ function ProductsManager() {
   const handleEdit = (product: any) => {
     setFormData({
       name: product.name,
-      name_ar: product.name_ar,
       ram: product.ram,
       storage: product.storage,
       screen: product.screen,
@@ -398,7 +397,7 @@ function ProductsManager() {
               onClick={() => {
                 setEditingId(null);
                 setFormData({
-                  name: '', name_ar: '', ram: '', storage: '', screen: '', graphics: '', os: '', old_price: '', new_price: '', description: '', description_ar: ''
+                  name: '', ram: '', storage: '', screen: '', graphics: '', os: '', old_price: '', new_price: '', description: ''
                 });
               }}
               className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold"
@@ -422,7 +421,7 @@ function ProductsManager() {
           <tbody>
             {products.map((product: any) => (
               <tr key={product.id} className="border-b">
-                <td className="px-4 py-3">{product.name_ar}</td>
+                <td className="px-4 py-3">{product.name}</td>
                 <td className="px-4 py-3">{product.new_price?.toLocaleString()} دج</td>
                 <td className="px-4 py-3 text-sm">
                   {product.ram} | {product.storage}

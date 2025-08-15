@@ -122,7 +122,7 @@ export default function ProductDetailsPage() {
           city: orderForm.city,
           address: orderForm.address,
           productId: product.id,
-          productName: product.name_ar
+          productName: product.name
         }),
       });
 
@@ -161,7 +161,7 @@ export default function ProductDetailsPage() {
                     <div className="h-full w-full overflow-hidden">
                       <Image
                         src={product.images && product.images.length > 0 ? `http://localhost:5000${product.images[activeIndex]}` : '/images/hero.png'}
-                        alt={product.name_ar}
+                        alt={product.name}
                         fill
                         className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
                         sizes="(max-width: 768px) 100vw, 50vw"
@@ -208,7 +208,7 @@ export default function ProductDetailsPage() {
             <div className="space-y-8">
               <div className="space-y-4">
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                  {product.name_ar}
+                  {product.name}
                 </h1>
 
                 <div className="flex items-center space-x-4">

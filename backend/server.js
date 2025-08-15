@@ -63,7 +63,6 @@ async function createTables() {
       CREATE TABLE IF NOT EXISTS products (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        name_ar VARCHAR(255) NOT NULL,
         ram VARCHAR(50),
         storage VARCHAR(50),
         screen VARCHAR(100),
@@ -80,19 +79,25 @@ async function createTables() {
       )
     `);
 
-    // Ensure optional 'processor' column exists (for CPU model)
+    // Ensure schema: add processor if missing, drop name_ar if exists
     try {
-      await db.execute('ALTER TABLE products ADD COLUMN IF NOT EXISTS processor VARCHAR(100)');
-    } catch (e) {
-      // Some MySQL versions don't support IF NOT EXISTS; try a safer check
-      try {
-        const [cols] = await db.execute("SHOW COLUMNS FROM products LIKE 'processor'");
-        if (cols.length === 0) {
-          await db.execute('ALTER TABLE products ADD COLUMN processor VARCHAR(100)');
-        }
-      } catch (ee) {
-        console.warn('⚠️ Could not ensure processor column exists:', ee.message || ee);
+      const [procCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'processor'");
+      // @ts-ignore
+      if (Array.isArray(procCol) && procCol.length === 0) {
+        await db.execute('ALTER TABLE products ADD COLUMN processor VARCHAR(100)');
       }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure processor column exists:', e.message || e);
+    }
+
+    try {
+      const [nameArCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'name_ar'");
+      // @ts-ignore
+      if (Array.isArray(nameArCol) && nameArCol.length > 0) {
+        await db.execute('ALTER TABLE products DROP COLUMN name_ar');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not drop name_ar column (may not exist):', e.message || e);
     }
 
     // Clients table
@@ -332,17 +337,14 @@ app.get('/api/products', async (req, res) => {
 
 app.post('/api/products', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.array('images', 5), async (req, res) => {
   try {
-    let { name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
-
-    // Default Arabic name to English name if not provided
-    if (!name_ar || name_ar.trim() === '') name_ar = name;
+    let { name, ram, storage, screen, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
 
     const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
 
     const [result] = await db.execute(
-      `INSERT INTO products (name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, images, description, description_ar)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, JSON.stringify(images), description, description_ar]
+      `INSERT INTO products (name, ram, storage, screen, graphics, os, processor, old_price, new_price, images, description, description_ar)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, ram, storage, screen, graphics, os, processor, old_price, new_price, JSON.stringify(images), description, description_ar]
     );
 
     res.json({ success: true, productId: result.insertId, message: 'Product created successfully' });
@@ -355,9 +357,7 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
 app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.array('images', 5), async (req, res) => {
   try {
     const { id } = req.params;
-    let { name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
-
-    if (!name_ar || name_ar.trim() === '') name_ar = name;
+    let { name, ram, storage, screen, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
 
     let images = [];
     if (req.files && req.files.length > 0) {
@@ -367,8 +367,8 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
     }
 
     await db.execute(
-      `UPDATE products SET name=?, name_ar=?, ram=?, storage=?, screen=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, description=?, description_ar=? WHERE id=?`,
-      [name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, JSON.stringify(images), description, description_ar, id]
+      `UPDATE products SET name=?, ram=?, storage=?, screen=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, description=?, description_ar=? WHERE id=?`,
+      [name, ram, storage, screen, graphics, os, processor, old_price, new_price, JSON.stringify(images), description, description_ar, id]
     );
 
     res.json({ success: true, message: 'Product updated successfully' });

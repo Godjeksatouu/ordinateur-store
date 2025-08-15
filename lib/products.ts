@@ -1,12 +1,12 @@
 export interface Product {
   id: string;
   name: string;
-  name_ar: string;
   ram: string;
   storage: string;
   screen: string;
   graphics: string;
   os: string;
+  processor?: string;
   old_price: number;
   new_price: number;
   images: string[];
@@ -55,7 +55,6 @@ export function searchProducts(products: Product[], query: string): Product[] {
   const lowercaseQuery = query.toLowerCase();
   return products.filter(product =>
     product.name.toLowerCase().includes(lowercaseQuery) ||
-    product.name_ar.includes(query) ||
     (product.description && product.description.toLowerCase().includes(lowercaseQuery)) ||
     (product.description_ar && product.description_ar.includes(query))
   );

@@ -68,7 +68,7 @@ export default function LaptopsPage() {
                   {product.images && product.images.length > 0 ? (
                     <Image
                       src={`http://localhost:5000${product.images[0]}`}
-                      alt={product.name_ar}
+                      alt={product.name}
                       fill
                       className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -92,7 +92,7 @@ export default function LaptopsPage() {
                         href={`/product/${product.id}`}
                         className="w-full bg-white text-gray-900 px-4 py-2 rounded-lg font-semibold text-center block hover:bg-gray-100 transition-colors duration-200"
                       >
-                        عرض التفاصيل
+                        {t('viewDetails')}
                       </Link>
                     </div>
                   </div>
@@ -109,7 +109,7 @@ export default function LaptopsPage() {
                 <div className="p-6 flex flex-col h-full">
                   <div className="flex-grow">
                     <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 line-clamp-2">
-                      {product.name_ar}
+                      {product.name}
                     </h3>
 
                     {/* Specifications Grid */}

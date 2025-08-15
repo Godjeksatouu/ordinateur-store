@@ -34,7 +34,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
         {product.images && product.images.length > 0 ? (
           <Image
             src={`http://localhost:5000${product.images[0]}`}
-            alt={product.name_ar}
+            alt={product.name}
             fill
             className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -65,23 +65,31 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
       <div className="p-6">
         {/* Product Title */}
         <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 leading-tight">
-          {product.name_ar}
+          {product.name}
         </h3>
 
         {/* Specifications */}
         <div className="space-y-2 mb-4">
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">الذاكرة:</span>
+            <span className="text-gray-600">{t('ram')}:</span>
             <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">
               {product.ram}
             </span>
           </div>
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">التخزين:</span>
+            <span className="text-gray-600">{t('storage')}:</span>
             <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">
               {product.storage}
             </span>
           </div>
+          {product.processor && (
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">{t('processor')}:</span>
+              <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">
+                {product.processor}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Rating */}
@@ -95,19 +103,16 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
         </div>
 
         {/* Price */}
-        {showPrice && (
-          <div className="mb-4">
-            {product.old_price && product.old_price > 0 && (
-              <div className="text-sm text-gray-500 line-through">
-                {product.old_price.toLocaleString()} دج
-              </div>
-            )}
-            <div className="text-2xl font-bold text-amber-600">
-              {product.new_price.toLocaleString()}
-              <span className="text-sm text-gray-500 mr-1">دج</span>
+        <div className="mb-4">
+          {product.old_price && product.old_price > 0 && (
+            <div className="text-sm text-gray-500 line-through">
+              {product.old_price.toLocaleString()} {t('currency')}
             </div>
+          )}
+          <div className="text-2xl font-bold text-amber-600">
+            {product.new_price.toLocaleString()} <span className="text-sm text-gray-500 mr-1">{t('currency')}</span>
           </div>
-        )}
+        </div>
 
         {/* Action Button */}
         <Link
