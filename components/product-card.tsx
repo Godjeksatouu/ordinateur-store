@@ -32,20 +32,34 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
       {/* Product Image */}
       <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         {product.images && product.images.length > 0 ? (
-          <Image
-            src={`http://localhost:5000${product.images[0]}`}
-            alt={product.name}
-            fill
-            className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            onError={(e) => {
-              // Fallback to placeholder if image fails to load
-              e.currentTarget.style.display = 'none';
-            }}
-          />
+          <>
+            <Image
+              src={`http://localhost:5000${product.images[0]}`}
+              alt={product.name}
+              fill
+              className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              onError={(e) => {
+                // Hide the broken image and show fallback
+                e.currentTarget.style.display = 'none';
+                const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback');
+                if (fallback) {
+                  (fallback as HTMLElement).style.display = 'flex';
+                }
+              }}
+            />
+            {/* Fallback for broken images */}
+            <div className="image-fallback absolute inset-0 flex-col items-center justify-center text-center p-4 hidden">
+              <ShoppingBagIcon className="h-16 w-16 text-gray-400 mb-3" />
+              <div className="text-sm text-gray-500 font-medium">{product.name}</div>
+              <div className="text-xs text-gray-400 mt-1">صورة غير متوفرة</div>
+            </div>
+          </>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <ShoppingBagIcon className="h-20 w-20 text-gray-300 group-hover:text-amber-500 transition-all duration-300 transform group-hover:scale-110" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+            <ShoppingBagIcon className="h-16 w-16 text-gray-400 group-hover:text-amber-500 transition-all duration-300 transform group-hover:scale-110 mb-3" />
+            <div className="text-sm text-gray-500 font-medium">{product.name}</div>
+            <div className="text-xs text-gray-400 mt-1">صورة غير متوفرة</div>
           </div>
         )}
 
@@ -117,7 +131,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
         {/* Action Button */}
         <Link
           href={`/product/${product.id}`}
-          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-xl font-semibold text-center block transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-xl font-semibold text-center block transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg cursor-pointer"
           prefetch={true}
         >
           {showPrice ? t('orderNow') : t('buyNow')}
@@ -125,7 +139,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
       </div>
 
       {/* Hover Effect Border */}
-      <div className={`absolute inset-0 rounded-2xl border-2 border-amber-400 transition-opacity duration-300 ${
+      <div className={`absolute inset-0 rounded-2xl border-2 border-amber-400 transition-opacity duration-300 pointer-events-none ${
         isHovered ? 'opacity-100' : 'opacity-0'
       }`} />
     </div>

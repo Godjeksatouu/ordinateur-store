@@ -75,7 +75,6 @@ async function createTables() {
         main_images JSON,
         optional_images JSON,
         description TEXT,
-        description_ar TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
@@ -121,6 +120,18 @@ async function createTables() {
       }
     } catch (e) {
       console.warn('⚠️ Could not ensure optional_images column exists:', e.message || e);
+    }
+
+    // Drop description_ar column if it exists
+    try {
+      const [descriptionArCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'description_ar'");
+      // @ts-ignore
+      if (Array.isArray(descriptionArCol) && descriptionArCol.length > 0) {
+        await db.execute('ALTER TABLE products DROP COLUMN description_ar');
+        console.log('✅ Dropped description_ar column');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not drop description_ar column (may not exist):', e.message || e);
     }
 
     // Clients table
@@ -364,7 +375,7 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
   { name: 'images', maxCount: 5 } // Keep for backward compatibility
 ]), async (req, res) => {
   try {
-    let { name, ram, storage, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
+    let { name, ram, storage, graphics, os, processor, old_price, new_price, description } = req.body;
 
     // Handle different image types
     const mainImages = req.files?.mainImages ? req.files.mainImages.map(file => `/uploads/${file.filename}`) : [];
@@ -388,13 +399,12 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
       JSON.stringify([...finalMainImages, ...finalOptionalImages]), // Combined for legacy images field
       JSON.stringify(finalMainImages),
       JSON.stringify(finalOptionalImages),
-      description || null,
-      description_ar || null
+      description || null
     ];
 
     const [result] = await db.execute(
-      `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, main_images, optional_images, description, description_ar)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, main_images, optional_images, description)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       params
     );
 
@@ -412,7 +422,7 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
 ]), async (req, res) => {
   try {
     const { id } = req.params;
-    let { name, ram, storage, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
+    let { name, ram, storage, graphics, os, processor, old_price, new_price, description } = req.body;
 
     // Handle different image types for update
     let mainImages = [];
@@ -456,12 +466,11 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
       JSON.stringify(finalMainImages),
       JSON.stringify(finalOptionalImages),
       description || null,
-      description_ar || null,
       id
     ];
 
     await db.execute(
-      `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, main_images=?, optional_images=?, description=?, description_ar=? WHERE id=?`,
+      `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, main_images=?, optional_images=?, description=? WHERE id=?`,
       params
     );
 

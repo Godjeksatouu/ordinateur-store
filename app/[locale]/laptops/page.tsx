@@ -66,20 +66,34 @@ export default function LaptopsPage() {
                 {/* Product Image */}
                 <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                   {product.images && product.images.length > 0 ? (
-                    <Image
-                      src={`http://localhost:5000${product.images[0]}`}
-                      alt={product.name}
-                      fill
-                      className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      onError={(e) => {
-                        // Fallback to placeholder if image fails to load
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
+                    <>
+                      <Image
+                        src={`http://localhost:5000${product.images[0]}`}
+                        alt={product.name}
+                        fill
+                        className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        onError={(e) => {
+                          // Hide the broken image and show fallback
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback');
+                          if (fallback) {
+                            (fallback as HTMLElement).style.display = 'flex';
+                          }
+                        }}
+                      />
+                      {/* Fallback for broken images */}
+                      <div className="image-fallback absolute inset-0 flex-col items-center justify-center text-center p-4 hidden">
+                        <ShoppingBagIcon className="h-16 w-16 text-gray-400 mb-3" />
+                        <div className="text-sm text-gray-500 font-medium">{product.name}</div>
+                        <div className="text-xs text-gray-400 mt-1">صورة غير متوفرة</div>
+                      </div>
+                    </>
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ShoppingBagIcon className="h-20 w-20 text-gray-400 group-hover:text-gray-600 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                      <ShoppingBagIcon className="h-16 w-16 text-gray-400 group-hover:text-gray-600 transition-colors duration-300 mb-3" />
+                      <div className="text-sm text-gray-500 font-medium">{product.name}</div>
+                      <div className="text-xs text-gray-400 mt-1">صورة غير متوفرة</div>
                     </div>
                   )}
 

@@ -12,7 +12,6 @@ export interface Product {
   main_images?: string[];
   optional_images?: string[];
   description?: string;
-  description_ar?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -74,7 +73,6 @@ export function searchProducts(products: Product[], query: string): Product[] {
   const lowercaseQuery = query.toLowerCase();
   return products.filter(product =>
     product.name.toLowerCase().includes(lowercaseQuery) ||
-    (product.description && product.description.toLowerCase().includes(lowercaseQuery)) ||
-    (product.description_ar && product.description_ar.includes(query))
+    (product.description && product.description.toLowerCase().includes(lowercaseQuery))
   );
 }

@@ -272,7 +272,7 @@ export default function ProductDetailsPage() {
                   <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
                   الوصف
                 </h2>
-                <p className="text-gray-700 leading-relaxed text-lg">{product.description_ar}</p>
+                <p className="text-gray-700 leading-relaxed text-lg">{product.description || 'لا يوجد وصف متاح لهذا المنتج.'}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
