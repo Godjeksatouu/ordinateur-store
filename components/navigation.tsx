@@ -1,7 +1,9 @@
 import { getCart } from '@/lib/actions';
 import { ShoppingBagIcon, ShoppingCartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Suspense } from 'react';
+import { LanguageSwitcherWrapper } from './language-switcher-wrapper';
 
 const navigation = [
   { name: 'الصفحة الرئيسية', href: '/' },
@@ -41,14 +43,20 @@ export function Navigation() {
         <div className="flex h-20 items-center justify-between" suppressHydrationWarning>
           {/* Mobile menu button */}
           <div className="flex flex-1 items-center lg:hidden" suppressHydrationWarning>
-            <button type="button" className="-ml-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 p-3 shadow-lg">
-              <Link
-                href="/"
-                className="flex w-full items-center justify-center"
-              >
-                <ShoppingBagIcon className="h-6 w-6 text-white" />
-              </Link>
-            </button>
+            <Link
+              href="/"
+              className="flex items-center justify-center"
+            >
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg">
+                <Image
+                  src="/images/logo.png"
+                  alt="Logo"
+                  fill
+                  className="object-contain"
+                  sizes="40px"
+                />
+              </div>
+            </Link>
           </div>
 
           {/* Logo */}
@@ -57,8 +65,15 @@ export function Navigation() {
               href="/"
               className="flex items-center justify-center group"
             >
-              <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105" suppressHydrationWarning>
-                <ShoppingBagIcon className="h-8 w-8 text-white" />
+              <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105 bg-white p-1">
+                <Image
+                  src="/images/logo.png"
+                  alt="Logo"
+                  fill
+                  className="object-contain"
+                  sizes="48px"
+                  priority
+                />
               </div>
             </Link>
           </div>
@@ -79,8 +94,14 @@ export function Navigation() {
             </div>
           </div>
 
-          {/* Search and Cart */}
+          {/* Search, Language and Cart */}
           <div className="flex flex-1 items-center justify-end space-x-4" suppressHydrationWarning>
+            {/* Language Switcher */}
+            <div className="hidden lg:flex items-center" suppressHydrationWarning>
+              <div className="relative mr-2" suppressHydrationWarning>
+                <LanguageSwitcherWrapper />
+              </div>
+            </div>
             {/* Search Bar */}
             <div className="hidden lg:flex items-center" suppressHydrationWarning>
               <div className="relative" suppressHydrationWarning>

@@ -1,6 +1,6 @@
 import { Main } from '@/components/main';
 import Image from 'next/image';
-import { laptops } from '@/lib/products';
+import { fetchProducts } from '@/lib/products';
 import { ProductCard } from '@/components/product-card';
 import {
   ClockIcon,
@@ -12,6 +12,7 @@ export default async function Page(props: {
   params: Promise<{ code: string }>;
 }) {
   const params = await props.params;
+  const products = await fetchProducts();
 
   return (
     <div>
@@ -50,9 +51,15 @@ export default async function Page(props: {
             <div className="w-24 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto"></div>
           </div>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {laptops.map((laptop) => (
-              <ProductCard key={laptop.id} product={laptop} />
-            ))}
+            {products && products.length > 0 ? (
+              products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500">لا توجد منتجات متاحة حالياً</p>
+              </div>
+            )}
           </div>
         </div>
       </Main>

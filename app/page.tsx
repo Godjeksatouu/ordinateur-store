@@ -2,6 +2,7 @@
 
 import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';
+import { HydrationSafe } from '@/components/hydration-safe';
 import Image from 'next/image';
 import { fetchProducts, Product } from '@/lib/products';
 import { ProductCard } from '@/components/product-card';
@@ -118,28 +119,30 @@ export default function Page() {
   }, []);
   return (
     <PublicLayout>
-      <div>
-        {/* Hero Section - Slider */}
-        <div className="relative h-[70vh] md:h-[80vh] overflow-hidden">
+      <HydrationSafe>
+        <div suppressHydrationWarning>
+          {/* Hero Section - Slider */}
+          <div className="relative h-[70vh] md:h-[80vh] overflow-hidden" suppressHydrationWarning>
           {/* Per-slide gradient backgrounds to match branding */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0" suppressHydrationWarning>
             {slides.map((_, idx) => (
               <div
                 key={`bg-${idx}`}
                 className={`absolute inset-0 transition-opacity duration-700 ${idx === currentSlide ? 'opacity-100' : 'opacity-0'}`}
                 aria-hidden={idx !== currentSlide}
+                suppressHydrationWarning
               >
                 <div className={`w-full h-full ${
                   idx === 0 ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-black' :
                   idx === 1 ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-black' :
                   idx === 2 ? 'bg-gradient-to-br from-slate-900 via-gray-900 to-black' :
                                'bg-gradient-to-br from-gray-900 via-neutral-800 to-black'
-                }`} />
+                }`} suppressHydrationWarning />
               </div>
             ))}
           </div>
           {/* Slides */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0" suppressHydrationWarning>
             {slides.map((slide, idx) => (
               <div
                 key={idx}
@@ -147,10 +150,11 @@ export default function Page() {
                   idx === currentSlide ? 'opacity-100' : 'opacity-0'
                 }`}
                 aria-hidden={idx !== currentSlide}
+                suppressHydrationWarning
               >
-                <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-4">
+                <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-4" suppressHydrationWarning>
                   {/* Left: Text */}
-                  <div className="text-white max-w-xl">
+                  <div className="text-white max-w-xl" suppressHydrationWarning>
                     <h2 className="text-3xl md:text-5xl font-extrabold mb-3 leading-tight">
                       {slide.title}
                     </h2>
@@ -160,7 +164,7 @@ export default function Page() {
                     </p>
 
                     {/* Features grid: 2x2 */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" suppressHydrationWarning>
                       <Feature icon={<IconMemory className="h-5 w-5" />} label="16GB RAM" />
                       <Feature icon={<IconStorage className="h-5 w-5" />} label="256GB SSD" />
                       <Feature
@@ -176,7 +180,7 @@ export default function Page() {
                     </div>
                   </div>
                   {/* Right: Image */}
-                  <div className="relative w-1/2 h-[50vh] hidden sm:block">
+                  <div className="relative w-1/2 h-[50vh] hidden sm:block" suppressHydrationWarning>
                     <Image
                       src={slide.image}
                       alt={slide.title}
@@ -187,7 +191,7 @@ export default function Page() {
                   </div>
                 </div>
                 {/* Subtle background vignette */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60 pointer-events-none" suppressHydrationWarning />
               </div>
             ))}
           </div>
@@ -222,7 +226,10 @@ export default function Page() {
             ))}
           </div>
         </div>
+        </div>
+      </HydrationSafe>
 
+      <div>
         {/* Featured Text Section */}
         <div className="bg-gradient-to-r from-gray-50 to-white py-16">
           <div className="max-w-4xl mx-auto text-center px-4">
@@ -264,12 +271,12 @@ export default function Page() {
         </Main>
 
         {/* 3-Image Grid Feature */}
-        <section className="bg-white py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative w-full md:h-[28rem] lg:h-[32rem]">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+        <section className="bg-white py-8" suppressHydrationWarning>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
+            <div className="relative w-full md:h-[28rem] lg:h-[32rem]" suppressHydrationWarning>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full" suppressHydrationWarning>
                 {/* Left: large image (2/3 width) */}
-                <div className="relative md:col-span-2 h-64 md:h-full overflow-hidden rounded-2xl">
+                <div className="relative md:col-span-2 h-64 md:h-full overflow-hidden rounded-2xl" suppressHydrationWarning>
                   <Image
                     src="/images/f3.png"
                     alt="HP EliteBook - feature large"
@@ -280,8 +287,8 @@ export default function Page() {
                   />
                 </div>
                 {/* Right: two stacked images (1/3 width) */}
-                <div className="md:col-span-1 grid grid-rows-2 gap-4 h-64 md:h-full">
-                  <div className="relative overflow-hidden rounded-2xl">
+                <div className="md:col-span-1 grid grid-rows-2 gap-4 h-64 md:h-full" suppressHydrationWarning>
+                  <div className="relative overflow-hidden rounded-2xl" suppressHydrationWarning>
                     <Image
                       src="/images/f1.png"
                       alt="Feature image 1"
@@ -290,7 +297,7 @@ export default function Page() {
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
                   </div>
-                  <div className="relative overflow-hidden rounded-2xl">
+                  <div className="relative overflow-hidden rounded-2xl" suppressHydrationWarning>
                     <Image
                       src="/images/f2.png"
                       alt="Feature image 2"
@@ -307,30 +314,30 @@ export default function Page() {
 
 
         {/* New 3 Cards Section */}
-        <section className="bg-white py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
-                <div className="flex items-center mb-4">
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg">
+        <section className="bg-white py-16" suppressHydrationWarning>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6" suppressHydrationWarning>
+              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow" suppressHydrationWarning>
+                <div className="flex items-center mb-4" suppressHydrationWarning>
+                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg" suppressHydrationWarning>
                     <ClockIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
                 <h4 className="text-2xl font-bold text-gray-900 mb-3">اكتشف عالم جديد من الذكاء</h4>
                 <p className="text-gray-600">اجعل كل يوم أفضل مع ساعة ذكية مبتكرة!</p>
               </div>
-              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
-                <div className="flex items-center mb-4">
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg">
+              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow" suppressHydrationWarning>
+                <div className="flex items-center mb-4" suppressHydrationWarning>
+                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg" suppressHydrationWarning>
                     <TruckIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
                 <h4 className="text-2xl font-bold text-gray-900 mb-3">التوصيل السريع</h4>
                 <p className="text-gray-600">خدمة التوصيل السريع في جميع انحاء المدن</p>
               </div>
-              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
-                <div className="flex items-center mb-4">
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg">
+              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow" suppressHydrationWarning>
+                <div className="flex items-center mb-4" suppressHydrationWarning>
+                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg" suppressHydrationWarning>
                     <CurrencyDollarIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>

@@ -145,7 +145,7 @@ function ProductsManager() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: '', name_ar: '', ram: '', storage: '', screen: '', graphics: '', os: '', old_price: '', new_price: '', description: '', description_ar: ''
+    name: '', name_ar: '', ram: '', storage: '', screen: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
   });
   const [images, setImages] = useState<FileList | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -196,7 +196,7 @@ function ProductsManager() {
       if (response.ok) {
         fetchProducts();
         setFormData({
-          name: '', name_ar: '', ram: '', storage: '', screen: '', graphics: '', os: '', old_price: '', new_price: '', description: '', description_ar: ''
+          name: '', name_ar: '', ram: '', storage: '', screen: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
         });
         setImages(null);
         setEditingId(null);
@@ -215,10 +215,10 @@ function ProductsManager() {
       screen: product.screen,
       graphics: product.graphics,
       os: product.os,
+      processor: product.processor || '',
       old_price: product.old_price,
       new_price: product.new_price,
-      description: product.description,
-      description_ar: product.description_ar
+      description: product.description
     });
     setEditingId(product.id);
   };
@@ -262,18 +262,7 @@ function ProductsManager() {
             required
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            اسم المنتج (العربية) <span className="text-red-500">*</span>
-          </label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="اسم المنتج"
-            value={formData.name_ar}
-            onChange={(e) => setFormData({...formData, name_ar: e.target.value})}
-            required
-          />
-        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">الذاكرة (RAM)</label>
           <input
@@ -308,6 +297,15 @@ function ProductsManager() {
             placeholder="مثال: NVIDIA GTX 1650"
             value={formData.graphics}
             onChange={(e) => setFormData({...formData, graphics: e.target.value})}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">المعالج (Processor)</label>
+          <input
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+            placeholder="مثال: Intel Core i5-1135G7"
+            value={formData.processor}
+            onChange={(e) => setFormData({...formData, processor: e.target.value})}
           />
         </div>
         <div>
@@ -346,14 +344,35 @@ function ProductsManager() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">صور المنتج (متعددة)</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={(e) => setImages(e.target.files)}
-          />
-          <p className="text-xs text-gray-500 mt-1">يمكنك اختيار عدة صور (حد أقصى 5 صور)</p>
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-amber-400 transition-colors bg-gray-50">
+            <input
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => setImages(e.target.files)}
+            />
+            <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
+              <span>يمكنك اختيار عدة صور (حد أقصى 5 صور)</span>
+              <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
+                {images ? `تم اختيار ${images.length} صور` : 'لم يتم اختيار صور بعد'}
+              </span>
+            </div>
+          </div>
+          {/* Previews */}
+          {images && images.length > 0 && (
+            <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+              {Array.from(images).map((file, idx) => (
+                <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`preview-${idx}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">الوصف (English)</label>
@@ -365,16 +384,7 @@ function ProductsManager() {
             onChange={(e) => setFormData({...formData, description: e.target.value})}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">الوصف (العربية)</label>
-          <textarea
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="وصف المنتج بالعربية"
-            rows={4}
-            value={formData.description_ar}
-            onChange={(e) => setFormData({...formData, description_ar: e.target.value})}
-          />
-        </div>
+
         <div className="md:col-span-2 flex gap-4">
           <button
             type="submit"

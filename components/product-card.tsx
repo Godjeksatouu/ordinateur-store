@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/lib/products';
 import { ShoppingBagIcon, StarIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +14,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, showPrice = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const { t } = useTranslations();
 
   return (
     <div
@@ -111,8 +113,9 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
         <Link
           href={`/product/${product.id}`}
           className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-xl font-semibold text-center block transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+          prefetch={true}
         >
-          {showPrice ? 'اطلب الآن' : 'شراء الآن'}
+          {showPrice ? t('orderNow') : t('buyNow')}
         </Link>
       </div>
 

@@ -23,6 +23,7 @@ export default function ProductDetailsPage() {
 
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [orderSuccess, setOrderSuccess] = useState(false);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -57,6 +58,22 @@ export default function ProductDetailsPage() {
             <p className="mt-2 text-gray-600">جاري تحميل المنتج...</p>
           </div>
         </Main>
+      </PublicLayout>
+    );
+  }
+
+  if (orderSuccess) {
+    return (
+      <PublicLayout>
+        <div className="min-h-[70vh] flex items-center justify-center">
+          <div className="text-center p-8 bg-white rounded-2xl shadow-lg border border-green-100">
+            <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+              <span className="text-3xl">✅</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-green-700 mb-2">تم إرسال طلبك بنجاح! سنتواصل معك قريباً.</h2>
+            <p className="text-gray-600">شكراً لثقتك بنا</p>
+          </div>
+        </div>
       </PublicLayout>
     );
   }
@@ -112,7 +129,7 @@ export default function ProductDetailsPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message || 'تم إرسال طلبك بنجاح! سنتواصل معك قريباً.');
+        setOrderSuccess(true);
         setShowOrderForm(false);
         setOrderForm({
           fullName: '',
@@ -121,11 +138,11 @@ export default function ProductDetailsPage() {
           address: ''
         });
       } else {
-        alert('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.');
+        // show inline error later if needed
+        console.error('Order submit failed');
       }
     } catch (error) {
       console.error('Error submitting order:', error);
-      alert('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
     }
   };
 

@@ -7,11 +7,13 @@ import { fetchProducts, Product } from '@/lib/products';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from '@/hooks/use-translations';
 
 export default function LaptopsPage() {
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslations();
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -104,44 +106,62 @@ export default function LaptopsPage() {
                 </div>
 
                 {/* Product Info */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors duration-300">
-                    {product.name_ar}
-                  </h3>
+                <div className="p-6 flex flex-col h-full">
+                  <div className="flex-grow">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 line-clamp-2">
+                      {product.name_ar}
+                    </h3>
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>الذاكرة:</span>
-                      <span className="font-semibold">{product.ram}</span>
+                    {/* Specifications Grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      {product.ram && (
+                        <div className="bg-gray-50 rounded-lg p-2">
+                          <div className="text-xs text-gray-500 mb-1">{t('ram')}</div>
+                          <div className="text-sm font-semibold text-gray-900">{product.ram}</div>
+                        </div>
+                      )}
+                      {product.storage && (
+                        <div className="bg-gray-50 rounded-lg p-2">
+                          <div className="text-xs text-gray-500 mb-1">{t('storage')}</div>
+                          <div className="text-sm font-semibold text-gray-900">{product.storage}</div>
+                        </div>
+                      )}
+                      {product.screen && (
+                        <div className="bg-gray-50 rounded-lg p-2">
+                          <div className="text-xs text-gray-500 mb-1">{t('screen')}</div>
+                          <div className="text-sm font-semibold text-gray-900">{product.screen}</div>
+                        </div>
+                      )}
+                      {product.graphics && (
+                        <div className="bg-gray-50 rounded-lg p-2">
+                          <div className="text-xs text-gray-500 mb-1">{t('graphics')}</div>
+                          <div className="text-sm font-semibold text-gray-900 line-clamp-1">{product.graphics}</div>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>التخزين:</span>
-                      <span className="font-semibold">{product.storage}</span>
-                    </div>
-                    {product.graphics && (
-                      <div className="flex justify-between text-sm text-gray-600">
-                        <span>كرت الشاشة:</span>
-                        <span className="font-semibold text-xs">{product.graphics}</span>
-                      </div>
-                    )}
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    {product.old_price && product.old_price > 0 && (
-                      <div className="text-sm text-gray-500 line-through">
-                        {product.old_price.toLocaleString()} دج
+                  {/* Price and Button Section */}
+                  <div className="mt-auto">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex flex-col">
+                        {product.old_price && product.old_price > 0 && (
+                          <div className="text-sm text-gray-500 line-through">
+                            {product.old_price.toLocaleString()} دج
+                          </div>
+                        )}
+                        <div className="text-xl font-bold text-amber-600">
+                          {product.new_price.toLocaleString()}
+                          <span className="text-sm text-gray-500 mr-1">{t('currency')}</span>
+                        </div>
                       </div>
-                    )}
-                    <div className="text-2xl font-bold text-amber-600">
-                      {product.new_price.toLocaleString()}
-                      <span className="text-sm text-gray-500 mr-1">دج</span>
                     </div>
-                    
+
                     <Link
                       href={`/product/${product.id}`}
-                      className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                      className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 py-3 rounded-xl font-semibold text-center block transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
                     >
-                      اطلب الآن
+                      {t('orderNow')}
                     </Link>
                   </div>
                 </div>

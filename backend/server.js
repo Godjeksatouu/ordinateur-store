@@ -69,6 +69,7 @@ async function createTables() {
         screen VARCHAR(100),
         graphics VARCHAR(100),
         os VARCHAR(50),
+        processor VARCHAR(100),
         old_price DECIMAL(10,2),
         new_price DECIMAL(10,2) NOT NULL,
         images JSON,
@@ -78,6 +79,21 @@ async function createTables() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
+
+    // Ensure optional 'processor' column exists (for CPU model)
+    try {
+      await db.execute('ALTER TABLE products ADD COLUMN IF NOT EXISTS processor VARCHAR(100)');
+    } catch (e) {
+      // Some MySQL versions don't support IF NOT EXISTS; try a safer check
+      try {
+        const [cols] = await db.execute("SHOW COLUMNS FROM products LIKE 'processor'");
+        if (cols.length === 0) {
+          await db.execute('ALTER TABLE products ADD COLUMN processor VARCHAR(100)');
+        }
+      } catch (ee) {
+        console.warn('⚠️ Could not ensure processor column exists:', ee.message || ee);
+      }
+    }
 
     // Clients table
     await db.execute(`
@@ -316,14 +332,17 @@ app.get('/api/products', async (req, res) => {
 
 app.post('/api/products', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.array('images', 5), async (req, res) => {
   try {
-    const { name, name_ar, ram, storage, screen, graphics, os, old_price, new_price, description, description_ar } = req.body;
+    let { name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
+
+    // Default Arabic name to English name if not provided
+    if (!name_ar || name_ar.trim() === '') name_ar = name;
 
     const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
 
     const [result] = await db.execute(
-      `INSERT INTO products (name, name_ar, ram, storage, screen, graphics, os, old_price, new_price, images, description, description_ar)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, name_ar, ram, storage, screen, graphics, os, old_price, new_price, JSON.stringify(images), description, description_ar]
+      `INSERT INTO products (name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, images, description, description_ar)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, JSON.stringify(images), description, description_ar]
     );
 
     res.json({ success: true, productId: result.insertId, message: 'Product created successfully' });
@@ -336,7 +355,9 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
 app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.array('images', 5), async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, name_ar, ram, storage, screen, graphics, os, old_price, new_price, description, description_ar } = req.body;
+    let { name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
+
+    if (!name_ar || name_ar.trim() === '') name_ar = name;
 
     let images = [];
     if (req.files && req.files.length > 0) {
@@ -346,8 +367,8 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
     }
 
     await db.execute(
-      `UPDATE products SET name=?, name_ar=?, ram=?, storage=?, screen=?, graphics=?, os=?, old_price=?, new_price=?, images=?, description=?, description_ar=? WHERE id=?`,
-      [name, name_ar, ram, storage, screen, graphics, os, old_price, new_price, JSON.stringify(images), description, description_ar, id]
+      `UPDATE products SET name=?, name_ar=?, ram=?, storage=?, screen=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, description=?, description_ar=? WHERE id=?`,
+      [name, name_ar, ram, storage, screen, graphics, os, processor, old_price, new_price, JSON.stringify(images), description, description_ar, id]
     );
 
     res.json({ success: true, message: 'Product updated successfully' });

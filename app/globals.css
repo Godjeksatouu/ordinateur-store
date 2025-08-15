@@ -3,8 +3,12 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Prevent hydration mismatches from browser extensions */
-[bis_skin_checked] {
+[bis_skin_checked],
+[data-adblock-key],
+[data-ad-blocked],
+[data-abp] {
   /* This rule helps prevent hydration mismatches caused by browser extensions */
+  /* These attributes are commonly added by ad blockers and security extensions */
 }
 
 @theme {
