@@ -339,12 +339,25 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
   try {
     let { name, ram, storage, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
 
-    const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
+    // Convert undefined values to null for MySQL compatibility
+    const params = [
+      name || null,
+      ram || null,
+      storage || null,
+      graphics || null,
+      os || null,
+      processor || null,
+      old_price ? parseFloat(old_price) : null,
+      new_price ? parseFloat(new_price) : null,
+      JSON.stringify(req.files ? req.files.map(file => `/uploads/${file.filename}`) : []),
+      description || null,
+      description_ar || null
+    ];
 
     const [result] = await db.execute(
       `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, description, description_ar)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, ram, storage, graphics, os, processor, old_price, new_price, JSON.stringify(images), description, description_ar]
+      params
     );
 
     res.json({ success: true, productId: result.insertId, message: 'Product created successfully' });
@@ -366,9 +379,25 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
       images = JSON.parse(req.body.existing_images);
     }
 
+    // Convert undefined values to null for MySQL compatibility
+    const params = [
+      name || null,
+      ram || null,
+      storage || null,
+      graphics || null,
+      os || null,
+      processor || null,
+      old_price ? parseFloat(old_price) : null,
+      new_price ? parseFloat(new_price) : null,
+      JSON.stringify(images),
+      description || null,
+      description_ar || null,
+      id
+    ];
+
     await db.execute(
       `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, description=?, description_ar=? WHERE id=?`,
-      [name, ram, storage, graphics, os, processor, old_price, new_price, JSON.stringify(images), description, description_ar, id]
+      params
     );
 
     res.json({ success: true, message: 'Product updated successfully' });

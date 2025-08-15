@@ -21,13 +21,20 @@ export function LanguageSwitcher() {
     setOpen(false);
     if (!pathname) return;
 
-    // For Next.js App Router with i18n, we need to manually construct the URL
-    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(\/|$)/, '/');
-    const newPath = code === 'ar' ? pathWithoutLocale : `/${code}${pathWithoutLocale}`;
-    router.push(newPath);
+    // Extract the path without locale
+    const pathSegments = pathname.split('/').filter(Boolean);
+    const validLocales = ['en', 'fr', 'es', 'ar'];
 
-    // Force a page reload to ensure proper locale switching
-    window.location.href = newPath;
+    // Remove current locale if present
+    if (validLocales.includes(pathSegments[0])) {
+      pathSegments.shift();
+    }
+
+    // Construct new path
+    const basePath = pathSegments.length > 0 ? `/${pathSegments.join('/')}` : '/';
+    const newPath = code === 'ar' ? basePath : `/${code}${basePath}`;
+
+    router.push(newPath);
   };
 
   return (
