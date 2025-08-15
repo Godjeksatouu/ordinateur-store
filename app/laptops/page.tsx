@@ -52,7 +52,7 @@ export default function LaptopsPage() {
           {loading ? (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-              <p className="mt-2 text-gray-600">جاري تحميل المنتجات...</p>
+              <p className="mt-2 text-gray-600">{t('loadingProducts')}</p>
             </div>
           ) : products.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -126,12 +126,7 @@ export default function LaptopsPage() {
                           <div className="text-sm font-semibold text-gray-900">{product.storage}</div>
                         </div>
                       )}
-                      {product.screen && (
-                        <div className="bg-gray-50 rounded-lg p-2">
-                          <div className="text-xs text-gray-500 mb-1">{t('screen')}</div>
-                          <div className="text-sm font-semibold text-gray-900">{product.screen}</div>
-                        </div>
-                      )}
+
                       {product.graphics && (
                         <div className="bg-gray-50 rounded-lg p-2">
                           <div className="text-xs text-gray-500 mb-1">{t('graphics')}</div>
@@ -147,7 +142,7 @@ export default function LaptopsPage() {
                       <div className="flex flex-col">
                         {product.old_price && product.old_price > 0 && (
                           <div className="text-sm text-gray-500 line-through">
-                            {product.old_price.toLocaleString()} دج
+                            {product.old_price.toLocaleString()} {t('currency')}
                           </div>
                         )}
                         <div className="text-xl font-bold text-amber-600">
@@ -169,7 +164,7 @@ export default function LaptopsPage() {
                 {/* Premium Badge */}
                 <div className="absolute top-4 right-4">
                   <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    مميز
+                    {t('featured') || 'مميز'}
                   </div>
                 </div>
               </div>
@@ -177,7 +172,7 @@ export default function LaptopsPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600">لا توجد منتجات متاحة حالياً</p>
+              <p className="text-gray-600">{t('noProducts')}</p>
             </div>
           )}
 

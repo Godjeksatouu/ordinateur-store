@@ -20,14 +20,14 @@ export function LanguageSwitcher() {
   const onSelect = (code: string) => {
     setOpen(false);
     if (!pathname) return;
-    // naive locale prefix switching: replace existing locale or prefix path
-    const parts = pathname.split('/').filter(Boolean);
-    if (languages.some(l => l.code === parts[0])) {
-      parts[0] = code;
-    } else {
-      parts.unshift(code);
-    }
-    router.push('/' + parts.join('/'));
+
+    // For Next.js App Router with i18n, we need to manually construct the URL
+    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(\/|$)/, '/');
+    const newPath = code === 'ar' ? pathWithoutLocale : `/${code}${pathWithoutLocale}`;
+    router.push(newPath);
+
+    // Force a page reload to ensure proper locale switching
+    window.location.href = newPath;
   };
 
   return (

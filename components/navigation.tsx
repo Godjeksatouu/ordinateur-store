@@ -4,12 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Suspense } from 'react';
 import { LanguageSwitcherWrapper } from './language-switcher-wrapper';
+import { NavigationClient } from './navigation-client';
 
-const navigation = [
-  { name: 'الصفحة الرئيسية', href: '/' },
-  { name: 'حاسوب', href: '/laptops' },
-  { name: 'اتصل بنا', href: '/contact' }
-];
+
 
 function ShoppingCartNavItemFallback() {
   return (
@@ -80,18 +77,7 @@ export function Navigation() {
 
           {/* Centered Navigation */}
           <div className="hidden lg:flex flex-1 justify-center" suppressHydrationWarning>
-            <div className="flex space-x-2" suppressHydrationWarning>
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="relative px-6 py-3 text-lg font-semibold text-gray-700 hover:text-amber-600 transition-all duration-300 rounded-xl hover:bg-amber-50 group"
-                >
-                  {item.name}
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-600 group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
-                </Link>
-              ))}
-            </div>
+            <NavigationClient />
           </div>
 
           {/* Search, Language and Cart */}

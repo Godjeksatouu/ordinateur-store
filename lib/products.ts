@@ -3,7 +3,6 @@ export interface Product {
   name: string;
   ram: string;
   storage: string;
-  screen: string;
   graphics: string;
   os: string;
   processor?: string;

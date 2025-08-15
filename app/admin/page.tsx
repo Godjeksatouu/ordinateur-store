@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Main } from '@/components/main';
+import { useTranslations } from '@/hooks/use-translations';
 
 const roles = [
   { key: 'products', label: 'Products', icon: '📦' },
