@@ -127,10 +127,16 @@ export default function LaptopsPage() {
                         </div>
                       )}
 
-                      {product.graphics && (
+                      {product.processor && (
                         <div className="bg-gray-50 rounded-lg p-2">
-                          <div className="text-xs text-gray-500 mb-1">{t('graphics')}</div>
-                          <div className="text-sm font-semibold text-gray-900 line-clamp-1">{product.graphics}</div>
+                          <div className="text-xs text-gray-500 mb-1">{t('processor')}</div>
+                          <div className="text-sm font-semibold text-gray-900 line-clamp-1">{product.processor}</div>
+                        </div>
+                      )}
+                      {product.os && (
+                        <div className="bg-gray-50 rounded-lg p-2">
+                          <div className="text-xs text-gray-500 mb-1">{t('os')}</div>
+                          <div className="text-sm font-semibold text-gray-900 line-clamp-1">{product.os}</div>
                         </div>
                       )}
                     </div>
@@ -138,26 +144,31 @@ export default function LaptopsPage() {
 
                   {/* Price and Button Section */}
                   <div className="mt-auto">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex flex-col">
-                        {product.old_price && product.old_price > 0 && (
-                          <div className="text-sm text-gray-500 line-through">
+                    {/* Button and Old Price Row */}
+                    <div className="flex items-center justify-between mb-2">
+                      <Link
+                        href={`/product/${product.id}`}
+                        className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 py-3 rounded-xl font-semibold text-center transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                      >
+                        {t('orderNow')}
+                      </Link>
+
+                      {product.old_price && product.old_price > 0 && (
+                        <div className="ml-3 text-right">
+                          <div className="text-sm text-red-500 line-through font-medium">
                             {product.old_price.toLocaleString()} {t('currency')}
                           </div>
-                        )}
-                        <div className="text-xl font-bold text-amber-600">
-                          {product.new_price.toLocaleString()}
-                          <span className="text-sm text-gray-500 mr-1">{t('currency')}</span>
                         </div>
-                      </div>
+                      )}
                     </div>
 
-                    <Link
-                      href={`/product/${product.id}`}
-                      className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 py-3 rounded-xl font-semibold text-center block transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
-                    >
-                      {t('orderNow')}
-                    </Link>
+                    {/* New Price */}
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-amber-600">
+                        {product.new_price.toLocaleString()}
+                        <span className="text-sm text-gray-500 mr-1">{t('currency')}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

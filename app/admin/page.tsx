@@ -148,7 +148,8 @@ function ProductsManager() {
   const [formData, setFormData] = useState({
     name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
   });
-  const [images, setImages] = useState<FileList | null>(null);
+  const [mainImages, setMainImages] = useState<FileList | null>(null);
+  const [optionalImages, setOptionalImages] = useState<FileList | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -176,9 +177,17 @@ function ProductsManager() {
       formDataToSend.append(key, value);
     });
 
-    if (images) {
-      Array.from(images).forEach(file => {
-        formDataToSend.append('images', file);
+    // Append main images
+    if (mainImages) {
+      Array.from(mainImages).forEach(file => {
+        formDataToSend.append('mainImages', file);
+      });
+    }
+
+    // Append optional images
+    if (optionalImages) {
+      Array.from(optionalImages).forEach(file => {
+        formDataToSend.append('optionalImages', file);
       });
     }
 
@@ -199,7 +208,8 @@ function ProductsManager() {
         setFormData({
           name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
         });
-        setImages(null);
+        setMainImages(null);
+        setOptionalImages(null);
         setEditingId(null);
       }
     } catch (error) {
@@ -333,33 +343,74 @@ function ProductsManager() {
             required
           />
         </div>
+        {/* Main Images Section */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">صور المنتج (متعددة)</label>
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-amber-400 transition-colors bg-gray-50">
+          <label className="block text-sm font-medium text-gray-700 mb-2">الصور الرئيسية</label>
+          <div className="border-2 border-dashed border-blue-300 rounded-xl p-4 hover:border-blue-400 transition-colors bg-blue-50">
             <input
-              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
               type="file"
               multiple
               accept="image/*"
-              onChange={(e) => setImages(e.target.files)}
+              onChange={(e) => setMainImages(e.target.files)}
             />
             <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-              <span>يمكنك اختيار عدة صور (حد أقصى 5 صور)</span>
-              <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
-                {images ? `تم اختيار ${images.length} صور` : 'لم يتم اختيار صور بعد'}
+              <span>الصور الرئيسية للمنتج (حد أقصى 3 صور)</span>
+              <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                {mainImages ? `تم اختيار ${mainImages.length} صور رئيسية` : 'لم يتم اختيار صور رئيسية'}
               </span>
             </div>
           </div>
-          {/* Previews */}
-          {images && images.length > 0 && (
-            <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-              {Array.from(images).map((file, idx) => (
-                <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border">
+          {/* Main Images Previews */}
+          {mainImages && mainImages.length > 0 && (
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {Array.from(mainImages).map((file, idx) => (
+                <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-blue-200">
                   <img
                     src={URL.createObjectURL(file)}
-                    alt={`preview-${idx}`}
+                    alt={`main-preview-${idx}`}
                     className="w-full h-full object-cover"
                   />
+                  <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
+                    رئيسية {idx + 1}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Optional Images Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">الصور الاختيارية</label>
+          <div className="border-2 border-dashed border-green-300 rounded-xl p-4 hover:border-green-400 transition-colors bg-green-50">
+            <input
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => setOptionalImages(e.target.files)}
+            />
+            <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
+              <span>صور إضافية للتفاصيل (حد أقصى 5 صور)</span>
+              <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                {optionalImages ? `تم اختيار ${optionalImages.length} صور اختيارية` : 'لم يتم اختيار صور اختيارية'}
+              </span>
+            </div>
+          </div>
+          {/* Optional Images Previews */}
+          {optionalImages && optionalImages.length > 0 && (
+            <div className="mt-3 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+              {Array.from(optionalImages).map((file, idx) => (
+                <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border border-green-200">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`optional-preview-${idx}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-1 left-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded">
+                    {idx + 1}
+                  </div>
                 </div>
               ))}
             </div>

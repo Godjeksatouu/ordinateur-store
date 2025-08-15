@@ -72,6 +72,8 @@ async function createTables() {
         old_price DECIMAL(10,2),
         new_price DECIMAL(10,2) NOT NULL,
         images JSON,
+        main_images JSON,
+        optional_images JSON,
         description TEXT,
         description_ar TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -98,6 +100,27 @@ async function createTables() {
       }
     } catch (e) {
       console.warn('⚠️ Could not drop name_ar column (may not exist):', e.message || e);
+    }
+
+    // Add main_images and optional_images columns if they don't exist
+    try {
+      const [mainImagesCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'main_images'");
+      // @ts-ignore
+      if (Array.isArray(mainImagesCol) && mainImagesCol.length === 0) {
+        await db.execute('ALTER TABLE products ADD COLUMN main_images JSON');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure main_images column exists:', e.message || e);
+    }
+
+    try {
+      const [optionalImagesCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'optional_images'");
+      // @ts-ignore
+      if (Array.isArray(optionalImagesCol) && optionalImagesCol.length === 0) {
+        await db.execute('ALTER TABLE products ADD COLUMN optional_images JSON');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure optional_images column exists:', e.message || e);
     }
 
     // Clients table
@@ -335,9 +358,22 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-app.post('/api/products', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.array('images', 5), async (req, res) => {
+app.post('/api/products', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.fields([
+  { name: 'mainImages', maxCount: 3 },
+  { name: 'optionalImages', maxCount: 5 },
+  { name: 'images', maxCount: 5 } // Keep for backward compatibility
+]), async (req, res) => {
   try {
     let { name, ram, storage, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
+
+    // Handle different image types
+    const mainImages = req.files?.mainImages ? req.files.mainImages.map(file => `/uploads/${file.filename}`) : [];
+    const optionalImages = req.files?.optionalImages ? req.files.optionalImages.map(file => `/uploads/${file.filename}`) : [];
+    const legacyImages = req.files?.images ? req.files.images.map(file => `/uploads/${file.filename}`) : [];
+
+    // For backward compatibility, if no main/optional images but legacy images exist, use legacy
+    const finalMainImages = mainImages.length > 0 ? mainImages : legacyImages;
+    const finalOptionalImages = optionalImages;
 
     // Convert undefined values to null for MySQL compatibility
     const params = [
@@ -349,14 +385,16 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
       processor || null,
       old_price ? parseFloat(old_price) : null,
       new_price ? parseFloat(new_price) : null,
-      JSON.stringify(req.files ? req.files.map(file => `/uploads/${file.filename}`) : []),
+      JSON.stringify([...finalMainImages, ...finalOptionalImages]), // Combined for legacy images field
+      JSON.stringify(finalMainImages),
+      JSON.stringify(finalOptionalImages),
       description || null,
       description_ar || null
     ];
 
     const [result] = await db.execute(
-      `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, description, description_ar)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, main_images, optional_images, description, description_ar)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       params
     );
 
@@ -367,17 +405,42 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
   }
 });
 
-app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.array('images', 5), async (req, res) => {
+app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.fields([
+  { name: 'mainImages', maxCount: 3 },
+  { name: 'optionalImages', maxCount: 5 },
+  { name: 'images', maxCount: 5 } // Keep for backward compatibility
+]), async (req, res) => {
   try {
     const { id } = req.params;
     let { name, ram, storage, graphics, os, processor, old_price, new_price, description, description_ar } = req.body;
 
-    let images = [];
-    if (req.files && req.files.length > 0) {
-      images = req.files.map(file => `/uploads/${file.filename}`);
-    } else if (req.body.existing_images) {
-      images = JSON.parse(req.body.existing_images);
+    // Handle different image types for update
+    let mainImages = [];
+    let optionalImages = [];
+    let legacyImages = [];
+
+    if (req.files?.mainImages) {
+      mainImages = req.files.mainImages.map(file => `/uploads/${file.filename}`);
+    } else if (req.body.existing_main_images) {
+      mainImages = JSON.parse(req.body.existing_main_images);
     }
+
+    if (req.files?.optionalImages) {
+      optionalImages = req.files.optionalImages.map(file => `/uploads/${file.filename}`);
+    } else if (req.body.existing_optional_images) {
+      optionalImages = JSON.parse(req.body.existing_optional_images);
+    }
+
+    if (req.files?.images) {
+      legacyImages = req.files.images.map(file => `/uploads/${file.filename}`);
+    } else if (req.body.existing_images) {
+      legacyImages = JSON.parse(req.body.existing_images);
+    }
+
+    // For backward compatibility
+    const finalMainImages = mainImages.length > 0 ? mainImages : legacyImages;
+    const finalOptionalImages = optionalImages;
+    const combinedImages = [...finalMainImages, ...finalOptionalImages];
 
     // Convert undefined values to null for MySQL compatibility
     const params = [
@@ -389,14 +452,16 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
       processor || null,
       old_price ? parseFloat(old_price) : null,
       new_price ? parseFloat(new_price) : null,
-      JSON.stringify(images),
+      JSON.stringify(combinedImages), // Legacy images field
+      JSON.stringify(finalMainImages),
+      JSON.stringify(finalOptionalImages),
       description || null,
       description_ar || null,
       id
     ];
 
     await db.execute(
-      `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, description=?, description_ar=? WHERE id=?`,
+      `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, main_images=?, optional_images=?, description=?, description_ar=? WHERE id=?`,
       params
     );
 

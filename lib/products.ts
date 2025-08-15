@@ -9,6 +9,8 @@ export interface Product {
   old_price: number;
   new_price: number;
   images: string[];
+  main_images?: string[];
+  optional_images?: string[];
   description?: string;
   description_ar?: string;
   created_at?: string;
