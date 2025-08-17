@@ -3,6 +3,7 @@ export const translations = {
     // Navigation
     home: 'الصفحة الرئيسية',
     laptops: 'حاسوب',
+    laptopsDescription: 'اكتشف مجموعتنا الحصرية من أجهزة الكمبيوتر المحمولة عالية الأداء',
     contact: 'اتصل بنا',
     cart: 'السلة',
     search: 'البحث...',
@@ -37,6 +38,20 @@ export const translations = {
     heroTitle: 'تجربة أحسن حاسوب تنتظرك',
     heroSubtitle: 'نقدم لك أفضل أجهزة الكمبيوتر المحمولة بأحدث التقنيات وأعلى معايير الجودة',
     featuredCollection: 'مجموعتنا المميزة',
+
+    // Services Section
+    smartWatch: 'اكتشف عالم جديد من الذكاء',
+    smartWatchDesc: 'اجعل كل يوم أفضل مع ساعة ذكية مبتكرة!',
+    fastDelivery: 'التوصيل السريع',
+    fastDeliveryDesc: 'خدمة التوصيل السريع في جميع انحاء المدن',
+    cashOnDelivery: 'خدمة الدفع عند الاستلام',
+    cashOnDeliveryDesc: 'التسوق اون لاين من المتجر ودفع المال عند التوصيل.',
+
+    // Call to Action
+    notFoundWhat: 'لم تجد ما تبحث عنه؟',
+    contactUsHelp: 'تواصل معنا وسنساعدك في العثور على الجهاز المثالي لاحتياجاتك',
+    contactUsButton: 'تواصل معنا',
+    loadingProducts: 'جاري تحميل المنتجات...',
 
     // Checkout & Orders
     fullName: 'اسمك بالكامل',
@@ -101,14 +116,9 @@ export const translations = {
     oldPrice: 'السعر القديم',
     newPrice: 'السعر الجديد',
     images: 'صور المنتج',
-    save: 'حفظ',
-    cancel: 'إلغاء',
-    edit: 'تعديل',
-    delete: 'حذف',
     specs: 'المواصفات',
     actions: 'إجراءات',
     name: 'الاسم',
-    loadingProducts: 'جاري تحميل المنتجات...',
     productImages: 'صور المنتج (متعددة)',
     selectImages: 'اختر الصور',
     imagesSelected: 'تم اختيار {count} صور',
@@ -120,6 +130,7 @@ export const translations = {
     // Navigation
     home: 'Home',
     laptops: 'Laptops',
+    laptopsDescription: 'Discover our exclusive collection of high-performance laptops',
     contact: 'Contact',
     cart: 'Cart',
     search: 'Search...',
@@ -187,6 +198,12 @@ export const translations = {
     fastDeliveryDesc: 'Fast delivery service in all cities',
     cashOnDelivery: 'Cash on Delivery Service',
     cashOnDeliveryDesc: 'Shop online from the store and pay cash on delivery.',
+
+    // Call to Action
+    notFoundWhat: 'Didn\'t find what you\'re looking for?',
+    contactUsHelp: 'Contact us and we\'ll help you find the perfect device for your needs',
+    contactUsButton: 'Contact Us',
+    loadingProducts: 'Loading products...',
     smartWatch: 'Discover a New World of Intelligence',
     smartWatchDesc: 'Make every day better with an innovative smartwatch!',
 
@@ -218,14 +235,9 @@ export const translations = {
     oldPrice: 'Old Price',
     newPrice: 'New Price',
     images: 'Product Images',
-    save: 'Save',
-    cancel: 'Cancel',
-    edit: 'Edit',
-    delete: 'Delete',
     specs: 'Specifications',
     actions: 'Actions',
     name: 'Name',
-    loadingProducts: 'Loading products...',
     productImages: 'Product Images (Multiple)',
     selectImages: 'Select Images',
     imagesSelected: '{count} images selected',
@@ -237,6 +249,7 @@ export const translations = {
     // Navigation
     home: 'Accueil',
     laptops: 'Ordinateurs Portables',
+    laptopsDescription: 'Découvrez notre collection exclusive d\'ordinateurs portables haute performance',
     contact: 'Contact',
     cart: 'Panier',
     search: 'Rechercher...',
@@ -335,14 +348,9 @@ export const translations = {
     oldPrice: 'Ancien Prix',
     newPrice: 'Nouveau Prix',
     images: 'Images du Produit',
-    save: 'Enregistrer',
-    cancel: 'Annuler',
-    edit: 'Modifier',
-    delete: 'Supprimer',
     specs: 'Spécifications',
     actions: 'Actions',
     name: 'Nom',
-    loadingProducts: 'Chargement des produits...',
     productImages: 'Images du Produit (Multiples)',
     selectImages: 'Sélectionner les Images',
     imagesSelected: '{count} images sélectionnées',
@@ -424,19 +432,13 @@ export const translations = {
     oldPrice: 'Precio Anterior',
     newPrice: 'Precio Nuevo',
     images: 'Imágenes del Producto',
-    save: 'Guardar',
-    cancel: 'Cancelar',
-    edit: 'Editar',
-    delete: 'Eliminar',
     specs: 'Especificaciones',
     actions: 'Acciones',
     name: 'Nombre',
-    loadingProducts: 'Cargando productos...',
     productImages: 'Imágenes del Producto (Múltiples)',
     selectImages: 'Seleccionar Imágenes',
     imagesSelected: '{count} imágenes seleccionadas',
     featured: 'Destacado',
-    loadingProducts: 'Cargando productos...',
   }
 };
 

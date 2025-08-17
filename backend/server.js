@@ -979,9 +979,11 @@ app.delete('/api/products/:id', authenticateToken, requireRole(['product_manager
 app.get('/api/clients', authenticateToken, requireRole(['gestion_commandes', 'super_admin']), async (req, res) => {
   try {
     const [clients] = await db.execute(`
-      SELECT DISTINCT c.id, c.full_name, c.phone as phone_number, c.city, c.address, c.created_at
+      SELECT DISTINCT c.id, c.full_name, c.phone as phone_number, c.city, c.address, c.email, c.created_at,
+             COUNT(o.id) as total_orders
       FROM clients c
       INNER JOIN orders o ON c.id = o.client_id
+      GROUP BY c.id, c.full_name, c.phone, c.city, c.address, c.email, c.created_at
       ORDER BY c.created_at DESC
     `);
     res.json(clients);

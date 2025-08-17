@@ -876,9 +876,11 @@ function ClientsManager() {
           <thead>
             <tr className="bg-gray-50">
               <th className="px-4 py-3">الاسم الكامل</th>
+              <th className="px-4 py-3">البريد الإلكتروني</th>
               <th className="px-4 py-3">رقم الهاتف</th>
               <th className="px-4 py-3">المدينة</th>
               <th className="px-4 py-3">العنوان</th>
+              <th className="px-4 py-3">عدد الطلبات</th>
               <th className="px-4 py-3">تاريخ التسجيل</th>
             </tr>
           </thead>
@@ -886,9 +888,23 @@ function ClientsManager() {
             {Array.isArray(clients) && clients.map((client: any) => (
               <tr key={client.id} className="border-b">
                 <td className="px-4 py-3">{client.full_name}</td>
+                <td className="px-4 py-3">
+                  {client.email ? (
+                    <a href={`mailto:${client.email}`} className="text-blue-600 hover:text-blue-800">
+                      {client.email}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">غير متوفر</span>
+                  )}
+                </td>
                 <td className="px-4 py-3">{client.phone_number}</td>
                 <td className="px-4 py-3">{client.city}</td>
                 <td className="px-4 py-3">{client.address}</td>
+                <td className="px-4 py-3">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                    {client.total_orders || 0} طلب
+                  </span>
+                </td>
                 <td className="px-4 py-3">
                   {new Date(client.created_at).toLocaleDateString('ar-DZ')}
                 </td>

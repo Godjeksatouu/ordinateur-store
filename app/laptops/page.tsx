@@ -36,10 +36,10 @@ export default function LaptopsPage() {
       <div className="bg-dark text-light py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-light">
-            حاسوب
+            {t('laptops')}
           </h1>
           <p className="text-base md:text-lg text-light/80 max-w-3xl mx-auto leading-relaxed">
-            اكتشف مجموعتنا الحصرية من أجهزة الكمبيوتر المحمولة عالية الأداء
+            {t('laptopsDescription')}
           </p>
           <div className="w-24 h-1 bg-primary/80 mx-auto mt-6 rounded"></div>
         </div>
@@ -69,16 +69,16 @@ export default function LaptopsPage() {
           <div className="mt-20 text-center">
             <div className="bg-dark rounded-2xl p-12 text-light">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                لم تجد ما تبحث عنه؟
+                {t('notFoundWhat')}
               </h2>
               <p className="text-lg text-light/80 mb-8 max-w-2xl mx-auto">
-                تواصل معنا وسنساعدك في العثور على الجهاز المثالي لاحتياجاتك
+                {t('contactUsHelp')}
               </p>
               <Link
                 href="/contact"
                 className="inline-block bg-primary text-light hover:brightness-95 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
-                تواصل معنا
+                {t('contactUsButton')}
               </Link>
             </div>
           </div>

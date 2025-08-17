@@ -77,7 +77,7 @@ export default function Page(props: {
               ))
             ) : (
               <div className="col-span-full text-center py-12">
-                <p className="text-gray-500">لا توجد منتجات متاحة حالياً</p>
+                <p className="text-gray-500">{t('noProducts')}</p>
               </div>
             )}
           </div>
@@ -94,8 +94,8 @@ export default function Page(props: {
                   <ClockIcon className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-3">اكتشف عالم جديد من الذكاء</h4>
-              <p className="text-gray-600">اجعل كل يوم أفضل مع ساعة ذكية مبتكرة!</p>
+              <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('smartWatch')}</h4>
+              <p className="text-gray-600">{t('smartWatchDesc')}</p>
             </div>
             <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
               <div className="flex items-center mb-4">
@@ -103,8 +103,8 @@ export default function Page(props: {
                   <TruckIcon className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-3">التوصيل السريع</h4>
-              <p className="text-gray-600">خدمة التوصيل السريع في جميع انحاء المدن</p>
+              <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('fastDelivery')}</h4>
+              <p className="text-gray-600">{t('fastDeliveryDesc')}</p>
             </div>
             <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
               <div className="flex items-center mb-4">
@@ -112,8 +112,8 @@ export default function Page(props: {
                   <CurrencyDollarIcon className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-3">خدمة الدفع عند الاستلام</h4>
-              <p className="text-gray-600">التسوق اون لاين من المتجر ودفع المال عند التوصيل.</p>
+              <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('cashOnDelivery')}</h4>
+              <p className="text-gray-600">{t('cashOnDeliveryDesc')}</p>
             </div>
           </div>
         </div>
