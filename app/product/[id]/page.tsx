@@ -15,7 +15,7 @@ interface OrderForm {
   city: string;
   address: string;
   email?: string;
-  paymentMethod?: 'Cashplus' | 'Virement bancaire' | '';
+  paymentMethod?: 'Cashplus' | 'Virement bancaire' | 'Retrait au Magasin' | '';
   codePromo?: string;
 }
 
@@ -29,24 +29,6 @@ export default function ProductDetailsPage() {
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [orderSuccess, setOrderSuccess] = useState(false);
-
-  useEffect(() => {
-    const loadProduct = async () => {
-      try {
-        const fetchedProduct = await getProductById(productId);
-        setProduct(fetchedProduct || null);
-        setFinalPrice(fetchedProduct?.new_price || 0);
-      } catch (error) {
-        console.error('Error loading product:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (productId) {
-      loadProduct();
-    }
-  }, [productId]);
   const [orderForm, setOrderForm] = useState<OrderForm>({
     fullName: '',
     phoneNumber: '',
@@ -65,6 +47,34 @@ export default function ProductDetailsPage() {
   } | null>(null);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   const [finalPrice, setFinalPrice] = useState(0);
+  const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        const fetchedProduct = await getProductById(productId);
+        setProduct(fetchedProduct || null);
+        setFinalPrice(fetchedProduct?.new_price || 0);
+      } catch (error) {
+        console.error('Error loading product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (productId) {
+      loadProduct();
+    }
+  }, [productId]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (promoDebounceTimer) {
+        clearTimeout(promoDebounceTimer);
+      }
+    };
+  }, [promoDebounceTimer]);
 
   if (loading) {
     return (
@@ -113,15 +123,45 @@ export default function ProductDetailsPage() {
       [field]: value
     }));
 
-    // If promo code field is changed, validate it
+    // If promo code field is changed, validate it with debouncing
     if (field === 'codePromo') {
+      // Clear existing timer
+      if (promoDebounceTimer) {
+        clearTimeout(promoDebounceTimer);
+      }
+
       if (value.trim() === '') {
         setPromoValidation(null);
-        setFinalPrice(product?.new_price || 0);
+        calculateFinalPrice(product?.new_price || 0, 0, orderForm.paymentMethod);
+        setPromoDebounceTimer(null);
       } else {
-        validatePromoCode(value.trim());
+        // Set new timer for validation
+        const timer = setTimeout(() => {
+          validatePromoCode(value.trim());
+        }, 500); // 500ms delay
+        setPromoDebounceTimer(timer);
       }
     }
+
+    // If payment method is changed, recalculate price
+    if (field === 'paymentMethod') {
+      const promoDiscount = promoValidation?.isValid ?
+        (promoValidation.discountType === 'percentage' ?
+          (product?.new_price || 0) * (promoValidation.discount / 100) :
+          promoValidation.discount) : 0;
+      calculateFinalPrice(product?.new_price || 0, promoDiscount, value);
+    }
+  };
+
+  const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
+    let finalPrice = basePrice - promoDiscount;
+
+    // Apply Virement bancaire discount
+    if (paymentMethod === 'Virement bancaire') {
+      finalPrice = Math.max(0, finalPrice - 100); // 100 DH discount
+    }
+
+    setFinalPrice(finalPrice);
   };
 
   const validatePromoCode = async (code: string) => {
@@ -146,14 +186,11 @@ export default function ProductDetailsPage() {
         const discount = data.discount;
         const discountType = data.type;
         let discountAmount = 0;
-        let newPrice = product.new_price;
 
         if (discountType === 'percentage') {
           discountAmount = (product.new_price * discount) / 100;
-          newPrice = product.new_price - discountAmount;
         } else {
           discountAmount = discount;
-          newPrice = Math.max(0, product.new_price - discount);
         }
 
         setPromoValidation({
@@ -162,7 +199,8 @@ export default function ProductDetailsPage() {
           discount: discount,
           discountType: discountType
         });
-        setFinalPrice(newPrice);
+
+        calculateFinalPrice(product.new_price, discountAmount, orderForm.paymentMethod);
       } else {
         setPromoValidation({
           isValid: false,
@@ -170,7 +208,7 @@ export default function ProductDetailsPage() {
           discount: 0,
           discountType: 'percentage'
         });
-        setFinalPrice(product.new_price);
+        calculateFinalPrice(product.new_price, 0, orderForm.paymentMethod);
       }
     } catch (error) {
       console.error('Error validating promo code:', error);
@@ -180,7 +218,7 @@ export default function ProductDetailsPage() {
         discount: 0,
         discountType: 'percentage'
       });
-      setFinalPrice(product.new_price);
+      calculateFinalPrice(product.new_price, 0, orderForm.paymentMethod);
     } finally {
       setIsValidatingPromo(false);
     }
@@ -217,8 +255,13 @@ export default function ProductDetailsPage() {
           productName: product.name,
           language: locale,
           finalPrice: finalPrice,
-          originalPrice: product.old_price,
-          discount: promoValidation?.isValid ? (product.new_price - finalPrice) : null
+          originalPrice: product.new_price,
+          discount: promoValidation?.isValid ?
+            (promoValidation.discountType === 'percentage' ?
+              (product.new_price * promoValidation.discount / 100) :
+              promoValidation.discount) : 0,
+          quantity: 1,
+          categoryId: null // Will be implemented when categories are linked to products
         }),
       });
 
@@ -533,7 +576,7 @@ export default function ProductDetailsPage() {
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             طرق الدفع
                           </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cashplus' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
                               <input
                                 type="radio"
@@ -564,6 +607,22 @@ export default function ProductDetailsPage() {
                                 <div className="text-xs text-green-700 mt-1">خصم تلقائي: -100 درهم</div>
                               </div>
                             </label>
+
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Retrait au Magasin' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="Retrait au Magasin"
+                                checked={orderForm.paymentMethod === 'Retrait au Magasin'}
+                                onChange={() => handleInputChange('paymentMethod', 'Retrait au Magasin')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">Retrait au Magasin</div>
+                                <div className="text-sm text-gray-600">استلام من المتجر</div>
+                                <div className="text-xs text-blue-700 mt-1">دفع عند الاستلام</div>
+                              </div>
+                            </label>
                           </div>
                         </div>
                       </div>
@@ -585,39 +644,56 @@ export default function ProductDetailsPage() {
 
                         {/* Dynamic Price Display */}
                         <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <div className="text-sm text-gray-600 mb-2">{t('productPrice')}:</div>
-                          {promoValidation?.isValid && finalPrice !== product.new_price ? (
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg text-gray-500 line-through">
-                                  {product.new_price.toLocaleString()} {t('currency')}
-                                </span>
-                                <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
-                                  {t('originalPrice')}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xl font-bold text-green-600">
-                                  {finalPrice.toLocaleString()} {t('currency')}
-                                </span>
-                                <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-                                  {t('afterDiscount')}
-                                </span>
-                              </div>
-                              <div className="text-sm text-green-700 font-medium">
-                                {t('youSaved')}: {(product.new_price - finalPrice).toLocaleString()} {t('currency')}
-                              </div>
+                          <div className="text-sm text-gray-600 mb-2">تفاصيل السعر:</div>
+                          <div className="space-y-2">
+                            {/* Original Price */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">السعر الأصلي:</span>
+                              <span className="text-sm font-medium">
+                                {product.new_price.toLocaleString()} {t('currency')}
+                              </span>
                             </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
+
+                            {/* Promo Code Discount */}
+                            {promoValidation?.isValid && (
+                              <div className="flex justify-between items-center text-green-600">
+                                <span className="text-sm">خصم كود التخفيض:</span>
+                                <span className="text-sm font-medium">
+                                  -{(promoValidation.discountType === 'percentage' ?
+                                    (product.new_price * promoValidation.discount / 100) :
+                                    promoValidation.discount).toLocaleString()} {t('currency')}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Virement Bancaire Discount */}
+                            {orderForm.paymentMethod === 'Virement bancaire' && (
+                              <div className="flex justify-between items-center text-green-600">
+                                <span className="text-sm">خصم التحويل البنكي:</span>
+                                <span className="text-sm font-medium">-100 {t('currency')}</span>
+                              </div>
+                            )}
+
+                            {/* Divider */}
+                            {(promoValidation?.isValid || orderForm.paymentMethod === 'Virement bancaire') && (
+                              <hr className="border-gray-200" />
+                            )}
+
+                            {/* Final Price */}
+                            <div className="flex justify-between items-center">
+                              <span className="text-lg font-semibold text-gray-900">المجموع النهائي:</span>
                               <span className="text-xl font-bold text-[#6188a4]">
                                 {finalPrice.toLocaleString()} {t('currency')}
                               </span>
-                              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                                {t('finalPrice')}
-                              </span>
                             </div>
-                          )}
+
+                            {/* Savings Summary */}
+                            {finalPrice !== product.new_price && (
+                              <div className="text-sm text-green-700 font-medium bg-green-50 p-2 rounded">
+                                وفرت: {(product.new_price - finalPrice).toLocaleString()} {t('currency')}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 

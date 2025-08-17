@@ -38,15 +38,27 @@ export default function CategoryPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
         <Main>
-          <div className="py-10">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">{category?.name || 'الفئة'}</h1>
+          <div className="py-20">
+            <div className="text-center mb-16">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                {category?.name || 'الفئة'}
+              </h1>
+              <div className="w-24 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto rounded"></div>
+            </div>
             {loading ? (
-              <div className="text-center py-16">جاري التحميل...</div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((p) => (
-                  <ProductCard key={p.id} product={p as any} showPrice />
+              <div className="text-center py-16">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p className="mt-2 text-gray-600">جاري التحميل...</p>
+              </div>
+            ) : products.length > 0 ? (
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
                 ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <p className="text-gray-600">لا توجد منتجات في هذه الفئة حالياً</p>
               </div>
             )}
           </div>

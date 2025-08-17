@@ -189,7 +189,18 @@ function ProductsManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Basic validation
+    if (!formData.name || !formData.new_price) {
+      alert('يرجى تعبئة اسم المنتج والسعر الجديد على الأقل');
+      return;
+    }
+
     const token = localStorage.getItem('adminToken');
+    if (!token) {
+      alert('يرجى تسجيل الدخول أولاً');
+      return;
+    }
 
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
@@ -230,9 +241,20 @@ function ProductsManager() {
         setMainImages(null);
         setOptionalImages(null);
         setEditingId(null);
+        alert(editingId ? 'تم تحديث المنتج بنجاح' : 'تم إنشاء المنتج بنجاح');
+      } else {
+        let errorMessage = 'خطأ غير معروف';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || 'خطأ غير معروف';
+        } catch (jsonError) {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        alert(`خطأ في ${editingId ? 'تحديث' : 'إنشاء'} المنتج: ${errorMessage}`);
       }
     } catch (error) {
       console.error('Error saving product:', error);
+      alert(`خطأ في ${editingId ? 'تحديث' : 'إنشاء'} المنتج: ${error.message || 'خطأ في الاتصال'}`);
     }
   };
 
@@ -617,6 +639,9 @@ function OrdersManager() {
               <th className="px-4 py-3">المنتج</th>
               <th className="px-4 py-3">الهاتف</th>
               <th className="px-4 py-3">المدينة</th>
+              <th className="px-4 py-3">طريقة الدفع</th>
+              <th className="px-4 py-3">كود التخفيض</th>
+              <th className="px-4 py-3">السعر النهائي</th>
               <th className="px-4 py-3">الحالة</th>
               <th className="px-4 py-3">تحديث الحالة</th>
             </tr>
@@ -626,9 +651,57 @@ function OrdersManager() {
               <tr key={order.id} className="border-b">
                 <td className="px-4 py-3">#{order.id}</td>
                 <td className="px-4 py-3">{order.full_name}</td>
-                <td className="px-4 py-3">{order.product_name}</td>
+                <td className="px-4 py-3">
+                  <div>
+                    <div className="font-medium">{order.product_name}</div>
+                    {order.quantity && order.quantity > 1 && (
+                      <div className="text-xs text-gray-500">الكمية: {order.quantity}</div>
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3">{order.phone}</td>
                 <td className="px-4 py-3">{order.city}</td>
+                <td className="px-4 py-3">
+                  <div>
+                    <div className="text-sm font-medium">
+                      {order.payment_method || 'غير محدد'}
+                    </div>
+                    {order.virement_discount > 0 && (
+                      <div className="text-xs text-green-600">خصم: -{order.virement_discount} درهم</div>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <div>
+                    {order.code_promo ? (
+                      <div>
+                        <div className="text-sm font-medium text-blue-600">{order.code_promo}</div>
+                        {order.promo_discount > 0 && (
+                          <div className="text-xs text-green-600">خصم: -{order.promo_discount} درهم</div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">لا يوجد</span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <div>
+                    {order.final_price ? (
+                      <div>
+                        <div className="font-medium text-green-600">{order.final_price} درهم</div>
+                        {order.original_price && order.original_price !== order.final_price && (
+                          <div className="text-xs text-gray-500 line-through">{order.original_price} درهم</div>
+                        )}
+                        {order.discount_amount > 0 && (
+                          <div className="text-xs text-green-600">وفر: {order.discount_amount} درهم</div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">غير محدد</span>
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}>
                     {getStatusLabel(order.status)}

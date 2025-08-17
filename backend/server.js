@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 5000;
@@ -259,6 +259,98 @@ async function createTables() {
       }
     } catch (e) {
       console.warn('⚠️ Could not ensure orders.payment_method column exists:', e.message || e);
+    }
+
+    // Add additional order details columns
+    try {
+      const [quantityCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'quantity'");
+      // @ts-ignore
+      if (Array.isArray(quantityCol) && quantityCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN quantity INT DEFAULT 1');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.quantity column exists:', e.message || e);
+    }
+
+    try {
+      const [categoryCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'category_id'");
+      // @ts-ignore
+      if (Array.isArray(categoryCol) && categoryCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN category_id INT');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.category_id column exists:', e.message || e);
+    }
+
+    try {
+      const [originalPriceCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'original_price'");
+      // @ts-ignore
+      if (Array.isArray(originalPriceCol) && originalPriceCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN original_price DECIMAL(10,2)');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.original_price column exists:', e.message || e);
+    }
+
+    try {
+      const [finalPriceCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'final_price'");
+      // @ts-ignore
+      if (Array.isArray(finalPriceCol) && finalPriceCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN final_price DECIMAL(10,2)');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.final_price column exists:', e.message || e);
+    }
+
+    try {
+      const [discountAmountCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'discount_amount'");
+      // @ts-ignore
+      if (Array.isArray(discountAmountCol) && discountAmountCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN discount_amount DECIMAL(10,2) DEFAULT 0');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.discount_amount column exists:', e.message || e);
+    }
+
+    try {
+      const [promoDiscountCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'promo_discount'");
+      // @ts-ignore
+      if (Array.isArray(promoDiscountCol) && promoDiscountCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN promo_discount DECIMAL(10,2) DEFAULT 0');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.promo_discount column exists:', e.message || e);
+    }
+
+    try {
+      const [virementDiscountCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'virement_discount'");
+      // @ts-ignore
+      if (Array.isArray(virementDiscountCol) && virementDiscountCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN virement_discount DECIMAL(10,2) DEFAULT 0');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.virement_discount column exists:', e.message || e);
+    }
+
+    // Add promo_code and promo_type columns to products table
+    try {
+      const [promoCodeCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'promo_code'");
+      // @ts-ignore
+      if (Array.isArray(promoCodeCol) && promoCodeCol.length === 0) {
+        await db.execute('ALTER TABLE products ADD COLUMN promo_code VARCHAR(100)');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure products.promo_code column exists:', e.message || e);
+    }
+
+    try {
+      const [promoTypeCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'promo_type'");
+      // @ts-ignore
+      if (Array.isArray(promoTypeCol) && promoTypeCol.length === 0) {
+        await db.execute('ALTER TABLE products ADD COLUMN promo_type ENUM("percentage", "fixed")');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure products.promo_type column exists:', e.message || e);
     }
 
     // Categories table (called "categorie" per requirements)
@@ -564,7 +656,29 @@ app.post('/api/auth/login', async (req, res) => {
 // Place order (public endpoint)
 app.post('/api/orders', async (req, res) => {
   try {
-    const { fullName, phoneNumber, city, address, email, productId, productName, paymentMethod, codePromo, language = 'ar', finalPrice, originalPrice, discount } = req.body;
+    const {
+      fullName, phoneNumber, city, address, email,
+      productId, productName, paymentMethod, codePromo,
+      language = 'ar', finalPrice, originalPrice, discount,
+      quantity = 1, categoryId
+    } = req.body;
+
+    // Calculate discounts
+    let promoDiscount = 0;
+    let virementDiscount = 0;
+    let totalDiscount = 0;
+
+    // Calculate promo discount if promo code is provided
+    if (codePromo && discount) {
+      promoDiscount = discount;
+    }
+
+    // Calculate Virement bancaire discount
+    if (paymentMethod === 'Virement bancaire') {
+      virementDiscount = 100;
+    }
+
+    totalDiscount = promoDiscount + virementDiscount;
 
     // Insert client
     const [clientResult] = await db.execute(
@@ -574,10 +688,18 @@ app.post('/api/orders', async (req, res) => {
 
     const clientId = clientResult.insertId;
 
-    // Insert order
+    // Insert order with all details
     const [orderResult] = await db.execute(
-      'INSERT INTO orders (client_id, product_id, product_name, status, payment_method, code_promo) VALUES (?, ?, ?, ?, ?, ?)',
-      [clientId, productId, productName, 'en_attente', paymentMethod || null, codePromo || null]
+      `INSERT INTO orders (
+        client_id, product_id, product_name, status, payment_method, code_promo,
+        quantity, category_id, original_price, final_price, discount_amount,
+        promo_discount, virement_discount
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        clientId, productId, productName, 'en_attente', paymentMethod || null, codePromo || null,
+        quantity, categoryId || null, originalPrice || null, finalPrice || null, totalDiscount,
+        promoDiscount, virementDiscount
+      ]
     );
 
     // Fire-and-forget email (does not block the response)
@@ -810,7 +932,13 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
     res.json({ success: true, message: 'Product updated successfully' });
   } catch (error) {
     console.error('Update product error:', error);
-    res.status(500).json({ error: 'Failed to update product' });
+    console.error('Error details:', error.message);
+    console.error('SQL Error Code:', error.code);
+    res.status(500).json({
+      error: 'Failed to update product',
+      details: error.message,
+      code: error.code
+    });
   }
 });
 
