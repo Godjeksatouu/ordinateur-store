@@ -13,6 +13,9 @@ interface OrderForm {
   phoneNumber: string;
   city: string;
   address: string;
+  email?: string;
+  paymentMethod?: 'Cashplus' | 'Virement bancaire' | '';
+  codePromo?: string;
 }
 
 export default function ProductDetailsPage() {
@@ -45,7 +48,10 @@ export default function ProductDetailsPage() {
     fullName: '',
     phoneNumber: '',
     city: '',
-    address: ''
+    address: '',
+    email: '',
+    paymentMethod: '',
+    codePromo: ''
   });
   const [marketingConsent, setMarketingConsent] = useState(false);
 
@@ -121,6 +127,9 @@ export default function ProductDetailsPage() {
           phoneNumber: orderForm.phoneNumber,
           city: orderForm.city,
           address: orderForm.address,
+          email: orderForm.email,
+          paymentMethod: orderForm.paymentMethod,
+          codePromo: orderForm.codePromo,
           productId: product.id,
           productName: product.name
         }),
@@ -170,7 +179,7 @@ export default function ProductDetailsPage() {
                     </div>
 
                     {/* Badge */}
-                    <div className="absolute top-6 right-6 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                    <div className="absolute top-6 right-6 bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
                       جديد
                     </div>
                   </div>
@@ -185,7 +194,7 @@ export default function ProductDetailsPage() {
                           key={i}
                           onClick={() => setActiveIndex(i)}
                           className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-                            activeIndex === i ? 'border-amber-500' : 'border-transparent hover:border-gray-200'
+                            activeIndex === i ? 'border-[#6188a4]' : 'border-transparent hover:border-[#adb8c1]'
                           }`}
                           aria-label={`صورة ${i + 1}`}
                         >
@@ -217,7 +226,7 @@ export default function ProductDetailsPage() {
                       {product.old_price.toLocaleString()} دج
                     </div>
                   )}
-                  <div className="text-3xl font-bold text-amber-600">
+                  <div className="text-3xl font-bold text-[#6188a4]">
                     {product.new_price.toLocaleString()}
                     <span className="text-lg text-gray-500 mr-2">دج</span>
                   </div>
@@ -319,7 +328,7 @@ export default function ProductDetailsPage() {
                             required
                             value={orderForm.fullName}
                             onChange={(e) => handleInputChange('fullName', e.target.value)}
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white"
+                            className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
                             placeholder="أدخل اسمك الكامل"
                           />
                         </div>
@@ -336,7 +345,7 @@ export default function ProductDetailsPage() {
                             required
                             value={orderForm.phoneNumber}
                             onChange={(e) => handleInputChange('phoneNumber', e.target.value.replace(/[^0-9]/g, ''))}
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white"
+                            className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
                             placeholder="مثال: 0612345678"
                           />
                         </div>
@@ -352,24 +361,93 @@ export default function ProductDetailsPage() {
                           required
                           value={orderForm.city}
                           onChange={(e) => handleInputChange('city', e.target.value)}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white"
+                          className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
                           placeholder="أدخل اسم المدينة"
                         />
                       </div>
 
                       <div>
-                        <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
-                          العنوان التفصيلي
-                        </label>
-                        <textarea
-                          id="address"
-                          required
-                          rows={4}
-                          value={orderForm.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white resize-none"
-                          placeholder="أدخل عنوانك التفصيلي..."
-                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
+                              العنوان التفصيلي
+                            </label>
+                            <textarea
+                              id="address"
+                              required
+                              rows={4}
+                              value={orderForm.address}
+                              onChange={(e) => handleInputChange('address', e.target.value)}
+                              className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white resize-none"
+                              placeholder="أدخل عنوانك التفصيلي..."
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                              البريد الإلكتروني
+                            </label>
+                            <input
+                              type="email"
+                              id="email"
+                              value={orderForm.email}
+                              onChange={(e) => handleInputChange('email', e.target.value)}
+                              className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
+                              placeholder="example@email.com"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mt-6">
+                          <label htmlFor="codePromo" className="block text-sm font-semibold text-gray-700 mb-2">
+                            كود التخفيض
+                          </label>
+                          <input
+                            type="text"
+                            id="codePromo"
+                            value={orderForm.codePromo}
+                            onChange={(e) => handleInputChange('codePromo', e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
+                            placeholder="مثال: SAVE10"
+                          />
+                        </div>
+
+                        <div className="mt-6">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            طرق الدفع
+                          </label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cashplus' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="Cashplus"
+                                checked={orderForm.paymentMethod === 'Cashplus'}
+                                onChange={() => handleInputChange('paymentMethod', 'Cashplus')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">Cashplus</div>
+                                <div className="text-sm text-gray-600">RIB: 123 456 789 000 000 000 12</div>
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Virement bancaire' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="Virement bancaire"
+                                checked={orderForm.paymentMethod === 'Virement bancaire'}
+                                onChange={() => handleInputChange('paymentMethod', 'Virement bancaire')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">Virement bancaire</div>
+                                <div className="text-sm text-gray-600">RIB: 987 654 321 000 000 000 34</div>
+                                <div className="text-xs text-green-700 mt-1">خصم تلقائي: -100 درهم</div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
@@ -378,7 +456,7 @@ export default function ProductDetailsPage() {
                           type="checkbox"
                           checked={marketingConsent}
                           onChange={(e) => setMarketingConsent(e.target.checked)}
-                          className="mt-1 h-5 w-5 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+                          className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] rounded focus:ring-[#6188a4]"
                           required
                         />
                         <label htmlFor="marketingConsent" className="text-gray-700">

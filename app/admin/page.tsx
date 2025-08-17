@@ -147,6 +147,7 @@ function ProductsManager() {
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+    promo_code: '', promo_type: 'percentage',
   });
   const [mainImages, setMainImages] = useState<FileList | null>(null);
   const [optionalImages, setOptionalImages] = useState<FileList | null>(null);
@@ -174,7 +175,7 @@ function ProductsManager() {
 
     const formDataToSend = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      formDataToSend.append(key, value);
+      formDataToSend.append(key, value as any);
     });
 
     // Append main images
@@ -206,7 +207,7 @@ function ProductsManager() {
       if (response.ok) {
         fetchProducts();
         setFormData({
-          name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+          name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', promo_code: '', promo_type: 'percentage'
         });
         setMainImages(null);
         setOptionalImages(null);
@@ -417,6 +418,27 @@ function ProductsManager() {
           )}
         </div>
         <div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Code Promo</label>
+          <input
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+            placeholder="Ex: SAVE10"
+            value={(formData as any).promo_code}
+            onChange={(e) => setFormData({ ...formData, promo_code: e.target.value })}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">نوع التخفيض</label>
+          <select
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+            value={(formData as any).promo_type}
+            onChange={(e) => setFormData({ ...formData, promo_type: e.target.value })}
+          >
+            <option value="percentage">Percentage</option>
+            <option value="fixed">Montant fixe</option>
+          </select>
+        </div>
+
           <label className="block text-sm font-medium text-gray-700 mb-2">الوصف (English)</label>
           <textarea
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
@@ -424,6 +446,17 @@ function ProductsManager() {
             rows={4}
             value={formData.description}
             onChange={(e) => setFormData({...formData, description: e.target.value})}
+          />
+        </div>
+
+        <div className="md:col-span-2 flex gap-4">
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-6 py-3 rounded-xl font-semibold flex-1"
+          >
+            {editingId ? 'تحديث المنتج' : 'حفظ المنتج'}
+          </button
+        </div>
           />
         </div>
 
@@ -440,7 +473,7 @@ function ProductsManager() {
               onClick={() => {
                 setEditingId(null);
                 setFormData({
-                  name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+                  name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', promo_code: '', promo_type: 'percentage'
                 });
               }}
               className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold"

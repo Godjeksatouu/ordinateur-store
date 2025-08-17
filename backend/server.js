@@ -36,7 +36,7 @@ async function connectDB() {
   try {
     db = await mysql.createConnection(dbConfig);
     console.log('✅ Connected to MySQL database');
-    
+
     // Create tables if they don't exist
     await createTables();
   } catch (error) {
@@ -133,6 +133,26 @@ async function createTables() {
     } catch (e) {
       console.warn('⚠️ Could not drop description_ar column (may not exist):', e.message || e);
     }
+    // Ensure promo fields exist on products
+    try {
+      const [promoCodeCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'promo_code'");
+      // @ts-ignore
+      if (Array.isArray(promoCodeCol) && promoCodeCol.length === 0) {
+        await db.execute("ALTER TABLE products ADD COLUMN promo_code VARCHAR(100)");
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure products.promo_code column exists:', e.message || e);
+    }
+    try {
+      const [promoTypeCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'promo_type'");
+      // @ts-ignore
+      if (Array.isArray(promoTypeCol) && promoTypeCol.length === 0) {
+        await db.execute("ALTER TABLE products ADD COLUMN promo_type ENUM('percentage','fixed')");
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure products.promo_type column exists:', e.message || e);
+    }
+
 
     // Clients table
     await db.execute(`
@@ -145,6 +165,17 @@ async function createTables() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    // Ensure email column exists in clients
+    try {
+      const [emailCol] = await db.execute("SHOW COLUMNS FROM clients LIKE 'email'");
+      // @ts-ignore
+      if (Array.isArray(emailCol) && emailCol.length === 0) {
+        await db.execute('ALTER TABLE clients ADD COLUMN email VARCHAR(255)');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure clients.email column exists:', e.message || e);
+    }
+
 
     // Orders table
     await db.execute(`
@@ -160,6 +191,36 @@ async function createTables() {
         FOREIGN KEY (product_id) REFERENCES products(id)
       )
     `);
+    // Ensure extra fields on orders
+    try {
+      const [codePromoCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'code_promo'");
+      // @ts-ignore
+      if (Array.isArray(codePromoCol) && codePromoCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN code_promo VARCHAR(100)');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.code_promo column exists:', e.message || e);
+    }
+    try {
+      const [paymentMethodCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'payment_method'");
+      // @ts-ignore
+      if (Array.isArray(paymentMethodCol) && paymentMethodCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50)');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.payment_method column exists:', e.message || e);
+    }
+
+    // Categories table (called "categorie" per requirements)
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS categorie (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
 
     // Seed default role-based accounts if not exist (using username as email)
     const defaultUsers = [
@@ -196,7 +257,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
@@ -278,20 +339,20 @@ app.post('/api/auth/login', async (req, res) => {
 // Place order (public endpoint)
 app.post('/api/orders', async (req, res) => {
   try {
-    const { fullName, phoneNumber, city, address, productId, productName } = req.body;
+    const { fullName, phoneNumber, city, address, email, productId, productName, paymentMethod, codePromo } = req.body;
 
     // Insert client
     const [clientResult] = await db.execute(
-      'INSERT INTO clients (full_name, phone, city, address) VALUES (?, ?, ?, ?)',
-      [fullName, phoneNumber, city, address]
+      'INSERT INTO clients (full_name, phone, city, address, email) VALUES (?, ?, ?, ?, ?)',
+      [fullName, phoneNumber, city, address, email || null]
     );
 
     const clientId = clientResult.insertId;
 
     // Insert order
     const [orderResult] = await db.execute(
-      'INSERT INTO orders (client_id, product_id, product_name, status) VALUES (?, ?, ?, ?)',
-      [clientId, productId, productName, 'en_attente']
+      'INSERT INTO orders (client_id, product_id, product_name, status, payment_method, code_promo) VALUES (?, ?, ?, ?, ?, ?)',
+      [clientId, productId, productName, 'en_attente', paymentMethod || null, codePromo || null]
     );
 
     res.json({
@@ -309,9 +370,9 @@ app.post('/api/orders', async (req, res) => {
 app.get('/api/orders', authenticateToken, requireRole(['gestion_commandes', 'super_admin']), async (req, res) => {
   try {
     const [orders] = await db.execute(`
-      SELECT o.*, c.full_name, c.phone, c.city, c.address 
-      FROM orders o 
-      JOIN clients c ON o.client_id = c.id 
+      SELECT o.*, c.full_name, c.phone, c.city, c.address, c.email
+      FROM orders o
+      JOIN clients c ON o.client_id = c.id
       ORDER BY o.created_at DESC
     `);
     res.json(orders);
@@ -375,7 +436,7 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
   { name: 'images', maxCount: 5 } // Keep for backward compatibility
 ]), async (req, res) => {
   try {
-    let { name, ram, storage, graphics, os, processor, old_price, new_price, description } = req.body;
+    let { name, ram, storage, graphics, os, processor, old_price, new_price, description, promo_code, promo_type } = req.body;
 
     // Handle different image types
     const mainImages = req.files?.mainImages ? req.files.mainImages.map(file => `/uploads/${file.filename}`) : [];
@@ -399,12 +460,14 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
       JSON.stringify([...finalMainImages, ...finalOptionalImages]), // Combined for legacy images field
       JSON.stringify(finalMainImages),
       JSON.stringify(finalOptionalImages),
-      description || null
+      description || null,
+      promo_code || null,
+      promo_type || null
     ];
 
     const [result] = await db.execute(
-      `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, main_images, optional_images, description)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, main_images, optional_images, description, promo_code, promo_type)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       params
     );
 
@@ -422,7 +485,7 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
 ]), async (req, res) => {
   try {
     const { id } = req.params;
-    let { name, ram, storage, graphics, os, processor, old_price, new_price, description } = req.body;
+    let { name, ram, storage, graphics, os, processor, old_price, new_price, description, promo_code, promo_type } = req.body;
 
     // Handle different image types for update
     let mainImages = [];
@@ -466,11 +529,13 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
       JSON.stringify(finalMainImages),
       JSON.stringify(finalOptionalImages),
       description || null,
+      promo_code || null,
+      promo_type || null,
       id
     ];
 
     await db.execute(
-      `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, main_images=?, optional_images=?, description=? WHERE id=?`,
+      `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, main_images=?, optional_images=?, description=?, promo_code=?, promo_type=? WHERE id=?`,
       params
     );
 
@@ -593,6 +658,41 @@ app.put('/api/users/:id', authenticateToken, requireRole(['super_admin']), async
 
     let updateQuery = 'UPDATE users SET username = ?, role = ? WHERE id = ?';
     let updateParams = [email, role, id];
+// Categories endpoints
+app.get('/api/categories', async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT * FROM categorie ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Get categories error:', error);
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+app.post('/api/categories', authenticateToken, requireRole(['super_admin']), async (req, res) => {
+  try {
+    const { name, slug } = req.body;
+    if (!name) return res.status(400).json({ error: 'Name is required' });
+    const finalSlug = slug || name.toLowerCase().replace(/\s+/g, '-');
+    const [result] = await db.execute('INSERT INTO categorie (name, slug) VALUES (?, ?)', [name, finalSlug]);
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error('Create category error:', error);
+    res.status(500).json({ error: 'Failed to create category' });
+  }
+});
+
+app.delete('/api/categories/:id', authenticateToken, requireRole(['super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.execute('DELETE FROM categorie WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete category error:', error);
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
+
 
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);

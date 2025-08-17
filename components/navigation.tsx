@@ -10,8 +10,8 @@ import { NavigationClient } from './navigation-client';
 
 function ShoppingCartNavItemFallback() {
   return (
-    <Link href="/cart" className="group relative p-3 rounded-xl hover:bg-amber-50 transition-all duration-300">
-      <ShoppingCartIcon className="h-6 w-6 flex-shrink-0 text-gray-600 group-hover:text-amber-600 transition-colors duration-300" />
+    <Link href="/cart" className="group relative p-3 rounded-xl hover:bg-[#adb8c1]/30 transition-all duration-300">
+      <ShoppingCartIcon className="h-6 w-6 flex-shrink-0 text-[#262a2f] group-hover:text-[#6188a4] transition-colors duration-300" />
       <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-gray-200 animate-pulse" />
     </Link>
   );
@@ -35,7 +35,7 @@ function ShoppingCartNavItem() {
 
 export function Navigation() {
   return (
-    <header className="relative bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-40" suppressHydrationWarning>
+    <header className="relative bg-[#fdfefd]/95 backdrop-blur-md shadow-lg border-b border-[#adb8c1]/40 sticky top-0 z-40" suppressHydrationWarning>
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between" suppressHydrationWarning>
           {/* Mobile menu button */}

@@ -18,7 +18,7 @@ export function Footer() {
             {/* Logo and Description */}
             <div className="md:col-span-2 space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg">
+                <div className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] p-3 rounded-xl shadow-lg">
                   <ShoppingBagIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>

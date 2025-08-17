@@ -24,7 +24,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
     >
       {/* Premium Badge */}
       <div className="absolute top-4 right-4 z-10">
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+        <div className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
           مميز
         </div>
       </div>
@@ -78,7 +78,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
 
       <div className="p-6">
         {/* Product Title */}
-        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-amber-600 transition-colors duration-300 leading-tight">
+        <h3 className="text-xl font-bold text-[#262a2f] mb-3 group-hover:text-[#6188a4] transition-colors duration-300 leading-tight">
           {product.name}
         </h3>
 
@@ -123,7 +123,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
               {product.old_price.toLocaleString()} {t('currency')}
             </div>
           )}
-          <div className="text-2xl font-bold text-amber-600">
+          <div className="text-2xl font-bold text-[#6188a4]">
             {product.new_price.toLocaleString()} <span className="text-sm text-gray-500 mr-1">{t('currency')}</span>
           </div>
         </div>

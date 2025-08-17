@@ -12,6 +12,8 @@ export interface Product {
   main_images?: string[];
   optional_images?: string[];
   description?: string;
+  promo_code?: string | null;
+  promo_type?: 'percentage' | 'fixed' | null;
   created_at?: string;
   updated_at?: string;
 }
