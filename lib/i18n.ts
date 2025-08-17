@@ -24,7 +24,7 @@ export const translations = {
     // Common
     loading: 'جاري التحميل...',
     noProducts: 'لا توجد منتجات متاحة حالياً',
-    currency: 'دج',
+    currency: 'درهم',
     save: 'حفظ',
     cancel: 'إلغاء',
     edit: 'تعديل',
@@ -53,10 +53,17 @@ export const translations = {
     marketingConsent: 'أوافق على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني',
 
     // Promo codes
-    promoCodeValid: 'تم تطبيق الخصم! وفرت {amount} دج',
+    promoCodeValid: 'تم تطبيق الخصم! وفرت {amount} درهم',
     promoCodeInvalid: 'كود الخصم غير صحيح أو منتهي الصلاحية',
     promoCodeError: 'حدث خطأ في التحقق من كود الخصم',
     promoCodeNotForProduct: 'كود الخصم غير صالح لهذا المنتج',
+
+    // Price display
+    productPrice: 'سعر المنتج',
+    originalPrice: 'السعر الأصلي',
+    afterDiscount: 'بعد الخصم',
+    finalPrice: 'السعر النهائي',
+    youSaved: 'وفرت',
     
     // Services
     fastDelivery: 'التوصيل السريع',
@@ -65,6 +72,23 @@ export const translations = {
     cashOnDeliveryDesc: 'التسوق اون لاين من المتجر ودفع المال عند التوصيل.',
     smartWatch: 'اكتشف عالم جديد من الذكاء',
     smartWatchDesc: 'اجعل كل يوم أفضل مع ساعة ذكية مبتكرة!',
+
+    // Footer
+    storeName: 'متجر الحاسوب',
+    storeTagline: 'أفضل أجهزة الكمبيوتر المحمولة',
+    storeDescription: 'نحن متخصصون في توفير أحدث وأفضل أجهزة الكمبيوتر المحمولة بأعلى معايير الجودة وأفضل الأسعار في السوق.',
+    quickLinks: 'روابط سريعة',
+    aboutStore: 'حول المتجر',
+    termsConditions: 'الشروط والأحكام',
+    shippingPolicy: 'سياسة الشحن والإرجاع',
+    privacyPolicy: 'سياسة الخصوصية',
+    returnPolicy: 'سياسة الإرجاع',
+    contactUs: 'تواصل معنا',
+    phone: 'الهاتف',
+    email: 'البريد الإلكتروني',
+    address: 'العنوان',
+    storeAddress: 'الدار البيضاء، المغرب',
+    allRightsReserved: 'جميع الحقوق محفوظة',
     
     // Admin
     dashboard: 'لوحة التحكم',
@@ -117,7 +141,7 @@ export const translations = {
     // Common
     loading: 'Loading...',
     noProducts: 'No products available',
-    currency: 'DZD',
+    currency: 'DH',
     save: 'Save',
     cancel: 'Cancel',
     edit: 'Edit',
@@ -146,10 +170,17 @@ export const translations = {
     marketingConsent: 'I agree to receive the latest offers and products via email',
 
     // Promo codes
-    promoCodeValid: 'Discount applied! You saved {amount} DZD',
+    promoCodeValid: 'Discount applied! You saved {amount} DH',
     promoCodeInvalid: 'Invalid or expired promo code',
     promoCodeError: 'Error validating promo code',
     promoCodeNotForProduct: 'Promo code not valid for this product',
+
+    // Price display
+    productPrice: 'Product Price',
+    originalPrice: 'Original Price',
+    afterDiscount: 'After Discount',
+    finalPrice: 'Final Price',
+    youSaved: 'You Saved',
     
     // Services
     fastDelivery: 'Fast Delivery',
@@ -158,6 +189,23 @@ export const translations = {
     cashOnDeliveryDesc: 'Shop online from the store and pay cash on delivery.',
     smartWatch: 'Discover a New World of Intelligence',
     smartWatchDesc: 'Make every day better with an innovative smartwatch!',
+
+    // Footer
+    storeName: 'Computer Store',
+    storeTagline: 'Best Laptops Available',
+    storeDescription: 'We specialize in providing the latest and best laptops with the highest quality standards and best prices in the market.',
+    quickLinks: 'Quick Links',
+    aboutStore: 'About Store',
+    termsConditions: 'Terms & Conditions',
+    shippingPolicy: 'Shipping & Return Policy',
+    privacyPolicy: 'Privacy Policy',
+    returnPolicy: 'Return Policy',
+    contactUs: 'Contact Us',
+    phone: 'Phone',
+    email: 'Email',
+    address: 'Address',
+    storeAddress: 'Casablanca, Morocco',
+    allRightsReserved: 'All rights reserved',
     
     // Admin
     dashboard: 'Dashboard',
@@ -210,7 +258,7 @@ export const translations = {
     // Common
     loading: 'Chargement...',
     noProducts: 'Aucun produit disponible',
-    currency: 'DZD',
+    currency: 'DH',
     save: 'Enregistrer',
     cancel: 'Annuler',
     edit: 'Modifier',
@@ -239,10 +287,17 @@ export const translations = {
     marketingConsent: 'J\'accepte de recevoir les dernières offres et produits par email',
 
     // Promo codes
-    promoCodeValid: 'Remise appliquée! Vous avez économisé {amount} DZD',
+    promoCodeValid: 'Remise appliquée! Vous avez économisé {amount} DH',
     promoCodeInvalid: 'Code promo invalide ou expiré',
     promoCodeError: 'Erreur lors de la validation du code promo',
     promoCodeNotForProduct: 'Code promo non valide pour ce produit',
+
+    // Price display
+    productPrice: 'Prix du Produit',
+    originalPrice: 'Prix Original',
+    afterDiscount: 'Après Remise',
+    finalPrice: 'Prix Final',
+    youSaved: 'Vous avez économisé',
     
     // Services
     fastDelivery: 'Livraison Rapide',
@@ -251,6 +306,23 @@ export const translations = {
     cashOnDeliveryDesc: 'Achetez en ligne dans le magasin et payez en espèces à la livraison.',
     smartWatch: 'Découvrez un Nouveau Monde d\'Intelligence',
     smartWatchDesc: 'Rendez chaque jour meilleur avec une montre intelligente innovante!',
+
+    // Footer
+    storeName: 'Magasin d\'Ordinateurs',
+    storeTagline: 'Meilleurs Ordinateurs Portables',
+    storeDescription: 'Nous nous spécialisons dans la fourniture des ordinateurs portables les plus récents et les meilleurs avec les plus hauts standards de qualité et les meilleurs prix du marché.',
+    quickLinks: 'Liens Rapides',
+    aboutStore: 'À Propos du Magasin',
+    termsConditions: 'Termes et Conditions',
+    shippingPolicy: 'Politique d\'Expédition et de Retour',
+    privacyPolicy: 'Politique de Confidentialité',
+    returnPolicy: 'Politique de Retour',
+    contactUs: 'Contactez-nous',
+    phone: 'Téléphone',
+    email: 'Email',
+    address: 'Adresse',
+    storeAddress: 'Casablanca, Maroc',
+    allRightsReserved: 'Tous droits réservés',
     
     // Admin
     dashboard: 'Tableau de Bord',
@@ -302,8 +374,15 @@ export const translations = {
     // Common
     loading: 'Cargando...',
     noProducts: 'No hay productos disponibles',
-    currency: 'DZD',
-    
+    currency: 'DH',
+
+    // Price display
+    productPrice: 'Precio del Producto',
+    originalPrice: 'Precio Original',
+    afterDiscount: 'Después del Descuento',
+    finalPrice: 'Precio Final',
+    youSaved: 'Ahorraste',
+
     // Homepage
     heroTitle: 'La Mejor Experiencia de Computadora Te Espera',
     heroSubtitle: 'Te ofrecemos las mejores laptops con la última tecnología y los más altos estándares de calidad',
@@ -316,6 +395,23 @@ export const translations = {
     cashOnDeliveryDesc: 'Compra en línea en la tienda y paga en efectivo al momento de la entrega.',
     smartWatch: 'Descubre un Nuevo Mundo de Inteligencia',
     smartWatchDesc: '¡Haz que cada día sea mejor con un reloj inteligente innovador!',
+
+    // Footer
+    storeName: 'Tienda de Computadoras',
+    storeTagline: 'Mejores Laptops Disponibles',
+    storeDescription: 'Nos especializamos en proporcionar las laptops más recientes y mejores con los más altos estándares de calidad y mejores precios del mercado.',
+    quickLinks: 'Enlaces Rápidos',
+    aboutStore: 'Acerca de la Tienda',
+    termsConditions: 'Términos y Condiciones',
+    shippingPolicy: 'Política de Envío y Devolución',
+    privacyPolicy: 'Política de Privacidad',
+    returnPolicy: 'Política de Devolución',
+    contactUs: 'Contáctanos',
+    phone: 'Teléfono',
+    email: 'Correo Electrónico',
+    address: 'Dirección',
+    storeAddress: 'Casablanca, Marruecos',
+    allRightsReserved: 'Todos los derechos reservados',
     
     // Admin
     dashboard: 'Panel de Control',

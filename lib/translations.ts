@@ -23,7 +23,7 @@ export const translations = {
     // Common
     loading: 'جاري التحميل...',
     noProducts: 'لا توجد منتجات متاحة حالياً',
-    currency: 'دج',
+    currency: 'درهم',
     
     // Homepage
     heroTitle: 'تجربة أحسن حاسوب تنتظرك',
@@ -63,7 +63,7 @@ export const translations = {
     // Common
     loading: 'Loading...',
     noProducts: 'No products available',
-    currency: 'DZD',
+    currency: 'DH',
     
     // Homepage
     heroTitle: 'Experience the Best Computer Awaits You',
@@ -103,7 +103,7 @@ export const translations = {
     // Common
     loading: 'Chargement...',
     noProducts: 'Aucun produit disponible',
-    currency: 'DZD',
+    currency: 'DH',
     
     // Homepage
     heroTitle: 'Découvrez le Meilleur Ordinateur qui Vous Attend',
@@ -143,7 +143,7 @@ export const translations = {
     // Common
     loading: 'Cargando...',
     noProducts: 'No hay productos disponibles',
-    currency: 'DZD',
+    currency: 'DH',
     
     // Homepage
     heroTitle: 'La Mejor Experiencia de Computadora Te Espera',

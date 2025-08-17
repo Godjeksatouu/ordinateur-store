@@ -100,13 +100,23 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
         <div className="mt-auto">
           <div className="mb-4">
             {hasDiscount && (
-              <div className="text-sm text-[#adb8c1] line-through mb-1">
-                {product.old_price.toLocaleString()} {t('currency')}
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-sm text-[#adb8c1] line-through">
+                  {product.old_price.toLocaleString()} {t('currency')}
+                </div>
+                <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                  -{discountPercentage}%
+                </div>
               </div>
             )}
             <div className="text-2xl font-bold text-[#6188a4]">
               {product.new_price.toLocaleString()} <span className="text-sm text-[#adb8c1] mr-1">{t('currency')}</span>
             </div>
+            {hasDiscount && (
+              <div className="text-xs text-green-600 font-medium mt-1">
+                {t('youSaved')}: {(product.old_price - product.new_price).toLocaleString()} {t('currency')}
+              </div>
+            )}
           </div>
 
           {/* Action Button */}

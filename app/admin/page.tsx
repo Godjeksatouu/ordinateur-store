@@ -505,7 +505,7 @@ function ProductsManager() {
             {Array.isArray(products) && products.map((product: any) => (
               <tr key={product.id} className="border-b">
                 <td className="px-4 py-3">{product.name}</td>
-                <td className="px-4 py-3">{product.new_price?.toLocaleString()} دج</td>
+                <td className="px-4 py-3">{product.new_price?.toLocaleString()} درهم</td>
                 <td className="px-4 py-3 text-sm">
                   {product.ram} | {product.storage}
                 </td>
@@ -1366,7 +1366,7 @@ function PromoManager() {
                 <td className="px-4 py-3">{promo.name}</td>
                 <td className="px-4 py-3 font-mono bg-gray-100 rounded">{promo.code}</td>
                 <td className="px-4 py-3">{promo.type === 'percentage' ? 'نسبة مئوية' : 'مبلغ ثابت'}</td>
-                <td className="px-4 py-3">{promo.value}{promo.type === 'percentage' ? '%' : ' دج'}</td>
+                <td className="px-4 py-3">{promo.value}{promo.type === 'percentage' ? '%' : ' درهم'}</td>
                 <td className="px-4 py-3">{promo.applies_to === 'all' ? 'جميع المنتجات' : 'منتجات محددة'}</td>
                 <td className="px-4 py-3">{promo.commercial_name || '-'}</td>
                 <td className="px-4 py-3">

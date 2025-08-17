@@ -27,7 +27,7 @@ async function OrderSummaryContent({
   freeDelivery: boolean;
 }) {
   const { items } = await getCart();
-  const subtotal = items.length * 45000; // Assuming 45000 DZD per laptop
+  const subtotal = items.length * 45000; // Assuming 45000 DH per laptop
   const qualifyingForFreeDelivery = freeDelivery && subtotal > 50000;
   const shippingCost = 2000;
   const shipping = qualifyingForFreeDelivery ? 0 : shippingCost;
@@ -38,7 +38,7 @@ async function OrderSummaryContent({
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-600">المجموع الفرعي</p>
         <p className="text-sm font-medium text-gray-900">
-          {subtotal.toLocaleString()} دج
+          {subtotal.toLocaleString()} درهم
         </p>
       </div>
       <div className="flex items-center justify-between border-t border-gray-200 pt-4">
@@ -46,20 +46,20 @@ async function OrderSummaryContent({
         {qualifyingForFreeDelivery ? (
           <p className="text-sm font-medium text-gray-900">
             <span className="line-through font-normal">
-              {shipping.toLocaleString()} دج
+              {shipping.toLocaleString()} درهم
             </span>{' '}
             مجاني
           </p>
         ) : (
           <p className="text-sm font-medium text-gray-900">
-            {shipping.toLocaleString()} دج
+            {shipping.toLocaleString()} درهم
           </p>
         )}
       </div>
       <div className="flex items-center justify-between border-t border-gray-200 pt-4">
         <p className="text-base font-medium text-gray-900">المجموع الكلي</p>
         <p className="text-base font-medium text-gray-900">
-          {total.toLocaleString()} دج
+          {total.toLocaleString()} درهم
         </p>
       </div>
     </div>

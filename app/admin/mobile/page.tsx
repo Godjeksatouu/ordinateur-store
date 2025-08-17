@@ -293,11 +293,11 @@ function MobileProductsManager() {
                   </h4>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg font-bold text-[#6188a4]">
-                      {product.new_price?.toLocaleString()} دج
+                      {product.new_price?.toLocaleString()} درهم
                     </span>
                     {product.old_price && product.old_price > product.new_price && (
                       <span className="text-xs text-[#adb8c1] line-through">
-                        {product.old_price.toLocaleString()} دج
+                        {product.old_price.toLocaleString()} درهم
                       </span>
                     )}
                   </div>

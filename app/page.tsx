@@ -3,6 +3,7 @@
 import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';
 import { HydrationSafe } from '@/components/hydration-safe';
+import { useTranslations } from '@/hooks/use-translations';
 import Image from 'next/image';
 import { fetchProducts, Product } from '@/lib/products';
 import { ProductCard } from '@/components/product-card';
@@ -63,6 +64,7 @@ function Feature({ icon, label }: { icon: React.ReactNode; label: string }) {
 import { useEffect, useState } from 'react';
 
 export default function Page() {
+  const { t } = useTranslations();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -247,10 +249,10 @@ export default function Page() {
         <div className="bg-gradient-to-r from-gray-50 to-white py-16">
           <div className="max-w-4xl mx-auto text-center px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6 leading-tight">
-              تجربة أحسن حاسوب تنتظرك
+              {t('heroTitle')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              نقدم لك أفضل أجهزة الكمبيوتر المحمولة بأحدث التقنيات وأعلى معايير الجودة
+              {t('heroSubtitle')}
             </p>
           </div>
         </div>
@@ -260,14 +262,14 @@ export default function Page() {
           <div className="py-20">
             <div className="text-center mb-16">
               <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                مجموعتنا المميزة
+                {t('featuredCollection')}
               </h3>
               <div className="w-24 h-1 bg-primary mx-auto rounded"></div>
             </div>
             {loading ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <p className="mt-2 text-gray-600">جاري تحميل المنتجات...</p>
+                <p className="mt-2 text-gray-600">{t('loading')}</p>
               </div>
             ) : products.length > 0 ? (
               <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -277,7 +279,7 @@ export default function Page() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-600">لا توجد منتجات متاحة حالياً</p>
+                <p className="text-gray-600">{t('noProducts')}</p>
               </div>
             )}
           </div>
@@ -336,8 +338,8 @@ export default function Page() {
                     <ClockIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-3">اكتشف عالم جديد من الذكاء</h4>
-                <p className="text-gray-600">اجعل كل يوم أفضل مع ساعة ذكية مبتكرة!</p>
+                <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('smartWatch')}</h4>
+                <p className="text-gray-600">{t('smartWatchDesc')}</p>
               </div>
               <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow" suppressHydrationWarning>
                 <div className="flex items-center mb-4" suppressHydrationWarning>
@@ -345,8 +347,8 @@ export default function Page() {
                     <TruckIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-3">التوصيل السريع</h4>
-                <p className="text-gray-600">خدمة التوصيل السريع في جميع انحاء المدن</p>
+                <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('fastDelivery')}</h4>
+                <p className="text-gray-600">{t('fastDeliveryDesc')}</p>
               </div>
               <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow" suppressHydrationWarning>
                 <div className="flex items-center mb-4" suppressHydrationWarning>
@@ -354,8 +356,8 @@ export default function Page() {
                     <CurrencyDollarIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-3">خدمة الدفع عند الاستلام</h4>
-                <p className="text-gray-600">التسوق اون لاين من المتجر ودفع المال عند التوصيل.</p>
+                <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('cashOnDelivery')}</h4>
+                <p className="text-gray-600">{t('cashOnDeliveryDesc')}</p>
               </div>
             </div>
           </div>

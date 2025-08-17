@@ -1,18 +1,38 @@
+'use client';
+
 import { Main } from '@/components/main';
 import Image from 'next/image';
 import { fetchProducts } from '@/lib/products';
 import { ProductCard } from '@/components/product-card';
+import { useTranslations } from '@/hooks/use-translations';
 import {
   ClockIcon,
   TruckIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
-export default async function Page(props: {
+export default function Page(props: {
   params: Promise<{ locale: string }>;
 }) {
-  const params = await props.params;
-  const products = await fetchProducts();
+  const { t } = useTranslations();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const fetchedProducts = await fetchProducts();
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   return (
     <div>
@@ -33,10 +53,10 @@ export default async function Page(props: {
       <div className="bg-gradient-to-r from-gray-50 to-white py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6 leading-tight">
-            تجربة أحسن حاسوب تنتظرك
+            {t('heroTitle')}
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            نقدم لك أفضل أجهزة الكمبيوتر المحمولة بأحدث التقنيات وأعلى معايير الجودة
+            {t('heroSubtitle')}
           </p>
         </div>
       </div>
@@ -46,7 +66,7 @@ export default async function Page(props: {
         <div className="py-20">
           <div className="text-center mb-16">
             <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              مجموعتنا المميزة
+              {t('featuredCollection')}
             </h3>
             <div className="w-24 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto"></div>
           </div>

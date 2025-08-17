@@ -313,27 +313,140 @@ function createTransporter() {
   });
 }
 
-function buildOrderEmail({ storeName, fullName, productName, quantity, price, orderId, orderDate }) {
-  const plain = `السلام عليكم،\n\nنشكر لك ثقتك بشركتنا.\n\nلقد استلمنا طلبك بنجاح. التفاصيل كالتالي:\n\nالمنتج: ${productName}\nالكمية: ${quantity}\nالسعر: ${price}\nرقم الطلب: #${orderId}\nتاريخ الطلب: ${orderDate}\n\nسيتم تجهيز طلبك وشحنه خلال 3 أيام عمل. عند شحن الطلب ستصلك رسالة تتضمن رقم التتبع.\n\nللاستفسار، يمكنك التواصل معنا عبر البريد الإلكتروني: support@company.com أو الاتصال على الرقم: +212 600 000 000\n\nمع تحياتنا،\nفريق شركة ${storeName}`;
+// Email templates for different languages
+const emailTemplates = {
+  ar: {
+    greeting: 'السلام عليكم،',
+    thankYou: 'نشكر لك ثقتك بشركتنا.',
+    orderReceived: 'لقد استلمنا طلبك بنجاح. التفاصيل كالتالي:',
+    product: 'المنتج',
+    quantity: 'الكمية',
+    price: 'السعر',
+    orderNumber: 'رقم الطلب',
+    orderDate: 'تاريخ الطلب',
+    processingInfo: 'سيتم تجهيز طلبك وشحنه خلال 3 أيام عمل. عند شحن الطلب ستصلك رسالة تتضمن رقم التتبع.',
+    contactInfo: 'للاستفسار، يمكنك التواصل معنا عبر البريد الإلكتروني: support@company.com أو الاتصال على الرقم: +212 661-585396',
+    regards: 'مع تحياتنا،',
+    team: 'فريق شركة',
+    currency: 'درهم',
+    subject: 'تأكيد طلبك - رقم الطلب'
+  },
+  en: {
+    greeting: 'Hello,',
+    thankYou: 'Thank you for trusting our company.',
+    orderReceived: 'We have successfully received your order. Details are as follows:',
+    product: 'Product',
+    quantity: 'Quantity',
+    price: 'Price',
+    orderNumber: 'Order Number',
+    orderDate: 'Order Date',
+    processingInfo: 'Your order will be prepared and shipped within 3 business days. When the order is shipped, you will receive a message with the tracking number.',
+    contactInfo: 'For inquiries, you can contact us via email: support@company.com or call: +212 661-585396',
+    regards: 'Best regards,',
+    team: 'Team',
+    currency: 'DH',
+    subject: 'Order Confirmation - Order Number'
+  },
+  fr: {
+    greeting: 'Bonjour,',
+    thankYou: 'Merci de faire confiance à notre entreprise.',
+    orderReceived: 'Nous avons reçu votre commande avec succès. Les détails sont les suivants:',
+    product: 'Produit',
+    quantity: 'Quantité',
+    price: 'Prix',
+    orderNumber: 'Numéro de commande',
+    orderDate: 'Date de commande',
+    processingInfo: 'Votre commande sera préparée et expédiée dans les 3 jours ouvrables. Lorsque la commande est expédiée, vous recevrez un message avec le numéro de suivi.',
+    contactInfo: 'Pour toute question, vous pouvez nous contacter par email: support@company.com ou appeler: +212 661-585396',
+    regards: 'Cordialement,',
+    team: 'Équipe',
+    currency: 'DH',
+    subject: 'Confirmation de commande - Numéro de commande'
+  },
+  es: {
+    greeting: 'Hola,',
+    thankYou: 'Gracias por confiar en nuestra empresa.',
+    orderReceived: 'Hemos recibido su pedido exitosamente. Los detalles son los siguientes:',
+    product: 'Producto',
+    quantity: 'Cantidad',
+    price: 'Precio',
+    orderNumber: 'Número de pedido',
+    orderDate: 'Fecha del pedido',
+    processingInfo: 'Su pedido será preparado y enviado dentro de 3 días hábiles. Cuando el pedido sea enviado, recibirá un mensaje con el número de seguimiento.',
+    contactInfo: 'Para consultas, puede contactarnos por email: support@company.com o llamar: +212 661-585396',
+    regards: 'Saludos cordiales,',
+    team: 'Equipo',
+    currency: 'DH',
+    subject: 'Confirmación de pedido - Número de pedido'
+  }
+};
+
+function buildOrderEmail({ storeName, fullName, productName, quantity, price, orderId, orderDate, language = 'ar', originalPrice = null, discount = null }) {
+  const template = emailTemplates[language] || emailTemplates.ar;
+  const isRTL = language === 'ar';
+
+  // Format price with currency
+  const formattedPrice = `${price} ${template.currency}`;
+  const formattedOriginalPrice = originalPrice ? `${originalPrice} ${template.currency}` : null;
+
+  const plain = `${template.greeting}\n\n${template.thankYou}\n\n${template.orderReceived}\n\n${template.product}: ${productName}\n${template.quantity}: ${quantity}\n${template.price}: ${formattedPrice}\n${template.orderNumber}: #${orderId}\n${template.orderDate}: ${orderDate}\n\n${template.processingInfo}\n\n${template.contactInfo}\n\n${template.regards}\n${template.team} ${storeName}`;
 
   const html = `
-  <div dir="rtl" style="font-family: Tahoma, Arial, sans-serif; color: #262a2f; background:#fdfefd; padding:16px;">
-    <h2 style="margin-top:0">${storeName}</h2>
-    <p>السلام عليكم،</p>
-    <p>نشكر لك ثقتك بشركتنا.</p>
-    <p>لقد استلمنا طلبك بنجاح. التفاصيل كالتالي:</p>
-    <ul>
-      <li><b>المنتج:</b> ${productName}</li>
-      <li><b>الكمية:</b> ${quantity}</li>
-      <li><b>السعر:</b> ${price}</li>
-      <li><b>رقم الطلب:</b> #${orderId}</li>
-      <li><b>تاريخ الطلب:</b> ${orderDate}</li>
-    </ul>
-    <p>سيتم تجهيز طلبك وشحنه خلال 3 أيام عمل. عند شحن الطلب ستصلك رسالة تتضمن رقم التتبع.</p>
-    <p>للاستفسار، يمكنك التواصل معنا عبر البريد الإلكتروني: <a href="mailto:support@company.com">support@company.com</a> أو الاتصال على الرقم: +212 600 000 000</p>
-    <p>مع تحياتنا،<br/>فريق شركة ${storeName}</p>
+  <div dir="${isRTL ? 'rtl' : 'ltr'}" style="font-family: ${isRTL ? 'Tahoma, Arial' : 'Arial, Helvetica'}, sans-serif; color: #262a2f; background:#fdfefd; padding:24px; max-width: 600px; margin: 0 auto;">
+    <div style="background: linear-gradient(135deg, #6188a4 0%, #262a2f 100%); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+      <h2 style="margin: 0; color: white; font-size: 24px;">${storeName}</h2>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6;">${template.greeting}</p>
+    <p style="font-size: 16px; line-height: 1.6;">${template.thankYou}</p>
+    <p style="font-size: 16px; line-height: 1.6; font-weight: bold;">${template.orderReceived}</p>
+
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #6188a4;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr style="border-bottom: 1px solid #e9ecef;">
+          <td style="padding: 8px 0; font-weight: bold;">${template.product}:</td>
+          <td style="padding: 8px 0;">${productName}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e9ecef;">
+          <td style="padding: 8px 0; font-weight: bold;">${template.quantity}:</td>
+          <td style="padding: 8px 0;">${quantity}</td>
+        </tr>
+        ${originalPrice && discount ? `
+        <tr style="border-bottom: 1px solid #e9ecef;">
+          <td style="padding: 8px 0; font-weight: bold;">السعر الأصلي:</td>
+          <td style="padding: 8px 0; text-decoration: line-through; color: #6c757d;">${formattedOriginalPrice}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e9ecef;">
+          <td style="padding: 8px 0; font-weight: bold;">الخصم:</td>
+          <td style="padding: 8px 0; color: #28a745;">-${discount} ${template.currency}</td>
+        </tr>
+        ` : ''}
+        <tr style="border-bottom: 1px solid #e9ecef;">
+          <td style="padding: 8px 0; font-weight: bold;">${template.price}:</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #6188a4; font-size: 18px;">${formattedPrice}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e9ecef;">
+          <td style="padding: 8px 0; font-weight: bold;">${template.orderNumber}:</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #262a2f;">#${orderId}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; font-weight: bold;">${template.orderDate}:</td>
+          <td style="padding: 8px 0;">${orderDate}</td>
+        </tr>
+      </table>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6; background: #e3f2fd; padding: 16px; border-radius: 8px; border-left: 4px solid #2196f3;">${template.processingInfo}</p>
+
+    <p style="font-size: 14px; line-height: 1.6; color: #6c757d;">${template.contactInfo}</p>
+
+    <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+      <p style="margin: 0; font-size: 16px;">${template.regards}</p>
+      <p style="margin: 0; font-weight: bold; color: #6188a4;">${template.team} ${storeName}</p>
+    </div>
   </div>`;
-  return { plain, html };
+
+  return { plain, html, subject: `${template.subject} #${orderId}` };
 }
 
       }
@@ -451,7 +564,7 @@ app.post('/api/auth/login', async (req, res) => {
 // Place order (public endpoint)
 app.post('/api/orders', async (req, res) => {
   try {
-    const { fullName, phoneNumber, city, address, email, productId, productName, paymentMethod, codePromo } = req.body;
+    const { fullName, phoneNumber, city, address, email, productId, productName, paymentMethod, codePromo, language = 'ar', finalPrice, originalPrice, discount } = req.body;
 
     // Insert client
     const [clientResult] = await db.execute(
@@ -471,21 +584,39 @@ app.post('/api/orders', async (req, res) => {
     (async () => {
       try {
         const transporter = createTransporter();
-        const storeName = 'Ordinateur Store';
+        const storeName = 'متجر الحاسوب'; // Will be translated in email template
         const quantity = 1;
-        const price = '—'; // Optionally compute/format
+        const price = finalPrice || '—';
         const orderId = orderResult.insertId;
-        const orderDate = new Date().toLocaleDateString('ar-MA');
-        const { plain, html } = buildOrderEmail({ storeName, fullName, productName, quantity, price, orderId, orderDate });
+        const orderDate = new Date().toLocaleDateString(language === 'ar' ? 'ar-MA' : language === 'fr' ? 'fr-FR' : 'en-US');
+
+        const { plain, html, subject } = buildOrderEmail({
+          storeName,
+          fullName,
+          productName,
+          quantity,
+          price,
+          orderId,
+          orderDate,
+          language,
+          originalPrice,
+          discount
+        });
 
         if (email) {
           await transporter.sendMail({
-            from: process.env.SMTP_FROM || `"${storeName}" <no-reply@localhost>` ,
+            from: process.env.SMTP_FROM || `"${storeName}" <no-reply@laptopstore.ma>`,
             to: email,
-            subject: `تأكيد طلبك - رقم الطلب #${orderId}`,
+            subject,
             text: plain,
             html,
+            headers: {
+              'X-Priority': '1',
+              'X-MSMail-Priority': 'High',
+              'Importance': 'high'
+            }
           });
+          console.log(`✅ Order confirmation email sent to ${email} for order #${orderId}`);
         }
       } catch (mailErr) {
         console.error('Nodemailer error (non-blocking):', mailErr);

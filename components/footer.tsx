@@ -1,15 +1,10 @@
-import { ShoppingBagIcon } from '@heroicons/react/24/outline';
+'use client';
 
-const navigation = [
-  'الصفحة الرئيسية',
-  'حول المتجر',
-  'الشروط والأحكام',
-  'سياسة الشحن والإرجاع',
-  'سياسة الخصوصية',
-  'الأسئلة الشائعة',
-];
+import { ShoppingBagIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from '@/hooks/use-translations';
 
 export function Footer() {
+  const { t } = useTranslations();
   return (
     <footer className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -22,12 +17,12 @@ export function Footer() {
                   <ShoppingBagIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">متجر الحاسوب</h3>
-                  <p className="text-amber-400 font-medium">أفضل أجهزة الكمبيوتر المحمولة</p>
+                  <h3 className="text-2xl font-bold text-white">{t('storeName')}</h3>
+                  <p className="text-amber-400 font-medium">{t('storeTagline')}</p>
                 </div>
               </div>
               <p className="text-gray-300 leading-relaxed max-w-md">
-                نحن متخصصون في توفير أحدث وأفضل أجهزة الكمبيوتر المحمولة بأعلى معايير الجودة وأفضل الأسعار في السوق.
+                {t('storeDescription')}
               </p>
 
 
@@ -35,29 +30,45 @@ export function Footer() {
 
             {/* Quick Links */}
             <div>
-              <h4 className="text-lg font-bold text-white mb-6">روابط سريعة</h4>
+              <h4 className="text-lg font-bold text-white mb-6">{t('quickLinks')}</h4>
               <ul className="space-y-3">
-                {navigation.slice(0, 4).map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
-                      <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
-                      {item}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
+                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
+                    {t('home')}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
+                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
+                    {t('aboutStore')}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
+                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
+                    {t('termsConditions')}
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
+                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
+                    {t('shippingPolicy')}
+                  </a>
+                </li>
               </ul>
             </div>
 
             {/* Contact Info */}
             <div>
-              <h4 className="text-lg font-bold text-white mb-6">تواصل معنا</h4>
+              <h4 className="text-lg font-bold text-white mb-6">{t('contactUs')}</h4>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="bg-amber-500 p-2 rounded-lg">
                     <span className="text-white">📞</span>
                   </div>
                   <div>
-                    <p className="text-gray-300 text-sm">الهاتف</p>
+                    <p className="text-gray-300 text-sm">{t('phone')}</p>
                     <p className="text-white font-medium">+212 661-585396</p>
                   </div>
                 </div>
@@ -67,7 +78,7 @@ export function Footer() {
                     <span className="text-white">✉️</span>
                   </div>
                   <div>
-                    <p className="text-gray-300 text-sm">البريد الإلكتروني</p>
+                    <p className="text-gray-300 text-sm">{t('email')}</p>
                     <p className="text-white font-medium">info@laptopstore.ma</p>
                   </div>
                 </div>
@@ -77,8 +88,8 @@ export function Footer() {
                     <span className="text-white">📍</span>
                   </div>
                   <div>
-                    <p className="text-gray-300 text-sm">العنوان</p>
-                    <p className="text-white font-medium">الدار البيضاء، المغرب</p>
+                    <p className="text-gray-300 text-sm">{t('address')}</p>
+                    <p className="text-white font-medium">{t('storeAddress')}</p>
                   </div>
                 </div>
               </div>
@@ -90,18 +101,18 @@ export function Footer() {
         <div className="border-t border-gray-700 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              &copy; {new Date().getFullYear()} متجر الحاسوب. جميع الحقوق محفوظة.
+              &copy; {new Date().getFullYear()} {t('storeName')}. {t('allRightsReserved')}.
             </p>
 
             <div className="flex space-x-6 text-sm">
               <a href="#" className="text-gray-400 hover:text-amber-400 transition-colors duration-300">
-                سياسة الخصوصية
+                {t('privacyPolicy')}
               </a>
               <a href="#" className="text-gray-400 hover:text-amber-400 transition-colors duration-300">
-                الشروط والأحكام
+                {t('termsConditions')}
               </a>
               <a href="#" className="text-gray-400 hover:text-amber-400 transition-colors duration-300">
-                سياسة الإرجاع
+                {t('returnPolicy')}
               </a>
             </div>
           </div>

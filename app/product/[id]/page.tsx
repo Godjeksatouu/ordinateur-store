@@ -22,7 +22,7 @@ interface OrderForm {
 export default function ProductDetailsPage() {
   const params = useParams();
   const productId = params.id as string;
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -214,7 +214,11 @@ export default function ProductDetailsPage() {
           paymentMethod: orderForm.paymentMethod,
           codePromo: orderForm.codePromo,
           productId: product.id,
-          productName: product.name
+          productName: product.name,
+          language: locale,
+          finalPrice: finalPrice,
+          originalPrice: product.old_price,
+          discount: promoValidation?.isValid ? (product.new_price - finalPrice) : null
         }),
       });
 
@@ -306,23 +310,23 @@ export default function ProductDetailsPage() {
                 <div className="flex items-center space-x-4">
                   {product.old_price && product.old_price > 0 && (
                     <div className="text-xl text-gray-500 line-through">
-                      {product.old_price.toLocaleString()} دج
+                      {product.old_price.toLocaleString()} {t('currency')}
                     </div>
                   )}
                   {promoValidation?.isValid && finalPrice !== product.new_price ? (
                     <div className="flex flex-col">
                       <div className="text-lg text-gray-500 line-through">
-                        {product.new_price.toLocaleString()} دج
+                        {product.new_price.toLocaleString()} {t('currency')}
                       </div>
                       <div className="text-3xl font-bold text-green-600">
                         {finalPrice.toLocaleString()}
-                        <span className="text-lg text-gray-500 mr-2">دج</span>
+                        <span className="text-lg text-gray-500 mr-2">{t('currency')}</span>
                       </div>
                     </div>
                   ) : (
                     <div className="text-3xl font-bold text-[#6188a4]">
                       {finalPrice.toLocaleString()}
-                      <span className="text-lg text-gray-500 mr-2">دج</span>
+                      <span className="text-lg text-gray-500 mr-2">{t('currency')}</span>
                     </div>
                   )}
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -564,18 +568,57 @@ export default function ProductDetailsPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <input
-                          id="marketingConsent"
-                          type="checkbox"
-                          checked={marketingConsent}
-                          onChange={(e) => setMarketingConsent(e.target.checked)}
-                          className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] rounded focus:ring-[#6188a4]"
-                          required
-                        />
-                        <label htmlFor="marketingConsent" className="text-gray-700">
-                          أوافق على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني
-                        </label>
+                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <div className="flex items-start gap-3 mb-3">
+                          <input
+                            id="marketingConsent"
+                            type="checkbox"
+                            checked={marketingConsent}
+                            onChange={(e) => setMarketingConsent(e.target.checked)}
+                            className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] rounded focus:ring-[#6188a4]"
+                            required
+                          />
+                          <label htmlFor="marketingConsent" className="text-gray-700">
+                            أوافق على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني
+                          </label>
+                        </div>
+
+                        {/* Dynamic Price Display */}
+                        <div className="bg-white p-3 rounded-lg border border-gray-200">
+                          <div className="text-sm text-gray-600 mb-2">{t('productPrice')}:</div>
+                          {promoValidation?.isValid && finalPrice !== product.new_price ? (
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg text-gray-500 line-through">
+                                  {product.new_price.toLocaleString()} {t('currency')}
+                                </span>
+                                <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
+                                  {t('originalPrice')}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl font-bold text-green-600">
+                                  {finalPrice.toLocaleString()} {t('currency')}
+                                </span>
+                                <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
+                                  {t('afterDiscount')}
+                                </span>
+                              </div>
+                              <div className="text-sm text-green-700 font-medium">
+                                {t('youSaved')}: {(product.new_price - finalPrice).toLocaleString()} {t('currency')}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl font-bold text-[#6188a4]">
+                                {finalPrice.toLocaleString()} {t('currency')}
+                              </span>
+                              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                                {t('finalPrice')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex flex-col sm:flex-row gap-4">
