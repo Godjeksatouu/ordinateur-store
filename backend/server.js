@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 5000;
@@ -133,6 +133,18 @@ async function createTables() {
     } catch (e) {
       console.warn('⚠️ Could not drop description_ar column (may not exist):', e.message || e);
     }
+
+    // Add category_id column if it doesn't exist
+    try {
+      const [categoryCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'category_id'");
+      // @ts-ignore
+      if (Array.isArray(categoryCol) && categoryCol.length === 0) {
+        await db.execute("ALTER TABLE products ADD COLUMN category_id INT");
+        console.log('✅ Added category_id column to products table');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not add category_id column to products:', e.message || e);
+    }
     // Remove old promo fields from products (now using global promo system)
     try {
       const [promoCodeCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'promo_code'");
@@ -155,9 +167,17 @@ async function createTables() {
       console.warn('⚠️ Could not drop products.promo_type column:', e.message || e);
     }
 
+    // Drop and recreate promo codes table to ensure correct structure
+    try {
+      await db.execute('DROP TABLE IF EXISTS promo_codes');
+      console.log('✅ Dropped existing promo_codes table');
+    } catch (e) {
+      console.warn('⚠️ Could not drop promo_codes table:', e.message);
+    }
+
     // Create promo codes table
     await db.execute(`
-      CREATE TABLE IF NOT EXISTS promo_codes (
+      CREATE TABLE promo_codes (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         code VARCHAR(50) UNIQUE NOT NULL,
@@ -171,7 +191,18 @@ async function createTables() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
+    console.log('✅ Created promo_codes table with correct structure');
 
+    // Create categories table
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Created categories table');
 
     // Clients table
     await db.execute(`
@@ -371,14 +402,27 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Check if JWT_SECRET is available
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
     // We use the 'username' column to store the email address
     const [users] = await db.execute('SELECT * FROM users WHERE username = ?', [email]);
+
     if (users.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const user = users[0];
+
     const isValidPassword = await bcrypt.compare(password, user.password);
+
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -393,6 +437,7 @@ app.post('/api/auth/login', async (req, res) => {
       token,
       user: {
         id: user.id,
+        email: user.username, // Return as email for frontend compatibility
         username: user.username,
         role: user.role
       }
@@ -964,6 +1009,98 @@ app.post('/api/promos/validate', async (req, res) => {
   } catch (error) {
     console.error('Validate promo error:', error);
     res.status(500).json({ valid: false, message: 'حدث خطأ في التحقق من كود الخصم' });
+  }
+});
+
+// Category Management API endpoints
+
+// Get all categories
+app.get('/api/categories', async (req, res) => {
+  try {
+    const [categories] = await db.execute('SELECT * FROM categories ORDER BY name ASC');
+    res.json(categories);
+  } catch (error) {
+    console.error('Get categories error:', error);
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+// Create category (admin only)
+app.post('/api/categories', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ error: 'Category name is required' });
+    }
+
+    const [result] = await db.execute(
+      'INSERT INTO categories (name) VALUES (?)',
+      [name.trim()]
+    );
+
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error('Create category error:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      res.status(400).json({ error: 'Category name already exists' });
+    } else {
+      res.status(500).json({ error: 'Failed to create category' });
+    }
+  }
+});
+
+// Update category (admin only)
+app.put('/api/categories/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ error: 'Category name is required' });
+    }
+
+    const [result] = await db.execute(
+      'UPDATE categories SET name = ? WHERE id = ?',
+      [name.trim(), id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update category error:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      res.status(400).json({ error: 'Category name already exists' });
+    } else {
+      res.status(500).json({ error: 'Failed to update category' });
+    }
+  }
+});
+
+// Delete category (admin only)
+app.delete('/api/categories/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if category is being used by any products
+    const [products] = await db.execute('SELECT COUNT(*) as count FROM products WHERE category_id = ?', [id]);
+    if (products[0].count > 0) {
+      return res.status(400).json({ error: 'Cannot delete category that is being used by products' });
+    }
+
+    const [result] = await db.execute('DELETE FROM categories WHERE id = ?', [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete category error:', error);
+    res.status(500).json({ error: 'Failed to delete category' });
   }
 });
 

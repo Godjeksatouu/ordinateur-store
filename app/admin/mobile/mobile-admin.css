@@ -1,0 +1,240 @@
+/* Mobile Admin Dashboard Styles */
+
+/* Ensure proper touch targets */
+.mobile-touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 575px) {
+  /* Mobile phones (portrait) */
+  .mobile-sidebar {
+    width: 100vw !important;
+  }
+  
+  .mobile-content {
+    padding: 0.75rem;
+  }
+  
+  .mobile-header {
+    padding: 0.75rem;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  /* Tablets */
+  .mobile-sidebar {
+    width: 24rem;
+  }
+  
+  .mobile-content {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 992px) {
+  /* Desktop - redirect to desktop version */
+  .desktop-redirect {
+    display: block;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+  .mobile-header {
+    padding: 0.5rem 1rem;
+  }
+  
+  .mobile-sidebar {
+    padding-top: 0.5rem;
+  }
+  
+  .mobile-content {
+    padding-top: 0.5rem;
+  }
+}
+
+/* Smooth scrolling for mobile */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Prevent zoom on input focus (iOS) */
+input, select, textarea {
+  font-size: 16px;
+}
+
+/* Better touch feedback */
+.mobile-button {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.mobile-button:active {
+  transform: scale(0.98);
+}
+
+/* Ensure proper spacing for mobile cards */
+.mobile-card {
+  margin-bottom: 0.75rem;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile-optimized table styles */
+.mobile-table {
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.mobile-table-row {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+/* Loading states */
+.mobile-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* Form optimizations for mobile */
+.mobile-form-group {
+  margin-bottom: 1rem;
+}
+
+.mobile-form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.mobile-form-input:focus {
+  outline: none;
+  border-color: #6188a4;
+  box-shadow: 0 0 0 3px rgba(97, 136, 164, 0.1);
+}
+
+/* Mobile navigation improvements */
+.mobile-nav-item {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-item:active {
+  transform: scale(0.98);
+}
+
+/* Responsive grid for mobile */
+.mobile-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 576px) {
+  .mobile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile-specific animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.slide-out-right {
+  animation: slideOutRight 0.3s ease-out;
+}
+
+/* Mobile-optimized shadows */
+.mobile-shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-shadow-lg {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Ensure proper contrast for mobile */
+.mobile-text-primary {
+  color: #262a2f;
+  font-weight: 600;
+}
+
+.mobile-text-secondary {
+  color: #adb8c1;
+  font-weight: 500;
+}
+
+/* Mobile-specific utilities */
+.mobile-hidden {
+  display: none;
+}
+
+@media (max-width: 575px) {
+  .mobile-hidden-xs {
+    display: none;
+  }
+}
+
+@media (min-width: 576px) {
+  .mobile-show-sm {
+    display: block;
+  }
+}
+
+/* Accessibility improvements for mobile */
+.mobile-focus-visible:focus-visible {
+  outline: 2px solid #6188a4;
+  outline-offset: 2px;
+}
+
+/* Mobile-optimized spacing */
+.mobile-space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.mobile-space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+.mobile-space-y-4 > * + * {
+  margin-top: 1rem;
+}

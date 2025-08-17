@@ -7,6 +7,7 @@ export default function AdminLoginPage() {
   const [productsCreds, setProductsCreds] = useState({ email: '', password: '' });
   const [ordersCreds, setOrdersCreds] = useState({ email: '', password: '' });
   const [superCreds, setSuperCreds] = useState({ email: '', password: '' });
+  const [dashboardVersion, setDashboardVersion] = useState<'desktop' | 'mobile'>('desktop');
 
   const [loading, setLoading] = useState<{[k:string]: boolean}>({ products: false, orders: false, super: false });
   const [error, setError] = useState<{[k:string]: string}>({ products: '', orders: '', super: '' });
@@ -43,7 +44,14 @@ export default function AdminLoginPage() {
 
       localStorage.setItem('adminToken', data.token);
       localStorage.setItem('adminUser', JSON.stringify(data.user));
-      router.push('/admin');
+      localStorage.setItem('dashboardVersion', dashboardVersion);
+
+      // Redirect based on selected dashboard version
+      if (dashboardVersion === 'mobile') {
+        router.push('/admin/mobile');
+      } else {
+        router.push('/admin');
+      }
     } catch (err) {
       setError(prev => ({ ...prev, [key]: 'خطأ في الاتصال بالخادم' }));
     } finally {
@@ -56,7 +64,40 @@ export default function AdminLoginPage() {
       <div className="max-w-7xl w-full p-6 md:p-8" suppressHydrationWarning={true}>
         <div className="text-center mb-12" suppressHydrationWarning={true}>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">تسجيل دخول الإدارة</h2>
-          <p className="text-lg text-gray-600">اختر دورك وسجّل الدخول للوصول إلى لوحة التحكم</p>
+          <p className="text-lg text-gray-600 mb-8">اختر دورك وسجّل الدخول للوصول إلى لوحة التحكم</p>
+
+          {/* Dashboard Version Selector */}
+          <div className="max-w-md mx-auto mb-8">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">اختر نسخة لوحة التحكم:</label>
+            <div className="flex bg-gray-100 rounded-xl p-1">
+              <button
+                onClick={() => setDashboardVersion('desktop')}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${
+                  dashboardVersion === 'desktop'
+                    ? 'bg-white text-[#6188a4] shadow-md'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                🖥️ نسخة سطح المكتب
+              </button>
+              <button
+                onClick={() => setDashboardVersion('mobile')}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-300 ${
+                  dashboardVersion === 'mobile'
+                    ? 'bg-white text-[#6188a4] shadow-md'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                📱 النسخة المحمولة
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {dashboardVersion === 'desktop'
+                ? 'مُحسّنة للحاسوب وأجهزة الكمبيوتر المحمولة'
+                : 'مُحسّنة للهواتف والأجهزة اللوحية'
+              }
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 items-stretch" suppressHydrationWarning={true}>

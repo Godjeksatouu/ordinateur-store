@@ -9,6 +9,7 @@ const roles = [
   { key: 'products', label: 'Products', icon: '📦' },
   { key: 'orders', label: 'Commandes', icon: '📋' },
   { key: 'clients', label: 'Clients', icon: '👥' },
+  { key: 'categories', label: 'Categorie', icon: '📂' },
   { key: 'promos', label: 'Code Promo', icon: '🎫' },
   { key: 'users', label: 'Gestion des utilisateurs', icon: '⚙️' },
   { key: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -116,6 +117,7 @@ export default function AdminPage() {
               {activeRole === 'products' && hasAccess(user.role, 'products') && <ProductsManager />}
               {activeRole === 'orders' && hasAccess(user.role, 'orders') && <OrdersManager />}
               {activeRole === 'clients' && hasAccess(user.role, 'clients') && <ClientsManager />}
+              {activeRole === 'categories' && hasAccess(user.role, 'categories') && <CategoryManager />}
               {activeRole === 'promos' && hasAccess(user.role, 'promos') && <PromoManager />}
               {activeRole === 'users' && hasAccess(user.role, 'users') && <UsersManager />}
               {activeRole === 'dashboard' && hasAccess(user.role, 'dashboard') && <SuperAdminDashboard />}
@@ -139,16 +141,17 @@ function getRoleLabel(role: string) {
 
 function hasAccess(userRole: string, section: string) {
   if (userRole === 'super_admin') return true;
-  if (userRole === 'product_manager' && (section === 'products' || section === 'promos')) return true;
+  if (userRole === 'product_manager' && (section === 'products' || section === 'categories' || section === 'promos')) return true;
   if (userRole === 'gestion_commandes' && (section === 'orders' || section === 'clients')) return true;
   return false;
 }
 
 function ProductsManager() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+    name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', category_id: ''
   });
   const [mainImages, setMainImages] = useState<FileList | null>(null);
   const [optionalImages, setOptionalImages] = useState<FileList | null>(null);
@@ -156,6 +159,7 @@ function ProductsManager() {
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -169,6 +173,17 @@ function ProductsManager() {
       setProducts([]); // Set empty array on error
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/categories');
+      const data = await response.json();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories([]);
     }
   };
 
@@ -210,7 +225,7 @@ function ProductsManager() {
       if (response.ok) {
         fetchProducts();
         setFormData({
-          name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+          name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', category_id: ''
         });
         setMainImages(null);
         setOptionalImages(null);
@@ -231,7 +246,8 @@ function ProductsManager() {
       processor: product.processor || '',
       old_price: product.old_price,
       new_price: product.new_price,
-      description: product.description
+      description: product.description,
+      category_id: product.category_id || ''
     });
     setEditingId(product.id);
   };
@@ -323,6 +339,24 @@ function ProductsManager() {
             value={formData.os}
             onChange={(e) => setFormData({...formData, os: e.target.value})}
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            الفئة <span className="text-red-500">*</span>
+          </label>
+          <select
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+            value={formData.category_id}
+            onChange={(e) => setFormData({...formData, category_id: e.target.value})}
+            required
+          >
+            <option value="">اختر الفئة</option>
+            {categories.map((category: any) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">السعر القديم</label>
@@ -446,7 +480,7 @@ function ProductsManager() {
               onClick={() => {
                 setEditingId(null);
                 setFormData({
-                  name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
+                  name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', category_id: ''
                 });
               }}
               className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold"
@@ -1369,6 +1403,194 @@ function PromoManager() {
         {promos.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             لا توجد أكواد خصم حالياً
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CategoryManager() {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: ''
+  });
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/categories');
+      const data = await response.json();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('adminToken');
+
+    try {
+      const url = editingCategory ? `http://localhost:5000/api/categories/${editingCategory.id}` : 'http://localhost:5000/api/categories';
+      const method = editingCategory ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        fetchCategories();
+        setFormData({ name: '' });
+        setShowForm(false);
+        setEditingCategory(null);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'حدث خطأ في حفظ الفئة');
+      }
+    } catch (error) {
+      console.error('Error saving category:', error);
+      alert('حدث خطأ في حفظ الفئة');
+    }
+  };
+
+  const handleEdit = (category: any) => {
+    setEditingCategory(category);
+    setFormData({ name: category.name });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الفئة؟')) return;
+
+    const token = localStorage.getItem('adminToken');
+    try {
+      const response = await fetch(`http://localhost:5000/api/categories/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        fetchCategories();
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'حدث خطأ في حذف الفئة');
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('حدث خطأ في حذف الفئة');
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">جاري التحميل...</div>;
+  }
+
+  return (
+    <section className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">إدارة الفئات</h2>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-4 py-2 rounded-xl font-semibold"
+        >
+          {showForm ? 'إلغاء' : 'إضافة فئة جديدة'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-gray-50 rounded-xl p-6 mb-6">
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">اسم الفئة</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
+                placeholder="مثال: أجهزة كمبيوتر محمولة"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-4 mt-6">
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-6 py-2 rounded-lg font-semibold"
+            >
+              {editingCategory ? 'تحديث' : 'حفظ'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowForm(false);
+                setEditingCategory(null);
+                setFormData({ name: '' });
+              }}
+              className="bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold"
+            >
+              إلغاء
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-3 text-right">الرقم</th>
+              <th className="px-4 py-3 text-right">اسم الفئة</th>
+              <th className="px-4 py-3 text-right">تاريخ الإنشاء</th>
+              <th className="px-4 py-3 text-right">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(categories) && categories.map((category: any) => (
+              <tr key={category.id} className="border-b">
+                <td className="px-4 py-3">#{category.id}</td>
+                <td className="px-4 py-3 font-semibold">{category.name}</td>
+                <td className="px-4 py-3">{new Date(category.created_at).toLocaleDateString('ar-DZ')}</td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(category)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                    >
+                      تعديل
+                    </button>
+                    <button
+                      onClick={() => handleDelete(category.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {categories.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            لا توجد فئات حالياً
           </div>
         )}
       </div>
