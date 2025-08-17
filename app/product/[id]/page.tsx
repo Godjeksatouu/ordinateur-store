@@ -7,6 +7,7 @@ import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';
 import { getProductById, Product } from '@/lib/products';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface OrderForm {
   fullName: string;
@@ -21,6 +22,7 @@ interface OrderForm {
 export default function ProductDetailsPage() {
   const params = useParams();
   const productId = params.id as string;
+  const { t } = useTranslations();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -33,6 +35,7 @@ export default function ProductDetailsPage() {
       try {
         const fetchedProduct = await getProductById(productId);
         setProduct(fetchedProduct || null);
+        setFinalPrice(fetchedProduct?.new_price || 0);
       } catch (error) {
         console.error('Error loading product:', error);
       } finally {
@@ -54,6 +57,14 @@ export default function ProductDetailsPage() {
     codePromo: ''
   });
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [promoValidation, setPromoValidation] = useState<{
+    isValid: boolean;
+    message: string;
+    discount: number;
+    discountType: 'percentage' | 'fixed';
+  } | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+  const [finalPrice, setFinalPrice] = useState(0);
 
   if (loading) {
     return (
@@ -101,6 +112,78 @@ export default function ProductDetailsPage() {
       ...prev,
       [field]: value
     }));
+
+    // If promo code field is changed, validate it
+    if (field === 'codePromo') {
+      if (value.trim() === '') {
+        setPromoValidation(null);
+        setFinalPrice(product?.new_price || 0);
+      } else {
+        validatePromoCode(value.trim());
+      }
+    }
+  };
+
+  const validatePromoCode = async (code: string) => {
+    if (!code || !product) return;
+
+    setIsValidatingPromo(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/promos/validate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: code,
+          productId: product.id
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.valid) {
+        const discount = data.discount;
+        const discountType = data.type;
+        let discountAmount = 0;
+        let newPrice = product.new_price;
+
+        if (discountType === 'percentage') {
+          discountAmount = (product.new_price * discount) / 100;
+          newPrice = product.new_price - discountAmount;
+        } else {
+          discountAmount = discount;
+          newPrice = Math.max(0, product.new_price - discount);
+        }
+
+        setPromoValidation({
+          isValid: true,
+          message: t('promoCodeValid', { amount: discountAmount.toLocaleString() }),
+          discount: discount,
+          discountType: discountType
+        });
+        setFinalPrice(newPrice);
+      } else {
+        setPromoValidation({
+          isValid: false,
+          message: data.message || t('promoCodeInvalid'),
+          discount: 0,
+          discountType: 'percentage'
+        });
+        setFinalPrice(product.new_price);
+      }
+    } catch (error) {
+      console.error('Error validating promo code:', error);
+      setPromoValidation({
+        isValid: false,
+        message: t('promoCodeError'),
+        discount: 0,
+        discountType: 'percentage'
+      });
+      setFinalPrice(product.new_price);
+    } finally {
+      setIsValidatingPromo(false);
+    }
   };
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
@@ -226,10 +309,22 @@ export default function ProductDetailsPage() {
                       {product.old_price.toLocaleString()} دج
                     </div>
                   )}
-                  <div className="text-3xl font-bold text-[#6188a4]">
-                    {product.new_price.toLocaleString()}
-                    <span className="text-lg text-gray-500 mr-2">دج</span>
-                  </div>
+                  {promoValidation?.isValid && finalPrice !== product.new_price ? (
+                    <div className="flex flex-col">
+                      <div className="text-lg text-gray-500 line-through">
+                        {product.new_price.toLocaleString()} دج
+                      </div>
+                      <div className="text-3xl font-bold text-green-600">
+                        {finalPrice.toLocaleString()}
+                        <span className="text-lg text-gray-500 mr-2">دج</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-3xl font-bold text-[#6188a4]">
+                      {finalPrice.toLocaleString()}
+                      <span className="text-lg text-gray-500 mr-2">دج</span>
+                    </div>
+                  )}
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
                     متوفر
                   </div>
@@ -320,7 +415,7 @@ export default function ProductDetailsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
-                            اسمك بالكامل
+                            {t('fullName')}
                           </label>
                           <input
                             type="text"
@@ -329,7 +424,7 @@ export default function ProductDetailsPage() {
                             value={orderForm.fullName}
                             onChange={(e) => handleInputChange('fullName', e.target.value)}
                             className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder="أدخل اسمك الكامل"
+                            placeholder={t('fullName')}
                           />
                         </div>
 
@@ -399,16 +494,35 @@ export default function ProductDetailsPage() {
 
                         <div className="mt-6">
                           <label htmlFor="codePromo" className="block text-sm font-semibold text-gray-700 mb-2">
-                            كود التخفيض
+                            {t('promoCodeOptional')}
                           </label>
-                          <input
-                            type="text"
-                            id="codePromo"
-                            value={orderForm.codePromo}
-                            onChange={(e) => handleInputChange('codePromo', e.target.value)}
-                            className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder="مثال: SAVE10"
-                          />
+                          <div className="relative">
+                            <input
+                              type="text"
+                              id="codePromo"
+                              value={orderForm.codePromo}
+                              onChange={(e) => handleInputChange('codePromo', e.target.value)}
+                              className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 ${
+                                promoValidation?.isValid === true
+                                  ? 'border-green-500 bg-green-50 focus:ring-green-500 focus:border-green-500'
+                                  : promoValidation?.isValid === false
+                                  ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:border-red-500'
+                                  : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white focus:ring-[#6188a4] focus:border-[#6188a4]'
+                              }`}
+                              placeholder={t('promoCodePlaceholder')}
+                              disabled={isValidatingPromo}
+                            />
+                            {isValidatingPromo && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#6188a4]"></div>
+                              </div>
+                            )}
+                          </div>
+                          {promoValidation && (
+                            <div className={`mt-2 text-sm ${promoValidation.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                              {promoValidation.message}
+                            </div>
+                          )}
                         </div>
 
                         <div className="mt-6">

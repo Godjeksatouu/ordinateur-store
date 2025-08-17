@@ -133,25 +133,44 @@ async function createTables() {
     } catch (e) {
       console.warn('⚠️ Could not drop description_ar column (may not exist):', e.message || e);
     }
-    // Ensure promo fields exist on products
+    // Remove old promo fields from products (now using global promo system)
     try {
       const [promoCodeCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'promo_code'");
       // @ts-ignore
-      if (Array.isArray(promoCodeCol) && promoCodeCol.length === 0) {
-        await db.execute("ALTER TABLE products ADD COLUMN promo_code VARCHAR(100)");
+      if (Array.isArray(promoCodeCol) && promoCodeCol.length > 0) {
+        await db.execute("ALTER TABLE products DROP COLUMN promo_code");
+        console.log('✅ Dropped promo_code column from products');
       }
     } catch (e) {
-      console.warn('⚠️ Could not ensure products.promo_code column exists:', e.message || e);
+      console.warn('⚠️ Could not drop products.promo_code column:', e.message || e);
     }
     try {
       const [promoTypeCol] = await db.execute("SHOW COLUMNS FROM products LIKE 'promo_type'");
       // @ts-ignore
-      if (Array.isArray(promoTypeCol) && promoTypeCol.length === 0) {
-        await db.execute("ALTER TABLE products ADD COLUMN promo_type ENUM('percentage','fixed')");
+      if (Array.isArray(promoTypeCol) && promoTypeCol.length > 0) {
+        await db.execute("ALTER TABLE products DROP COLUMN promo_type");
+        console.log('✅ Dropped promo_type column from products');
       }
     } catch (e) {
-      console.warn('⚠️ Could not ensure products.promo_type column exists:', e.message || e);
+      console.warn('⚠️ Could not drop products.promo_type column:', e.message || e);
     }
+
+    // Create promo codes table
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS promo_codes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        code VARCHAR(50) UNIQUE NOT NULL,
+        type ENUM('percentage', 'fixed') NOT NULL,
+        value DECIMAL(10,2) NOT NULL,
+        applies_to ENUM('all', 'specific') DEFAULT 'all',
+        product_ids JSON,
+        commercial_name VARCHAR(255),
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
 
 
     // Clients table
@@ -238,6 +257,54 @@ async function createTables() {
           [u.email, hashed, u.role]
         );
         console.log(`✅ Seeded user: ${u.email} (${u.role})`);
+// Email (Nodemailer)
+const nodemailer = require('nodemailer');
+
+function createTransporter() {
+  // Use environment variables for credentials; if absent, fallback to ethereal
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SECURE } = process.env;
+  if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+    return nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT ? Number(SMTP_PORT) : 587,
+      secure: SMTP_SECURE === 'true',
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+    });
+  }
+  // Fallback: create a testing account (Ethereal)
+  return nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+      user: 'test@example.com',
+      pass: 'test-password',
+    },
+  });
+}
+
+function buildOrderEmail({ storeName, fullName, productName, quantity, price, orderId, orderDate }) {
+  const plain = `السلام عليكم،\n\nنشكر لك ثقتك بشركتنا.\n\nلقد استلمنا طلبك بنجاح. التفاصيل كالتالي:\n\nالمنتج: ${productName}\nالكمية: ${quantity}\nالسعر: ${price}\nرقم الطلب: #${orderId}\nتاريخ الطلب: ${orderDate}\n\nسيتم تجهيز طلبك وشحنه خلال 3 أيام عمل. عند شحن الطلب ستصلك رسالة تتضمن رقم التتبع.\n\nللاستفسار، يمكنك التواصل معنا عبر البريد الإلكتروني: support@company.com أو الاتصال على الرقم: +212 600 000 000\n\nمع تحياتنا،\nفريق شركة ${storeName}`;
+
+  const html = `
+  <div dir="rtl" style="font-family: Tahoma, Arial, sans-serif; color: #262a2f; background:#fdfefd; padding:16px;">
+    <h2 style="margin-top:0">${storeName}</h2>
+    <p>السلام عليكم،</p>
+    <p>نشكر لك ثقتك بشركتنا.</p>
+    <p>لقد استلمنا طلبك بنجاح. التفاصيل كالتالي:</p>
+    <ul>
+      <li><b>المنتج:</b> ${productName}</li>
+      <li><b>الكمية:</b> ${quantity}</li>
+      <li><b>السعر:</b> ${price}</li>
+      <li><b>رقم الطلب:</b> #${orderId}</li>
+      <li><b>تاريخ الطلب:</b> ${orderDate}</li>
+    </ul>
+    <p>سيتم تجهيز طلبك وشحنه خلال 3 أيام عمل. عند شحن الطلب ستصلك رسالة تتضمن رقم التتبع.</p>
+    <p>للاستفسار، يمكنك التواصل معنا عبر البريد الإلكتروني: <a href="mailto:support@company.com">support@company.com</a> أو الاتصال على الرقم: +212 600 000 000</p>
+    <p>مع تحياتنا،<br/>فريق شركة ${storeName}</p>
+  </div>`;
+  return { plain, html };
+}
+
       }
     }
 
@@ -354,6 +421,31 @@ app.post('/api/orders', async (req, res) => {
       'INSERT INTO orders (client_id, product_id, product_name, status, payment_method, code_promo) VALUES (?, ?, ?, ?, ?, ?)',
       [clientId, productId, productName, 'en_attente', paymentMethod || null, codePromo || null]
     );
+
+    // Fire-and-forget email (does not block the response)
+    (async () => {
+      try {
+        const transporter = createTransporter();
+        const storeName = 'Ordinateur Store';
+        const quantity = 1;
+        const price = '—'; // Optionally compute/format
+        const orderId = orderResult.insertId;
+        const orderDate = new Date().toLocaleDateString('ar-MA');
+        const { plain, html } = buildOrderEmail({ storeName, fullName, productName, quantity, price, orderId, orderDate });
+
+        if (email) {
+          await transporter.sendMail({
+            from: process.env.SMTP_FROM || `"${storeName}" <no-reply@localhost>` ,
+            to: email,
+            subject: `تأكيد طلبك - رقم الطلب #${orderId}`,
+            text: plain,
+            html,
+          });
+        }
+      } catch (mailErr) {
+        console.error('Nodemailer error (non-blocking):', mailErr);
+      }
+    })();
 
     res.json({
       success: true,
@@ -752,6 +844,126 @@ app.get('/api/stats', authenticateToken, requireRole(['super_admin']), async (re
   } catch (error) {
     console.error('Get stats error:', error);
     res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
+// Promo Codes API endpoints
+
+// Get all promo codes (admin only)
+app.get('/api/promos', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const [promos] = await db.execute('SELECT * FROM promo_codes ORDER BY created_at DESC');
+    res.json(promos);
+  } catch (error) {
+    console.error('Get promos error:', error);
+    res.status(500).json({ error: 'Failed to fetch promo codes' });
+  }
+});
+
+// Create promo code (admin only)
+app.post('/api/promos', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { name, code, type, value, applies_to, product_ids, commercial_name, is_active } = req.body;
+
+    const [result] = await db.execute(
+      'INSERT INTO promo_codes (name, code, type, value, applies_to, product_ids, commercial_name, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, code.toUpperCase(), type, value, applies_to, JSON.stringify(product_ids || []), commercial_name || null, is_active !== false]
+    );
+
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error('Create promo error:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      res.status(400).json({ error: 'Promo code already exists' });
+    } else {
+      res.status(500).json({ error: 'Failed to create promo code' });
+    }
+  }
+});
+
+// Update promo code (admin only)
+app.put('/api/promos/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, code, type, value, applies_to, product_ids, commercial_name, is_active } = req.body;
+
+    await db.execute(
+      'UPDATE promo_codes SET name = ?, code = ?, type = ?, value = ?, applies_to = ?, product_ids = ?, commercial_name = ?, is_active = ? WHERE id = ?',
+      [name, code.toUpperCase(), type, value, applies_to, JSON.stringify(product_ids || []), commercial_name || null, is_active !== false, id]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update promo error:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      res.status(400).json({ error: 'Promo code already exists' });
+    } else {
+      res.status(500).json({ error: 'Failed to update promo code' });
+    }
+  }
+});
+
+// Toggle promo code active status (admin only)
+app.put('/api/promos/:id/toggle', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_active } = req.body;
+
+    await db.execute('UPDATE promo_codes SET is_active = ? WHERE id = ?', [is_active, id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Toggle promo error:', error);
+    res.status(500).json({ error: 'Failed to toggle promo code status' });
+  }
+});
+
+// Delete promo code (admin only)
+app.delete('/api/promos/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.execute('DELETE FROM promo_codes WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete promo error:', error);
+    res.status(500).json({ error: 'Failed to delete promo code' });
+  }
+});
+
+// Validate promo code (public endpoint)
+app.post('/api/promos/validate', async (req, res) => {
+  try {
+    const { code, productId } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ valid: false, message: 'كود الخصم مطلوب' });
+    }
+
+    // Get promo code
+    const [promos] = await db.execute('SELECT * FROM promo_codes WHERE code = ? AND is_active = TRUE', [code.toUpperCase()]);
+
+    if (promos.length === 0) {
+      return res.status(400).json({ valid: false, message: 'كود الخصم غير صحيح أو منتهي الصلاحية' });
+    }
+
+    const promo = promos[0];
+
+    // Check if promo applies to this product
+    if (promo.applies_to === 'specific' && productId) {
+      const productIds = JSON.parse(promo.product_ids || '[]');
+      if (!productIds.includes(parseInt(productId))) {
+        return res.status(400).json({ valid: false, message: 'كود الخصم غير صالح لهذا المنتج' });
+      }
+    }
+
+    res.json({
+      valid: true,
+      discount: promo.value,
+      type: promo.type,
+      message: `تم تطبيق كود الخصم: ${promo.name}`
+    });
+  } catch (error) {
+    console.error('Validate promo error:', error);
+    res.status(500).json({ valid: false, message: 'حدث خطأ في التحقق من كود الخصم' });
   }
 });
 

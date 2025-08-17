@@ -52,7 +52,7 @@ function IconBattery({ className = 'h-5 w-5' }: { className?: string }) {
 function Feature({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
     <div className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-white">
-      <span className="text-amber-400">
+      <span className="text-primary">
         {icon}
       </span>
       <span className="text-sm md:text-base font-medium leading-tight">{label}</span>
@@ -92,16 +92,25 @@ export default function Page() {
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
-  // Auto-advance every 5s
+  // Ensure client-side rendering
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Auto-advance every 5s (only on client)
+  useEffect(() => {
+    if (!isClient) return;
+
     const id = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(id);
-  }, [slides.length]);
+  }, [slides.length, isClient]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -120,29 +129,29 @@ export default function Page() {
   return (
     <PublicLayout>
       <HydrationSafe>
-        <div suppressHydrationWarning>
+        <div>
           {/* Hero Section - Slider */}
-          <div className="relative h-[70vh] md:h-[80vh] overflow-hidden" suppressHydrationWarning>
+          <div className="relative h-[70vh] md:h-[80vh] overflow-hidden">
           {/* Per-slide gradient backgrounds to match branding */}
-          <div className="absolute inset-0" suppressHydrationWarning>
+          <div className="absolute inset-0">
             {slides.map((_, idx) => (
               <div
                 key={`bg-${idx}`}
                 className={`absolute inset-0 transition-opacity duration-700 ${idx === currentSlide ? 'opacity-100' : 'opacity-0'}`}
                 aria-hidden={idx !== currentSlide}
-                suppressHydrationWarning
+
               >
                 <div className={`w-full h-full ${
                   idx === 0 ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-black' :
                   idx === 1 ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-black' :
                   idx === 2 ? 'bg-gradient-to-br from-slate-900 via-gray-900 to-black' :
                                'bg-gradient-to-br from-gray-900 via-neutral-800 to-black'
-                }`} suppressHydrationWarning />
+                }`} />
               </div>
             ))}
           </div>
           {/* Slides */}
-          <div className="absolute inset-0" suppressHydrationWarning>
+          <div className="absolute inset-0">
             {slides.map((slide, idx) => (
               <div
                 key={idx}
@@ -150,11 +159,11 @@ export default function Page() {
                   idx === currentSlide ? 'opacity-100' : 'opacity-0'
                 }`}
                 aria-hidden={idx !== currentSlide}
-                suppressHydrationWarning
+
               >
-                <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-4" suppressHydrationWarning>
+                <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-4">
                   {/* Left: Text */}
-                  <div className="text-white max-w-xl" suppressHydrationWarning>
+                  <div className="text-white max-w-xl">
                     <h2 className="text-3xl md:text-5xl font-extrabold mb-3 leading-tight">
                       {slide.title}
                     </h2>
@@ -164,7 +173,7 @@ export default function Page() {
                     </p>
 
                     {/* Features grid: 2x2 */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" suppressHydrationWarning>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Feature icon={<IconMemory className="h-5 w-5" />} label="16GB RAM" />
                       <Feature icon={<IconStorage className="h-5 w-5" />} label="256GB SSD" />
                       <Feature
@@ -180,7 +189,7 @@ export default function Page() {
                     </div>
                   </div>
                   {/* Right: Image */}
-                  <div className="relative w-1/2 h-[50vh] hidden sm:block" suppressHydrationWarning>
+                  <div className="relative w-1/2 h-[50vh] hidden sm:block">
                     <Image
                       src={slide.image}
                       alt={slide.title}
@@ -191,40 +200,44 @@ export default function Page() {
                   </div>
                 </div>
                 {/* Subtle background vignette */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60 pointer-events-none" suppressHydrationWarning />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60 pointer-events-none" />
               </div>
             ))}
           </div>
 
-          {/* Controls */}
-          <button
-            aria-label="Previous slide"
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-md transition"
-          >
-            ‹
-          </button>
-          <button
-            aria-label="Next slide"
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-md transition"
-          >
-            ›
-          </button>
-
-          {/* Indicators */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-            {slides.map((_, i) => (
+          {/* Controls - Only render on client */}
+          {isClient && (
+            <>
               <button
-                key={i}
-                onClick={() => setCurrentSlide(i)}
-                className={`h-2 w-8 rounded-full transition-all ${
-                  i === currentSlide ? 'bg-amber-500 w-10' : 'bg-white/40'
-                }`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
-          </div>
+                aria-label="Previous slide"
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-md transition"
+              >
+                ‹
+              </button>
+              <button
+                aria-label="Next slide"
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-md transition"
+              >
+                ›
+              </button>
+
+              {/* Indicators */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                {slides.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentSlide(i)}
+                    className={`h-2 w-8 rounded-full transition-all ${
+                      i === currentSlide ? 'bg-primary w-10' : 'bg-white/40'
+                    }`}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
         </div>
       </HydrationSafe>
@@ -249,11 +262,11 @@ export default function Page() {
               <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
                 مجموعتنا المميزة
               </h3>
-              <div className="w-24 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto"></div>
+              <div className="w-24 h-1 bg-primary mx-auto rounded"></div>
             </div>
             {loading ? (
               <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 <p className="mt-2 text-gray-600">جاري تحميل المنتجات...</p>
               </div>
             ) : products.length > 0 ? (
@@ -271,12 +284,12 @@ export default function Page() {
         </Main>
 
         {/* 3-Image Grid Feature */}
-        <section className="bg-white py-8" suppressHydrationWarning>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
-            <div className="relative w-full md:h-[28rem] lg:h-[32rem]" suppressHydrationWarning>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full" suppressHydrationWarning>
+        <section className="bg-white py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative w-full md:h-[28rem] lg:h-[32rem]">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
                 {/* Left: large image (2/3 width) */}
-                <div className="relative md:col-span-2 h-64 md:h-full overflow-hidden rounded-2xl" suppressHydrationWarning>
+                <div className="relative md:col-span-2 h-64 md:h-full overflow-hidden rounded-2xl">
                   <Image
                     src="/images/f3.png"
                     alt="HP EliteBook - feature large"
@@ -319,7 +332,7 @@ export default function Page() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6" suppressHydrationWarning>
               <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow" suppressHydrationWarning>
                 <div className="flex items-center mb-4" suppressHydrationWarning>
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg" suppressHydrationWarning>
+                  <div className="bg-primary p-3 rounded-xl shadow-lg">
                     <ClockIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
@@ -328,7 +341,7 @@ export default function Page() {
               </div>
               <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow" suppressHydrationWarning>
                 <div className="flex items-center mb-4" suppressHydrationWarning>
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg" suppressHydrationWarning>
+                  <div className="bg-primary p-3 rounded-xl shadow-lg">
                     <TruckIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
@@ -337,7 +350,7 @@ export default function Page() {
               </div>
               <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow" suppressHydrationWarning>
                 <div className="flex items-center mb-4" suppressHydrationWarning>
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg" suppressHydrationWarning>
+                  <div className="bg-primary p-3 rounded-xl shadow-lg">
                     <CurrencyDollarIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>

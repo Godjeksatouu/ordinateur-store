@@ -16,28 +16,36 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const { t } = useTranslations();
 
+  // Calculate discount percentage
+  const hasDiscount = product.old_price && product.old_price > product.new_price;
+  const discountPercentage = hasDiscount
+    ? Math.round(((product.old_price - product.new_price) / product.old_price) * 100)
+    : 0;
+
   return (
     <div
-      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-gray-100"
+      className="group relative bg-[#fdfefd] rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-[#adb8c1]/20 hover:border-[#6188a4]/30 h-full flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Premium Badge */}
-      <div className="absolute top-4 right-4 z-10">
-        <div className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-          مميز
+      {/* Discount Badge */}
+      {hasDiscount && (
+        <div className="absolute top-3 right-3 z-10">
+          <div className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-[#fdfefd] px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+            -{discountPercentage}%
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Product Image */}
-      <div className="relative h-56 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+      <div className="relative h-48 bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 overflow-hidden">
         {product.images && product.images.length > 0 ? (
           <>
             <Image
               src={`http://localhost:5000${product.images[0]}`}
               alt={product.name}
               fill
-              className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+              className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               onError={(e) => {
                 // Hide the broken image and show fallback
@@ -50,98 +58,67 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
             />
             {/* Fallback for broken images */}
             <div className="image-fallback absolute inset-0 flex-col items-center justify-center text-center p-4 hidden">
-              <ShoppingBagIcon className="h-16 w-16 text-gray-400 mb-3" />
-              <div className="text-sm text-gray-500 font-medium">{product.name}</div>
-              <div className="text-xs text-gray-400 mt-1">صورة غير متوفرة</div>
+              <ShoppingBagIcon className="h-12 w-12 text-[#adb8c1] mb-2" />
+              <div className="text-sm text-[#262a2f] font-medium">{product.name}</div>
+              <div className="text-xs text-[#adb8c1] mt-1">صورة غير متوفرة</div>
             </div>
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-            <ShoppingBagIcon className="h-16 w-16 text-gray-400 group-hover:text-amber-500 transition-all duration-300 transform group-hover:scale-110 mb-3" />
-            <div className="text-sm text-gray-500 font-medium">{product.name}</div>
-            <div className="text-xs text-gray-400 mt-1">صورة غير متوفرة</div>
-          </div>
-        )}
-
-        {/* Gradient Overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent transition-opacity duration-300 ${
-          isHovered ? 'opacity-100' : 'opacity-0'
-        }`} />
-
-        {/* Fallback icon for failed images */}
-        {product.images && product.images.length > 0 && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <ShoppingBagIcon className="h-12 w-12 text-white/80" />
+            <ShoppingBagIcon className="h-12 w-12 text-[#adb8c1] group-hover:text-[#6188a4] transition-all duration-300 transform group-hover:scale-110 mb-2" />
+            <div className="text-sm text-[#262a2f] font-medium">{product.name}</div>
+            <div className="text-xs text-[#adb8c1] mt-1">صورة غير متوفرة</div>
           </div>
         )}
       </div>
 
-      <div className="p-6">
+      <div className="p-5 flex-1 flex flex-col">
         {/* Product Title */}
-        <h3 className="text-xl font-bold text-[#262a2f] mb-3 group-hover:text-[#6188a4] transition-colors duration-300 leading-tight">
+        <h3 className="text-lg font-bold text-[#262a2f] mb-3 group-hover:text-[#6188a4] transition-colors duration-300 leading-tight line-clamp-2 min-h-[3.5rem]">
           {product.name}
         </h3>
 
         {/* Specifications */}
-        <div className="space-y-2 mb-4">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">{t('ram')}:</span>
-            <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">
-              {product.ram}
-            </span>
+        <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+          <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
+            <div className="text-[#adb8c1] text-xs font-medium">{t('ram')}</div>
+            <div className="font-bold text-[#262a2f] text-sm">{product.ram}</div>
           </div>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">{t('storage')}:</span>
-            <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">
-              {product.storage}
-            </span>
+          <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
+            <div className="text-[#adb8c1] text-xs font-medium">{t('storage')}</div>
+            <div className="font-bold text-[#262a2f] text-sm">{product.storage}</div>
           </div>
           {product.processor && (
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">{t('processor')}:</span>
-              <span className="font-semibold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">
-                {product.processor}
-              </span>
+            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2 col-span-2">
+              <div className="text-[#adb8c1] text-xs font-medium">{t('processor')}</div>
+              <div className="font-bold text-[#262a2f] text-xs leading-tight">{product.processor}</div>
             </div>
           )}
         </div>
 
-        {/* Rating */}
-        <div className="flex items-center mb-4">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <StarIcon key={i} className="h-4 w-4 text-amber-400 fill-current" />
-            ))}
-          </div>
-          <span className="text-sm text-gray-600 mr-2">(4.9)</span>
-        </div>
-
-        {/* Price */}
-        <div className="mb-4">
-          {product.old_price && product.old_price > 0 && (
-            <div className="text-sm text-gray-500 line-through">
-              {product.old_price.toLocaleString()} {t('currency')}
+        {/* Price Section */}
+        <div className="mt-auto">
+          <div className="mb-4">
+            {hasDiscount && (
+              <div className="text-sm text-[#adb8c1] line-through mb-1">
+                {product.old_price.toLocaleString()} {t('currency')}
+              </div>
+            )}
+            <div className="text-2xl font-bold text-[#6188a4]">
+              {product.new_price.toLocaleString()} <span className="text-sm text-[#adb8c1] mr-1">{t('currency')}</span>
             </div>
-          )}
-          <div className="text-2xl font-bold text-[#6188a4]">
-            {product.new_price.toLocaleString()} <span className="text-sm text-gray-500 mr-1">{t('currency')}</span>
           </div>
-        </div>
 
-        {/* Action Button */}
-        <Link
-          href={`/product/${product.id}`}
-          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-xl font-semibold text-center block transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg cursor-pointer"
-          prefetch={true}
-        >
-          {showPrice ? t('orderNow') : t('buyNow')}
-        </Link>
+          {/* Action Button */}
+          <Link
+            href={`/product/${product.id}`}
+            className="w-full bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-[#fdfefd] hover:from-[#262a2f] hover:to-[#6188a4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6188a4] focus:ring-offset-[#fdfefd] px-6 py-3 rounded-xl font-bold text-center block transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl cursor-pointer"
+            prefetch={true}
+          >
+            {showPrice ? t('orderNow') : t('buyNow')}
+          </Link>
+        </div>
       </div>
-
-      {/* Hover Effect Border */}
-      <div className={`absolute inset-0 rounded-2xl border-2 border-amber-400 transition-opacity duration-300 pointer-events-none ${
-        isHovered ? 'opacity-100' : 'opacity-0'
-      }`} />
     </div>
   );
 }

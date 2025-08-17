@@ -9,6 +9,7 @@ const roles = [
   { key: 'products', label: 'Products', icon: '📦' },
   { key: 'orders', label: 'Commandes', icon: '📋' },
   { key: 'clients', label: 'Clients', icon: '👥' },
+  { key: 'promos', label: 'Code Promo', icon: '🎫' },
   { key: 'users', label: 'Gestion des utilisateurs', icon: '⚙️' },
   { key: 'dashboard', label: 'Dashboard', icon: '📊' },
 ] as const;
@@ -115,6 +116,7 @@ export default function AdminPage() {
               {activeRole === 'products' && hasAccess(user.role, 'products') && <ProductsManager />}
               {activeRole === 'orders' && hasAccess(user.role, 'orders') && <OrdersManager />}
               {activeRole === 'clients' && hasAccess(user.role, 'clients') && <ClientsManager />}
+              {activeRole === 'promos' && hasAccess(user.role, 'promos') && <PromoManager />}
               {activeRole === 'users' && hasAccess(user.role, 'users') && <UsersManager />}
               {activeRole === 'dashboard' && hasAccess(user.role, 'dashboard') && <SuperAdminDashboard />}
             </div>
@@ -137,7 +139,7 @@ function getRoleLabel(role: string) {
 
 function hasAccess(userRole: string, section: string) {
   if (userRole === 'super_admin') return true;
-  if (userRole === 'product_manager' && section === 'products') return true;
+  if (userRole === 'product_manager' && (section === 'products' || section === 'promos')) return true;
   if (userRole === 'gestion_commandes' && (section === 'orders' || section === 'clients')) return true;
   return false;
 }
@@ -147,7 +149,6 @@ function ProductsManager() {
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
-    promo_code: '', promo_type: 'percentage',
   });
   const [mainImages, setMainImages] = useState<FileList | null>(null);
   const [optionalImages, setOptionalImages] = useState<FileList | null>(null);
@@ -161,9 +162,11 @@ function ProductsManager() {
     try {
       const response = await fetch('http://localhost:5000/api/products');
       const data = await response.json();
-      setProducts(data);
+      // Ensure data is an array
+      setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setProducts([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -207,7 +210,7 @@ function ProductsManager() {
       if (response.ok) {
         fetchProducts();
         setFormData({
-          name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', promo_code: '', promo_type: 'percentage'
+          name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
         });
         setMainImages(null);
         setOptionalImages(null);
@@ -249,15 +252,17 @@ function ProductsManager() {
       console.error('Error deleting product:', error);
     }
   };
+
   if (loading) {
     return <div className="text-center py-8">جاري التحميل...</div>;
   }
 
   return (
-    <section className="bg-white rounded-2xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        {editingId ? 'تعديل المنتج' : 'إضافة منتج جديد'}
-      </h2>
+    <React.Fragment>
+      <section className="bg-white rounded-2xl shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          {editingId ? 'تعديل المنتج' : 'إضافة منتج جديد'}
+        </h2>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div>
@@ -418,27 +423,6 @@ function ProductsManager() {
           )}
         </div>
         <div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Code Promo</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="Ex: SAVE10"
-            value={(formData as any).promo_code}
-            onChange={(e) => setFormData({ ...formData, promo_code: e.target.value })}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">نوع التخفيض</label>
-          <select
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            value={(formData as any).promo_type}
-            onChange={(e) => setFormData({ ...formData, promo_type: e.target.value })}
-          >
-            <option value="percentage">Percentage</option>
-            <option value="fixed">Montant fixe</option>
-          </select>
-        </div>
-
           <label className="block text-sm font-medium text-gray-700 mb-2">الوصف (English)</label>
           <textarea
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
@@ -455,17 +439,6 @@ function ProductsManager() {
             className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-6 py-3 rounded-xl font-semibold flex-1"
           >
             {editingId ? 'تحديث المنتج' : 'حفظ المنتج'}
-          </button
-        </div>
-          />
-        </div>
-
-        <div className="md:col-span-2 flex gap-4">
-          <button
-            type="submit"
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl font-semibold flex-1"
-          >
-            {editingId ? 'تحديث المنتج' : 'حفظ المنتج'}
           </button>
           {editingId && (
             <button
@@ -473,7 +446,7 @@ function ProductsManager() {
               onClick={() => {
                 setEditingId(null);
                 setFormData({
-                  name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', promo_code: '', promo_type: 'percentage'
+                  name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: ''
                 });
               }}
               className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold"
@@ -495,7 +468,7 @@ function ProductsManager() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product: any) => (
+            {Array.isArray(products) && products.map((product: any) => (
               <tr key={product.id} className="border-b">
                 <td className="px-4 py-3">{product.name}</td>
                 <td className="px-4 py-3">{product.new_price?.toLocaleString()} دج</td>
@@ -522,6 +495,7 @@ function ProductsManager() {
         </table>
       </div>
     </section>
+    </React.Fragment>
   );
 }
 
@@ -542,9 +516,11 @@ function OrdersManager() {
         }
       });
       const data = await response.json();
-      setOrders(data);
+      // Ensure data is an array
+      setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching orders:', error);
+      setOrders([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -612,7 +588,7 @@ function OrdersManager() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order: any) => (
+            {Array.isArray(orders) && orders.map((order: any) => (
               <tr key={order.id} className="border-b">
                 <td className="px-4 py-3">#{order.id}</td>
                 <td className="px-4 py-3">{order.full_name}</td>
@@ -651,7 +627,19 @@ function SuperAdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
+    // Check if user has super_admin role before fetching stats
+    const userData = localStorage.getItem('adminUser');
+    if (userData) {
+      const user = JSON.parse(userData);
+      if (user.role === 'super_admin') {
+        fetchStats();
+      } else {
+        console.warn('User does not have super_admin role, skipping stats fetch');
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const fetchStats = async () => {
@@ -662,10 +650,22 @@ function SuperAdminDashboard() {
           'Authorization': `Bearer ${token}`
         }
       });
+
+      if (response.status === 403) {
+        console.warn('Access denied to stats endpoint. User may not have super_admin privileges.');
+        setStats(null);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setStats(null);
     } finally {
       setLoading(false);
     }
@@ -688,6 +688,19 @@ function SuperAdminDashboard() {
 
   if (loading) {
     return <div className="text-center py-8">جاري التحميل...</div>;
+  }
+
+  if (!stats) {
+    return (
+      <div className="text-center py-8">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-2">غير متاح</h3>
+          <p className="text-yellow-700">
+            لا يمكن الوصول إلى الإحصائيات. تأكد من أن لديك صلاحيات المدير العام.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -763,7 +776,7 @@ function ClientsManager() {
             </tr>
           </thead>
           <tbody>
-            {clients.map((client: any) => (
+            {Array.isArray(clients) && clients.map((client: any) => (
               <tr key={client.id} className="border-b">
                 <td className="px-4 py-3">{client.full_name}</td>
                 <td className="px-4 py-3">{client.phone_number}</td>
@@ -809,9 +822,11 @@ function UsersManager() {
         }
       });
       const data = await response.json();
-      setUsers(data);
+      // Ensure data is an array
+      setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching users:', error);
+      setUsers([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -995,7 +1010,7 @@ function UsersManager() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user: any) => (
+            {Array.isArray(users) && users.map((user: any) => (
               <tr key={user.id} className="border-b">
                 <td className="px-4 py-3">{user.username}</td>
                 <td className="px-4 py-3">
@@ -1027,6 +1042,333 @@ function UsersManager() {
         {users.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             لا توجد مستخدمين مسجلين حالياً
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function PromoManager() {
+  const [promos, setPromos] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingPromo, setEditingPromo] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    code: '',
+    type: 'percentage',
+    value: '',
+    applies_to: 'all',
+    product_ids: [] as number[],
+    commercial_name: '',
+    is_active: true
+  });
+
+  useEffect(() => {
+    fetchPromos();
+    fetchProducts();
+  }, []);
+
+  const fetchPromos = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/promos', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setPromos(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching promos:', error);
+      setPromos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/products');
+      const data = await response.json();
+      setProducts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProducts([]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('adminToken');
+
+    try {
+      const url = editingPromo ? `http://localhost:5000/api/promos/${editingPromo.id}` : 'http://localhost:5000/api/promos';
+      const method = editingPromo ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        fetchPromos();
+        setFormData({
+          name: '', code: '', type: 'percentage', value: '', applies_to: 'all',
+          product_ids: [], commercial_name: '', is_active: true
+        });
+        setShowForm(false);
+        setEditingPromo(null);
+      }
+    } catch (error) {
+      console.error('Error saving promo:', error);
+    }
+  };
+
+  const handleEdit = (promo: any) => {
+    setEditingPromo(promo);
+    setFormData({
+      name: promo.name,
+      code: promo.code,
+      type: promo.type,
+      value: promo.value.toString(),
+      applies_to: promo.applies_to,
+      product_ids: promo.product_ids || [],
+      commercial_name: promo.commercial_name || '',
+      is_active: promo.is_active
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('هل أنت متأكد من حذف هذا الكود؟')) return;
+
+    const token = localStorage.getItem('adminToken');
+    try {
+      await fetch(`http://localhost:5000/api/promos/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      fetchPromos();
+    } catch (error) {
+      console.error('Error deleting promo:', error);
+    }
+  };
+
+  const toggleActive = async (id: number, isActive: boolean) => {
+    const token = localStorage.getItem('adminToken');
+    try {
+      await fetch(`http://localhost:5000/api/promos/${id}/toggle`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ is_active: !isActive })
+      });
+      fetchPromos();
+    } catch (error) {
+      console.error('Error toggling promo status:', error);
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">جاري التحميل...</div>;
+  }
+
+  return (
+    <section className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">إدارة أكواد الخصم</h2>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-4 py-2 rounded-xl font-semibold"
+        >
+          {showForm ? 'إلغاء' : 'إضافة كود جديد'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-gray-50 rounded-xl p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">اسم الكود</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">الكود</label>
+              <input
+                type="text"
+                value={formData.code}
+                onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">نوع الخصم</label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({...formData, type: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
+              >
+                <option value="percentage">نسبة مئوية (%)</option>
+                <option value="fixed">مبلغ ثابت</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">قيمة الخصم</label>
+              <input
+                type="number"
+                value={formData.value}
+                onChange={(e) => setFormData({...formData, value: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">اسم التاجر (اختياري)</label>
+              <input
+                type="text"
+                value={formData.commercial_name}
+                onChange={(e) => setFormData({...formData, commercial_name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">ينطبق على</label>
+              <select
+                value={formData.applies_to}
+                onChange={(e) => setFormData({...formData, applies_to: e.target.value, product_ids: []})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
+              >
+                <option value="all">جميع المنتجات</option>
+                <option value="specific">منتجات محددة</option>
+              </select>
+            </div>
+          </div>
+
+          {formData.applies_to === 'specific' && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">اختر المنتجات</label>
+              <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-2">
+                {products.map((product: any) => (
+                  <label key={product.id} className="flex items-center space-x-2 p-2 hover:bg-gray-100">
+                    <input
+                      type="checkbox"
+                      checked={formData.product_ids.includes(product.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setFormData({...formData, product_ids: [...formData.product_ids, product.id]});
+                        } else {
+                          setFormData({...formData, product_ids: formData.product_ids.filter(id => id !== product.id)});
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{product.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-4 mt-6">
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-6 py-2 rounded-lg font-semibold"
+            >
+              {editingPromo ? 'تحديث' : 'حفظ'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowForm(false);
+                setEditingPromo(null);
+                setFormData({
+                  name: '', code: '', type: 'percentage', value: '', applies_to: 'all',
+                  product_ids: [], commercial_name: '', is_active: true
+                });
+              }}
+              className="bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold"
+            >
+              إلغاء
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-3 text-right">اسم الكود</th>
+              <th className="px-4 py-3 text-right">الكود</th>
+              <th className="px-4 py-3 text-right">النوع</th>
+              <th className="px-4 py-3 text-right">القيمة</th>
+              <th className="px-4 py-3 text-right">ينطبق على</th>
+              <th className="px-4 py-3 text-right">التاجر</th>
+              <th className="px-4 py-3 text-right">الحالة</th>
+              <th className="px-4 py-3 text-right">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(promos) && promos.map((promo: any) => (
+              <tr key={promo.id} className="border-b">
+                <td className="px-4 py-3">{promo.name}</td>
+                <td className="px-4 py-3 font-mono bg-gray-100 rounded">{promo.code}</td>
+                <td className="px-4 py-3">{promo.type === 'percentage' ? 'نسبة مئوية' : 'مبلغ ثابت'}</td>
+                <td className="px-4 py-3">{promo.value}{promo.type === 'percentage' ? '%' : ' دج'}</td>
+                <td className="px-4 py-3">{promo.applies_to === 'all' ? 'جميع المنتجات' : 'منتجات محددة'}</td>
+                <td className="px-4 py-3">{promo.commercial_name || '-'}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-1 rounded-full text-xs ${promo.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {promo.is_active ? 'نشط' : 'غير نشط'}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(promo)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                    >
+                      تعديل
+                    </button>
+                    <button
+                      onClick={() => toggleActive(promo.id, promo.is_active)}
+                      className={`px-3 py-1 rounded text-sm text-white ${promo.is_active ? 'bg-red-500' : 'bg-green-500'}`}
+                    >
+                      {promo.is_active ? 'إلغاء تفعيل' : 'تفعيل'}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(promo.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {promos.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            لا توجد أكواد خصم حالياً
           </div>
         )}
       </div>

@@ -6,12 +6,13 @@ export const translations = {
     contact: 'اتصل بنا',
     cart: 'السلة',
     search: 'البحث...',
-    
+
     // Product actions
     buyNow: 'شراء الآن',
     orderNow: 'اطلب الآن',
     viewDetails: 'عرض التفاصيل',
-    
+    addToCart: 'أضف إلى السلة',
+
     // Product specs
     ram: 'الذاكرة',
     storage: 'التخزين',
@@ -19,16 +20,43 @@ export const translations = {
     graphics: 'كرت الشاشة',
     processor: 'المعالج',
     os: 'نظام التشغيل',
-    
+
     // Common
     loading: 'جاري التحميل...',
     noProducts: 'لا توجد منتجات متاحة حالياً',
     currency: 'دج',
-    
+    save: 'حفظ',
+    cancel: 'إلغاء',
+    edit: 'تعديل',
+    delete: 'حذف',
+    confirm: 'تأكيد',
+    yes: 'نعم',
+    no: 'لا',
+
     // Homepage
     heroTitle: 'تجربة أحسن حاسوب تنتظرك',
     heroSubtitle: 'نقدم لك أفضل أجهزة الكمبيوتر المحمولة بأحدث التقنيات وأعلى معايير الجودة',
     featuredCollection: 'مجموعتنا المميزة',
+
+    // Checkout & Orders
+    fullName: 'اسمك بالكامل',
+    phoneNumber: 'رقم الهاتف',
+    city: 'المدينة',
+    address: 'العنوان',
+    email: 'البريد الإلكتروني',
+    paymentMethod: 'طرق الدفع',
+    promoCode: 'كود التخفيض',
+    promoCodeOptional: 'كود التخفيض (اختياري)',
+    promoCodePlaceholder: 'مثال: SAVE10',
+    orderDetails: 'تفاصيل الطلب',
+    orderNowButton: 'اضغط هنا للطلب',
+    marketingConsent: 'أوافق على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني',
+
+    // Promo codes
+    promoCodeValid: 'تم تطبيق الخصم! وفرت {amount} دج',
+    promoCodeInvalid: 'كود الخصم غير صحيح أو منتهي الصلاحية',
+    promoCodeError: 'حدث خطأ في التحقق من كود الخصم',
+    promoCodeNotForProduct: 'كود الخصم غير صالح لهذا المنتج',
     
     // Services
     fastDelivery: 'التوصيل السريع',
@@ -71,12 +99,13 @@ export const translations = {
     contact: 'Contact',
     cart: 'Cart',
     search: 'Search...',
-    
+
     // Product actions
     buyNow: 'Buy Now',
     orderNow: 'Order Now',
     viewDetails: 'View Details',
-    
+    addToCart: 'Add to Cart',
+
     // Product specs
     ram: 'RAM',
     storage: 'Storage',
@@ -84,16 +113,43 @@ export const translations = {
     graphics: 'Graphics',
     processor: 'Processor',
     os: 'Operating System',
-    
+
     // Common
     loading: 'Loading...',
     noProducts: 'No products available',
     currency: 'DZD',
-    
+    save: 'Save',
+    cancel: 'Cancel',
+    edit: 'Edit',
+    delete: 'Delete',
+    confirm: 'Confirm',
+    yes: 'Yes',
+    no: 'No',
+
     // Homepage
     heroTitle: 'Experience the Best Computer Awaits You',
     heroSubtitle: 'We offer you the best laptops with the latest technology and highest quality standards',
     featuredCollection: 'Our Featured Collection',
+
+    // Checkout & Orders
+    fullName: 'Full Name',
+    phoneNumber: 'Phone Number',
+    city: 'City',
+    address: 'Address',
+    email: 'Email',
+    paymentMethod: 'Payment Method',
+    promoCode: 'Promo Code',
+    promoCodeOptional: 'Promo Code (Optional)',
+    promoCodePlaceholder: 'e.g., SAVE10',
+    orderDetails: 'Order Details',
+    orderNowButton: 'Place Order',
+    marketingConsent: 'I agree to receive the latest offers and products via email',
+
+    // Promo codes
+    promoCodeValid: 'Discount applied! You saved {amount} DZD',
+    promoCodeInvalid: 'Invalid or expired promo code',
+    promoCodeError: 'Error validating promo code',
+    promoCodeNotForProduct: 'Promo code not valid for this product',
     
     // Services
     fastDelivery: 'Fast Delivery',
@@ -136,12 +192,13 @@ export const translations = {
     contact: 'Contact',
     cart: 'Panier',
     search: 'Rechercher...',
-    
+
     // Product actions
     buyNow: 'Acheter Maintenant',
     orderNow: 'Commander Maintenant',
     viewDetails: 'Voir Détails',
-    
+    addToCart: 'Ajouter au Panier',
+
     // Product specs
     ram: 'RAM',
     storage: 'Stockage',
@@ -149,16 +206,43 @@ export const translations = {
     graphics: 'Graphiques',
     processor: 'Processeur',
     os: 'Système d\'Exploitation',
-    
+
     // Common
     loading: 'Chargement...',
     noProducts: 'Aucun produit disponible',
     currency: 'DZD',
-    
+    save: 'Enregistrer',
+    cancel: 'Annuler',
+    edit: 'Modifier',
+    delete: 'Supprimer',
+    confirm: 'Confirmer',
+    yes: 'Oui',
+    no: 'Non',
+
     // Homepage
     heroTitle: 'Découvrez le Meilleur Ordinateur qui Vous Attend',
     heroSubtitle: 'Nous vous offrons les meilleurs ordinateurs portables avec les dernières technologies et les plus hauts standards de qualité',
     featuredCollection: 'Notre Collection Vedette',
+
+    // Checkout & Orders
+    fullName: 'Nom Complet',
+    phoneNumber: 'Numéro de Téléphone',
+    city: 'Ville',
+    address: 'Adresse',
+    email: 'Email',
+    paymentMethod: 'Méthode de Paiement',
+    promoCode: 'Code Promo',
+    promoCodeOptional: 'Code Promo (Optionnel)',
+    promoCodePlaceholder: 'ex: SAVE10',
+    orderDetails: 'Détails de la Commande',
+    orderNowButton: 'Passer Commande',
+    marketingConsent: 'J\'accepte de recevoir les dernières offres et produits par email',
+
+    // Promo codes
+    promoCodeValid: 'Remise appliquée! Vous avez économisé {amount} DZD',
+    promoCodeInvalid: 'Code promo invalide ou expiré',
+    promoCodeError: 'Erreur lors de la validation du code promo',
+    promoCodeNotForProduct: 'Code promo non valide pour ce produit',
     
     // Services
     fastDelivery: 'Livraison Rapide',

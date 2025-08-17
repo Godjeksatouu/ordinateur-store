@@ -16,6 +16,53 @@
   --color-success: rgb(0 112 243 / 1);
   --color-background: white;
   --color-success-dark: rgb(7 97 209 / 1);
+
+  /* Brand Color Palette */
+  --color-dark: #262a2f;
+  --color-light: #fdfefd;
+  --color-gray: #adb8c1;
+  --color-accent: #6188a4;
+
+  /* Semantic Colors */
+  --color-primary: var(--color-accent);
+  --color-secondary: var(--color-gray);
+  --color-text-primary: var(--color-dark);
+  --color-text-secondary: var(--color-gray);
+  --color-surface: var(--color-light);
+  --color-border: rgb(173 184 193 / 0.2);
+}
+
+/* Brand Utility Classes */
+.btn-primary {
+  @apply bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-[#fdfefd] hover:from-[#262a2f] hover:to-[#6188a4] focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:ring-offset-2 focus:ring-offset-[#fdfefd] font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl;
+}
+
+.btn-secondary {
+  @apply bg-[#fdfefd] border-2 border-[#adb8c1] text-[#262a2f] hover:bg-[#adb8c1]/10 hover:border-[#6188a4] focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:ring-offset-2 font-semibold rounded-xl transition-all duration-300;
+}
+
+.card-modern {
+  @apply bg-[#fdfefd] rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-[#adb8c1]/20 hover:border-[#6188a4]/30;
+}
+
+.text-brand-primary {
+  @apply text-[#262a2f];
+}
+
+.text-brand-secondary {
+  @apply text-[#adb8c1];
+}
+
+.text-brand-accent {
+  @apply text-[#6188a4];
+}
+
+.bg-brand-surface {
+  @apply bg-[#fdfefd];
+}
+
+.border-brand {
+  @apply border-[#adb8c1]/20;
 }
 
 /* Custom animations and styles */
