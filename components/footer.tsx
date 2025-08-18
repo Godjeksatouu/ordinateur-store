@@ -3,6 +3,7 @@
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '@/hooks/use-translations';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Footer() {
   const { t, locale } = useTranslations();
@@ -14,12 +15,18 @@ export function Footer() {
             {/* Logo and Description */}
             <div className="md:col-span-2 space-y-6">
               <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] p-3 rounded-xl shadow-lg">
-                  <ShoppingBagIcon className="h-8 w-8 text-white" />
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-lg bg-white p-1">
+                  <Image
+                    src="/images/logo.png"
+                    alt="Logo"
+                    fill
+                    className="object-contain"
+                    sizes="48px"
+                  />
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-white">{t('storeName')}</h3>
-                  <p className="text-amber-400 font-medium">{t('storeTagline')}</p>
+                  <p className="font-medium" style={{color: '#3a4956'}}>{t('storeTagline')}</p>
                 </div>
               </div>
               <p className="text-gray-300 leading-relaxed max-w-md">
@@ -34,14 +41,14 @@ export function Footer() {
               <h4 className="text-lg font-bold text-white mb-6">{t('quickLinks')}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
-                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
+                  <a href="#" className="text-gray-300 transition-colors duration-300 flex items-center" style={{'&:hover': {color: '#3a4956'}}}>
+                    <span className="w-2 h-2 rounded-full mr-3" style={{backgroundColor: '#3a4956'}}></span>
                     {t('home')}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
-                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
+                  <a href="#" className="text-gray-300 transition-colors duration-300 flex items-center" style={{'&:hover': {color: '#3a4956'}}}>
+                    <span className="w-2 h-2 rounded-full mr-3" style={{backgroundColor: '#3a4956'}}></span>
                     {t('aboutStore')}
                   </a>
                 </li>
@@ -53,7 +60,7 @@ export function Footer() {
               <h4 className="text-lg font-bold text-white mb-6">{t('contactUs')}</h4>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-amber-500 p-2 rounded-lg">
+                  <div className="p-2 rounded-lg" style={{backgroundColor: '#3a4956'}}>
                     <span className="text-white">📞</span>
                   </div>
                   <div>
@@ -63,7 +70,7 @@ export function Footer() {
                 </div>
 
                 <div className="flex items-center space-x-3">
-                  <div className="bg-amber-500 p-2 rounded-lg">
+                  <div className="p-2 rounded-lg" style={{backgroundColor: '#3a4956'}}>
                     <span className="text-white">✉️</span>
                   </div>
                   <div>
@@ -73,7 +80,7 @@ export function Footer() {
                 </div>
 
                 <div className="flex items-center space-x-3">
-                  <div className="bg-amber-500 p-2 rounded-lg">
+                  <div className="p-2 rounded-lg" style={{backgroundColor: '#3a4956'}}>
                     <span className="text-white">📍</span>
                   </div>
                   <div>

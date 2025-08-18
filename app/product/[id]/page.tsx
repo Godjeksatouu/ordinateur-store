@@ -15,7 +15,7 @@ interface OrderForm {
   city: string;
   address: string;
   email?: string;
-  paymentMethod?: 'Cashplus' | 'Virement bancaire' | 'Retrait au Magasin' | 'Cash on Delivery' | '';
+  paymentMethod?: string;
   codePromo?: string;
 }
 
@@ -48,6 +48,7 @@ export default function ProductDetailsPage() {
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   const [finalPrice, setFinalPrice] = useState(0);
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -66,6 +67,21 @@ export default function ProductDetailsPage() {
       loadProduct();
     }
   }, [productId]);
+
+  useEffect(() => {
+    const loadPaymentMethods = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/payment-methods');
+        const data = await response.json();
+        setPaymentMethods(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error loading payment methods:', error);
+        setPaymentMethods([]);
+      }
+    };
+
+    loadPaymentMethods();
+  }, []);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -156,9 +172,16 @@ export default function ProductDetailsPage() {
   const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
     let finalPrice = basePrice - promoDiscount;
 
-    // Apply Virement bancaire discount
-    if (paymentMethod === 'Virement bancaire') {
-      finalPrice = Math.max(0, finalPrice - 100); // 100 DH discount
+    // Apply payment method discount
+    if (paymentMethod) {
+      const selectedPaymentMethod = paymentMethods.find(pm => pm.name === paymentMethod);
+      if (selectedPaymentMethod && selectedPaymentMethod.discount_amount > 0) {
+        if (selectedPaymentMethod.discount_type === 'percentage') {
+          finalPrice = Math.max(0, finalPrice - (finalPrice * selectedPaymentMethod.discount_amount / 100));
+        } else {
+          finalPrice = Math.max(0, finalPrice - selectedPaymentMethod.discount_amount);
+        }
+      }
     }
 
     setFinalPrice(finalPrice);
@@ -380,36 +403,36 @@ export default function ProductDetailsPage() {
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
+                  <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
                   {t('technicalSpecs')}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {product.ram && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-amber-50 transition-colors duration-300">
+                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
                       <span className="text-sm text-gray-600 block">{t('ram')}</span>
                       <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
                     </div>
                   )}
                   {product.storage && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-amber-50 transition-colors duration-300">
+                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
                       <span className="text-sm text-gray-600 block">{t('storage')}</span>
                       <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
                     </div>
                   )}
                   {product.screen && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-amber-50 transition-colors duration-300">
+                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
                       <span className="text-sm text-gray-600 block">{t('screen')}</span>
                       <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
                     </div>
                   )}
-                  {product.graphics && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-amber-50 transition-colors duration-300">
+                  {product.processor && (
+                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
                       <span className="text-sm text-gray-600 block">{t('graphics')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.graphics}</span>
+                      <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
                     </div>
                   )}
                   {product.os && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-amber-50 transition-colors duration-300">
+                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
                       <span className="text-sm text-gray-600 block">{t('os')}</span>
                       <span className="text-lg font-semibold text-gray-900">{product.os}</span>
                     </div>
@@ -420,7 +443,7 @@ export default function ProductDetailsPage() {
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
+                  <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
                   {t('description')}
                 </h2>
                 <p className="text-gray-700 leading-relaxed text-lg">{product.description || t('noDescription')}</p>
@@ -431,7 +454,8 @@ export default function ProductDetailsPage() {
                   <div className="space-y-4">
                     <button
                       onClick={() => setShowOrderForm(true)}
-                      className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      className="w-full text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      style={{background: 'linear-gradient(to right, #3a4956, #2a3440)'}}
                     >
                       🛒 {t('orderNowBtn')}
                     </button>
@@ -576,69 +600,28 @@ export default function ProductDetailsPage() {
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             طرق الدفع
                           </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cashplus' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Cashplus"
-                                checked={orderForm.paymentMethod === 'Cashplus'}
-                                onChange={() => handleInputChange('paymentMethod', 'Cashplus')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                              />
-                              <div>
-                                <div className="font-semibold text-gray-900">Cashplus</div>
-                                <div className="text-sm text-gray-600">RIB: 123 456 789 000 000 000 12</div>
-                              </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Virement bancaire' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Virement bancaire"
-                                checked={orderForm.paymentMethod === 'Virement bancaire'}
-                                onChange={() => handleInputChange('paymentMethod', 'Virement bancaire')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                              />
-                              <div>
-                                <div className="font-semibold text-gray-900">Virement bancaire</div>
-                                <div className="text-sm text-gray-600">RIB: 987 654 321 000 000 000 34</div>
-                                <div className="text-xs text-green-700 mt-1">خصم تلقائي: -100 درهم</div>
-                              </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Retrait au Magasin' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Retrait au Magasin"
-                                checked={orderForm.paymentMethod === 'Retrait au Magasin'}
-                                onChange={() => handleInputChange('paymentMethod', 'Retrait au Magasin')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                              />
-                              <div>
-                                <div className="font-semibold text-gray-900">Retrait au Magasin</div>
-                                <div className="text-sm text-gray-600">استلام من المتجر</div>
-                                <div className="text-xs text-blue-700 mt-1">دفع عند الاستلام</div>
-                              </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cash on Delivery' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Cash on Delivery"
-                                checked={orderForm.paymentMethod === 'Cash on Delivery'}
-                                onChange={() => handleInputChange('paymentMethod', 'Cash on Delivery')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                              />
-                              <div>
-                                <div className="font-semibold text-gray-900">{t('cashOnDeliveryShort')}</div>
-                                <div className="text-sm text-gray-600">{t('cashOnDeliveryDesc2') || 'الدفع نقداً عند التوصيل'}</div>
-                                <div className="text-xs text-purple-700 mt-1">💵 {t('securePayment') || 'دفع آمن'}</div>
-                              </div>
-                            </label>
+                          <div className={`grid grid-cols-1 md:grid-cols-2 ${paymentMethods.length > 3 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
+                            {paymentMethods.map((pm) => (
+                              <label key={pm.id} className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === pm.name ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                                <input
+                                  type="radio"
+                                  name="paymentMethod"
+                                  value={pm.name}
+                                  checked={orderForm.paymentMethod === pm.name}
+                                  onChange={() => handleInputChange('paymentMethod', pm.name)}
+                                  className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                                />
+                                <div>
+                                  <div className="font-semibold text-gray-900">{pm.name_ar || pm.name}</div>
+                                  <div className="text-sm text-gray-600">{pm.description_ar || pm.description}</div>
+                                  {pm.discount_amount > 0 && (
+                                    <div className="text-xs text-green-700 mt-1">
+                                      خصم تلقائي: -{pm.discount_amount}{pm.discount_type === 'percentage' ? '%' : ' درهم'}
+                                    </div>
+                                  )}
+                                </div>
+                              </label>
+                            ))}
                           </div>
                         </div>
                       </div>
@@ -682,16 +665,24 @@ export default function ProductDetailsPage() {
                               </div>
                             )}
 
-                            {/* Virement Bancaire Discount */}
-                            {orderForm.paymentMethod === 'Virement bancaire' && (
-                              <div className="flex justify-between items-center text-green-600">
-                                <span className="text-sm">خصم التحويل البنكي:</span>
-                                <span className="text-sm font-medium">-100 {t('currency')}</span>
-                              </div>
-                            )}
+                            {/* Payment Method Discount */}
+                            {orderForm.paymentMethod && (() => {
+                              const selectedPaymentMethod = paymentMethods.find(pm => pm.name === orderForm.paymentMethod);
+                              if (selectedPaymentMethod && selectedPaymentMethod.discount_amount > 0) {
+                                return (
+                                  <div className="flex justify-between items-center text-green-600">
+                                    <span className="text-sm">خصم {selectedPaymentMethod.name_ar || selectedPaymentMethod.name}:</span>
+                                    <span className="text-sm font-medium">
+                                      -{selectedPaymentMethod.discount_amount}{selectedPaymentMethod.discount_type === 'percentage' ? '%' : ` ${t('currency')}`}
+                                    </span>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
 
                             {/* Divider */}
-                            {(promoValidation?.isValid || orderForm.paymentMethod === 'Virement bancaire') && (
+                            {(promoValidation?.isValid || (orderForm.paymentMethod && paymentMethods.find(pm => pm.name === orderForm.paymentMethod)?.discount_amount > 0)) && (
                               <hr className="border-gray-200" />
                             )}
 

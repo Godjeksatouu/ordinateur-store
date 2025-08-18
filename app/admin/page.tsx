@@ -11,6 +11,7 @@ const roles = [
   { key: 'clients', label: 'Clients', icon: '👥' },
   { key: 'categories', label: 'Categorie', icon: '📂' },
   { key: 'promos', label: 'Code Promo', icon: '🎫' },
+  { key: 'payment-methods', label: 'طرق الدفع', icon: '💳' },
   { key: 'users', label: 'Gestion des utilisateurs', icon: '⚙️' },
   { key: 'dashboard', label: 'Dashboard', icon: '📊' },
 ] as const;
@@ -100,9 +101,10 @@ export default function AdminPage() {
                       onClick={() => setActiveRole(r.key)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-right transition-all duration-300 ${
                         activeRole === r.key
-                          ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg'
+                          ? 'text-white shadow-lg'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
+                      style={activeRole === r.key ? {background: 'linear-gradient(to right, #3a4956, #2a3440)'} : {}}
                     >
                       <span className="text-lg">{r.icon}</span>
                       <span className="font-medium">{r.label}</span>
@@ -119,6 +121,7 @@ export default function AdminPage() {
               {activeRole === 'clients' && hasAccess(user.role, 'clients') && <ClientsManager />}
               {activeRole === 'categories' && hasAccess(user.role, 'categories') && <CategoryManager />}
               {activeRole === 'promos' && hasAccess(user.role, 'promos') && <PromoManager />}
+              {activeRole === 'payment-methods' && hasAccess(user.role, 'payment-methods') && <PaymentMethodsManager />}
               {activeRole === 'users' && hasAccess(user.role, 'users') && <UsersManager />}
               {activeRole === 'dashboard' && hasAccess(user.role, 'dashboard') && <SuperAdminDashboard />}
             </div>
@@ -141,7 +144,7 @@ function getRoleLabel(role: string) {
 
 function hasAccess(userRole: string, section: string) {
   if (userRole === 'super_admin') return true;
-  if (userRole === 'product_manager' && (section === 'products' || section === 'categories' || section === 'promos')) return true;
+  if (userRole === 'product_manager' && (section === 'products' || section === 'categories' || section === 'promos' || section === 'payment-methods')) return true;
   if (userRole === 'gestion_commandes' && (section === 'orders' || section === 'clients')) return true;
   return false;
 }
@@ -381,7 +384,8 @@ function ProductsManager() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">السعر القديم</label>
           <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300"
+            style={{'--tw-ring-color': '#3a4956'} as any}
             placeholder="0"
             type="number"
             min="0"
@@ -394,7 +398,8 @@ function ProductsManager() {
             السعر الجديد <span className="text-red-500">*</span>
           </label>
           <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300"
+            style={{'--tw-ring-color': '#3a4956'} as any}
             placeholder="0"
             type="number"
             min="0"
@@ -532,7 +537,8 @@ function ProductsManager() {
                 <td className="px-4 py-3 space-x-2 space-x-reverse">
                   <button
                     onClick={() => handleEdit(product)}
-                    className="text-amber-600 hover:underline"
+                    className="hover:underline"
+                    style={{color: '#3a4956'}}
                   >
                     تعديل
                   </button>
@@ -610,7 +616,7 @@ function OrdersManager() {
 
   const getStatusColor = (status: string) => {
     const colorMap: { [key: string]: string } = {
-      'en_attente': 'bg-yellow-100 text-yellow-800',
+      'en_attente': 'bg-slate-100 text-slate-800',
       'confirme': 'bg-green-100 text-green-800',
       'declined': 'bg-red-100 text-red-800',
       'en_cours': 'bg-blue-100 text-blue-800',
@@ -794,9 +800,9 @@ function SuperAdminDashboard() {
   if (!stats) {
     return (
       <div className="text-center py-8">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-yellow-800 mb-2">غير متاح</h3>
-          <p className="text-yellow-700">
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-slate-800 mb-2">غير متاح</h3>
+          <p className="text-slate-700">
             لا يمكن الوصول إلى الإحصائيات. تأكد من أن لديك صلاحيات المدير العام.
           </p>
         </div>
@@ -1665,6 +1671,300 @@ function CategoryManager() {
         {categories.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             لا توجد فئات حالياً
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// Payment Methods Manager Component
+function PaymentMethodsManager() {
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingMethod, setEditingMethod] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    name_ar: '',
+    name_en: '',
+    name_fr: '',
+    name_es: '',
+    description: '',
+    description_ar: '',
+    description_en: '',
+    description_fr: '',
+    description_es: '',
+    discount_amount: 0,
+    discount_type: 'fixed' as 'fixed' | 'percentage',
+    is_active: true
+  });
+
+  useEffect(() => {
+    fetchPaymentMethods();
+  }, []);
+
+  const fetchPaymentMethods = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('http://localhost:5000/api/admin/payment-methods', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setPaymentMethods(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setPaymentMethods([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('adminToken');
+      const url = editingMethod
+        ? `http://localhost:5000/api/admin/payment-methods/${editingMethod.id}`
+        : 'http://localhost:5000/api/admin/payment-methods';
+
+      const response = await fetch(url, {
+        method: editingMethod ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        fetchPaymentMethods();
+        setShowForm(false);
+        setEditingMethod(null);
+        setFormData({
+          name: '', name_ar: '', name_en: '', name_fr: '', name_es: '',
+          description: '', description_ar: '', description_en: '', description_fr: '', description_es: '',
+          discount_amount: 0, discount_type: 'fixed', is_active: true
+        });
+      }
+    } catch (error) {
+      console.error('Error saving payment method:', error);
+    }
+  };
+
+  const handleEdit = (method: any) => {
+    setEditingMethod(method);
+    setFormData(method);
+    setShowForm(true);
+  };
+
+  const handleToggle = async (id: number, is_active: boolean) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      await fetch(`http://localhost:5000/api/admin/payment-methods/${id}/toggle`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ is_active })
+      });
+      fetchPaymentMethods();
+    } catch (error) {
+      console.error('Error toggling payment method:', error);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm('هل أنت متأكد من حذف طريقة الدفع هذه؟')) {
+      try {
+        const token = localStorage.getItem('adminToken');
+        await fetch(`http://localhost:5000/api/admin/payment-methods/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        fetchPaymentMethods();
+      } catch (error) {
+        console.error('Error deleting payment method:', error);
+      }
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">جاري التحميل...</div>;
+  }
+
+  return (
+    <section className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">إدارة طرق الدفع</h2>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl transition-colors"
+        >
+          إضافة طريقة دفع جديدة
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="mb-6 p-4 border rounded-xl bg-gray-50">
+          <h3 className="text-lg font-semibold mb-4">
+            {editingMethod ? 'تعديل طريقة الدفع' : 'إضافة طريقة دفع جديدة'}
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="الاسم"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="border rounded px-3 py-2"
+                required
+              />
+              <input
+                type="text"
+                placeholder="الاسم بالعربية"
+                value={formData.name_ar}
+                onChange={(e) => setFormData({...formData, name_ar: e.target.value})}
+                className="border rounded px-3 py-2"
+                required
+              />
+              <input
+                type="text"
+                placeholder="الاسم بالإنجليزية"
+                value={formData.name_en}
+                onChange={(e) => setFormData({...formData, name_en: e.target.value})}
+                className="border rounded px-3 py-2"
+                required
+              />
+              <input
+                type="number"
+                placeholder="مبلغ الخصم"
+                value={formData.discount_amount}
+                onChange={(e) => setFormData({...formData, discount_amount: parseFloat(e.target.value) || 0})}
+                className="border rounded px-3 py-2"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <select
+                value={formData.discount_type}
+                onChange={(e) => setFormData({...formData, discount_type: e.target.value as 'fixed' | 'percentage'})}
+                className="border rounded px-3 py-2"
+              >
+                <option value="fixed">مبلغ ثابت</option>
+                <option value="percentage">نسبة مئوية</option>
+              </select>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={formData.is_active}
+                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+                  className="mr-2"
+                />
+                نشط
+              </label>
+            </div>
+            <textarea
+              placeholder="الوصف بالعربية"
+              value={formData.description_ar}
+              onChange={(e) => setFormData({...formData, description_ar: e.target.value})}
+              className="w-full border rounded px-3 py-2"
+              rows={3}
+            />
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
+              >
+                {editingMethod ? 'تحديث' : 'إضافة'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingMethod(null);
+                  setFormData({
+                    name: '', name_ar: '', name_en: '', name_fr: '', name_es: '',
+                    description: '', description_ar: '', description_en: '', description_fr: '', description_es: '',
+                    discount_amount: 0, discount_type: 'fixed', is_active: true
+                  });
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
+              >
+                إلغاء
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-right">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-3">الاسم</th>
+              <th className="px-4 py-3">الوصف</th>
+              <th className="px-4 py-3">الخصم</th>
+              <th className="px-4 py-3">الحالة</th>
+              <th className="px-4 py-3">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paymentMethods.map((method) => (
+              <tr key={method.id} className="border-b">
+                <td className="px-4 py-3">
+                  <div>
+                    <div className="font-medium">{method.name_ar || method.name}</div>
+                    <div className="text-sm text-gray-500">{method.name_en}</div>
+                  </div>
+                </td>
+                <td className="px-4 py-3">{method.description_ar || method.description}</td>
+                <td className="px-4 py-3">
+                  {method.discount_amount > 0 ? (
+                    <span className="text-green-600">
+                      -{method.discount_amount}{method.discount_type === 'percentage' ? '%' : ' درهم'}
+                    </span>
+                  ) : (
+                    <span className="text-gray-500">لا يوجد</span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={method.is_active}
+                      onChange={(e) => handleToggle(method.id, e.target.checked)}
+                      className="mr-2"
+                    />
+                    {method.is_active ? 'نشط' : 'غير نشط'}
+                  </label>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(method)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                    >
+                      تعديل
+                    </button>
+                    <button
+                      onClick={() => handleDelete(method.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {paymentMethods.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            لا توجد طرق دفع حالياً
           </div>
         )}
       </div>

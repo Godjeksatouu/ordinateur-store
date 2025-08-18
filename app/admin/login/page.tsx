@@ -178,9 +178,9 @@ export default function AdminLoginPage() {
           </div>
 
           {/* Super Admin Login */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-amber-100 h-full flex flex-col hover:shadow-xl transition-all duration-300 hover:border-amber-200" suppressHydrationWarning={true}>
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 h-full flex flex-col hover:shadow-xl transition-all duration-300 hover:border-slate-200" suppressHydrationWarning={true}>
             <div className="flex items-center mb-6" suppressHydrationWarning={true}>
-              <div className="w-3 h-3 bg-amber-500 rounded-full mr-3" suppressHydrationWarning={true}></div>
+              <div className="w-3 h-3 rounded-full mr-3" style={{backgroundColor: '#3a4956'}} suppressHydrationWarning={true}></div>
               <h3 className="text-2xl font-bold text-gray-900">Super Admin</h3>
             </div>
             <div className="space-y-5 flex-1 flex flex-col" suppressHydrationWarning={true}>
@@ -190,7 +190,8 @@ export default function AdminLoginPage() {
                   type="email"
                   value={superCreds.email}
                   onChange={(e) => setSuperCreds({ ...superCreds, email: e.target.value })}
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 text-base"
+                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 text-base"
+                  style={{'--tw-ring-color': '#3a4956'} as any}
                   placeholder="admin@example.com"
                 />
               </div>
@@ -200,7 +201,8 @@ export default function AdminLoginPage() {
                   type="password"
                   value={superCreds.password}
                   onChange={(e) => setSuperCreds({ ...superCreds, password: e.target.value })}
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 text-base"
+                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 text-base"
+                  style={{'--tw-ring-color': '#3a4956'} as any}
                   placeholder="********"
                 />
               </div>
@@ -208,7 +210,8 @@ export default function AdminLoginPage() {
               <button
                 onClick={() => loginForRole(superCreds, 'super_admin', 'super')}
                 disabled={loading.super}
-                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-4 rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
+                className="w-full text-white px-6 py-4 rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
+                style={{background: 'linear-gradient(to right, #3a4956, #2a3440)', ':hover': {background: 'linear-gradient(to right, #2a3440, #3a4956)'}}}
               >
                 {loading.super ? 'جاري الدخول...' : 'تسجيل الدخول كـ Super Admin'}
               </button>

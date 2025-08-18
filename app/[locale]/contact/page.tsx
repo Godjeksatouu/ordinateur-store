@@ -20,7 +20,7 @@ export default function LocalizedContactPage() {
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             نحن هنا لمساعدتك في العثور على الجهاز المثالي لاحتياجاتك
           </p>
-          <div className="w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto mt-8"></div>
+          <div className="w-32 h-1 mx-auto mt-8" style={{background: 'linear-gradient(to right, #3a4956, #3a4956)'}}></div>
         </div>
       </div>
 
@@ -31,17 +31,17 @@ export default function LocalizedContactPage() {
             <div className="space-y-8">
               <div className="bg-white rounded-2xl shadow-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
+                  <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
                   {t('contactInfo')}
                 </h2>
                 <div className="space-y-6">
-                  <div className="flex items-center space-x-4 p-4 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors duration-300">
-                    <div className="bg-amber-500 text-white p-3 rounded-full">
+                  <div className="flex items-center space-x-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors duration-300">
+                    <div className="text-white p-3 rounded-full" style={{backgroundColor: '#3a4956'}}>
                       📞
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">{t('phone')}</p>
-                      <p className="text-amber-600 font-medium">+212 661-585396</p>
+                      <p className="font-medium" style={{color: '#3a4956'}}>+212 661-585396</p>
                     </div>
                   </div>
 

@@ -208,6 +208,9 @@ export const translations = {
     termsAndConditions: 'الشروط والأحكام',
     returnPolicyPage: 'سياسة الاستبدال والاسترجاع',
     confidentialityPage: 'سياسة الخصوصية',
+
+    // Top Banner
+    topBannerWelcome: 'مرحبًا بك في متجرنا! احصل على خصومات مذهلة وعروض رائعة.',
   },
   
   en: {
@@ -419,6 +422,9 @@ export const translations = {
     termsAndConditions: 'Terms and Conditions',
     returnPolicyPage: 'Return and Exchange Policy',
     confidentialityPage: 'Privacy Policy',
+
+    // Top Banner
+    topBannerWelcome: 'Welcome to our store! Get amazing discounts and great offers.',
   },
   
   fr: {
@@ -552,6 +558,9 @@ export const translations = {
     selectImages: 'Sélectionner les Images',
     imagesSelected: '{count} images sélectionnées',
     featured: 'Vedette',
+
+    // Top Banner
+    topBannerWelcome: 'Bienvenue dans notre magasin! Obtenez des remises incroyables et de superbes offres.',
   },
   
   es: {
@@ -658,6 +667,9 @@ export const translations = {
     selectImages: 'Seleccionar Imágenes',
     imagesSelected: '{count} imágenes seleccionadas',
     featured: 'Destacado',
+
+    // Top Banner
+    topBannerWelcome: '¡Bienvenido a nuestra tienda! Obtén descuentos increíbles y ofertas geniales.',
   }
 };
 

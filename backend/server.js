@@ -363,6 +363,99 @@ async function createTables() {
       )
     `);
 
+    // Payment methods table
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS payment_methods (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        name_ar VARCHAR(100) NOT NULL,
+        name_en VARCHAR(100) NOT NULL,
+        name_fr VARCHAR(100) NOT NULL,
+        name_es VARCHAR(100) NOT NULL,
+        description VARCHAR(255),
+        description_ar VARCHAR(255),
+        description_en VARCHAR(255),
+        description_fr VARCHAR(255),
+        description_es VARCHAR(255),
+        is_active BOOLEAN DEFAULT TRUE,
+        discount_amount DECIMAL(10,2) DEFAULT 0,
+        discount_type ENUM('fixed', 'percentage') DEFAULT 'fixed',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Seed default payment methods if not exist
+    const defaultPaymentMethods = [
+      {
+        name: 'Cashplus',
+        name_ar: 'كاش بلوس',
+        name_en: 'Cashplus',
+        name_fr: 'Cashplus',
+        name_es: 'Cashplus',
+        description: 'RIB: 123 456 789 000 000 000 12',
+        description_ar: 'RIB: 123 456 789 000 000 000 12',
+        description_en: 'RIB: 123 456 789 000 000 000 12',
+        description_fr: 'RIB: 123 456 789 000 000 000 12',
+        description_es: 'RIB: 123 456 789 000 000 000 12'
+      },
+      {
+        name: 'Virement bancaire',
+        name_ar: 'تحويل بنكي',
+        name_en: 'Bank Transfer',
+        name_fr: 'Virement bancaire',
+        name_es: 'Transferencia bancaria',
+        description: 'RIB: 987 654 321 000 000 000 34',
+        description_ar: 'RIB: 987 654 321 000 000 000 34',
+        description_en: 'RIB: 987 654 321 000 000 000 34',
+        description_fr: 'RIB: 987 654 321 000 000 000 34',
+        description_es: 'RIB: 987 654 321 000 000 000 34',
+        discount_amount: 100,
+        discount_type: 'fixed'
+      },
+      {
+        name: 'Retrait au Magasin',
+        name_ar: 'استلام من المتجر',
+        name_en: 'Store Pickup',
+        name_fr: 'Retrait au Magasin',
+        name_es: 'Recogida en tienda',
+        description: 'استلام من المتجر',
+        description_ar: 'استلام من المتجر',
+        description_en: 'Store pickup',
+        description_fr: 'Retrait au magasin',
+        description_es: 'Recogida en tienda'
+      },
+      {
+        name: 'Cash on Delivery',
+        name_ar: 'الدفع عند الاستلام',
+        name_en: 'Cash on Delivery',
+        name_fr: 'Paiement à la livraison',
+        name_es: 'Pago contra entrega',
+        description: 'الدفع نقداً عند التوصيل',
+        description_ar: 'الدفع نقداً عند التوصيل',
+        description_en: 'Pay cash upon delivery',
+        description_fr: 'Payer en espèces à la livraison',
+        description_es: 'Pagar en efectivo al entregar'
+      }
+    ];
+
+    for (const pm of defaultPaymentMethods) {
+      const [rows] = await db.execute('SELECT id FROM payment_methods WHERE name = ?', [pm.name]);
+      if (rows.length === 0) {
+        await db.execute(
+          `INSERT INTO payment_methods (
+            name, name_ar, name_en, name_fr, name_es,
+            description, description_ar, description_en, description_fr, description_es,
+            discount_amount, discount_type
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            pm.name, pm.name_ar, pm.name_en, pm.name_fr, pm.name_es,
+            pm.description, pm.description_ar, pm.description_en, pm.description_fr, pm.description_es,
+            pm.discount_amount || 0, pm.discount_type || 'fixed'
+          ]
+        );
+        console.log(`✅ Seeded payment method: ${pm.name}`);
+      }
+    }
 
     // Seed default role-based accounts if not exist (using username as email)
     const defaultUsers = [
@@ -1166,6 +1259,119 @@ app.delete('/api/categories/:id', authenticateToken, requireRole(['product_manag
   } catch (error) {
     console.error('Delete category error:', error);
     res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
+
+// Payment Methods API endpoints
+
+// Get all payment methods (public endpoint)
+app.get('/api/payment-methods', async (req, res) => {
+  try {
+    const [paymentMethods] = await db.execute('SELECT * FROM payment_methods WHERE is_active = TRUE ORDER BY id');
+    res.json(paymentMethods);
+  } catch (error) {
+    console.error('Get payment methods error:', error);
+    res.status(500).json({ error: 'Failed to fetch payment methods' });
+  }
+});
+
+// Get all payment methods for admin (admin only)
+app.get('/api/admin/payment-methods', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const [paymentMethods] = await db.execute('SELECT * FROM payment_methods ORDER BY id');
+    res.json(paymentMethods);
+  } catch (error) {
+    console.error('Get admin payment methods error:', error);
+    res.status(500).json({ error: 'Failed to fetch payment methods' });
+  }
+});
+
+// Create payment method (admin only)
+app.post('/api/admin/payment-methods', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const {
+      name, name_ar, name_en, name_fr, name_es,
+      description, description_ar, description_en, description_fr, description_es,
+      discount_amount = 0, discount_type = 'fixed'
+    } = req.body;
+
+    if (!name || !name_ar || !name_en) {
+      return res.status(400).json({ error: 'Name is required in at least Arabic and English' });
+    }
+
+    const [result] = await db.execute(
+      `INSERT INTO payment_methods (
+        name, name_ar, name_en, name_fr, name_es,
+        description, description_ar, description_en, description_fr, description_es,
+        discount_amount, discount_type
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name, name_ar, name_en, name_fr || name_en, name_es || name_en,
+        description, description_ar, description_en, description_fr || description_en, description_es || description_en,
+        discount_amount, discount_type
+      ]
+    );
+
+    res.status(201).json({ id: result.insertId, success: true });
+  } catch (error) {
+    console.error('Create payment method error:', error);
+    res.status(500).json({ error: 'Failed to create payment method' });
+  }
+});
+
+// Update payment method (admin only)
+app.put('/api/admin/payment-methods/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name, name_ar, name_en, name_fr, name_es,
+      description, description_ar, description_en, description_fr, description_es,
+      discount_amount, discount_type, is_active
+    } = req.body;
+
+    await db.execute(
+      `UPDATE payment_methods SET
+        name = ?, name_ar = ?, name_en = ?, name_fr = ?, name_es = ?,
+        description = ?, description_ar = ?, description_en = ?, description_fr = ?, description_es = ?,
+        discount_amount = ?, discount_type = ?, is_active = ?
+      WHERE id = ?`,
+      [
+        name, name_ar, name_en, name_fr, name_es,
+        description, description_ar, description_en, description_fr, description_es,
+        discount_amount, discount_type, is_active, id
+      ]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update payment method error:', error);
+    res.status(500).json({ error: 'Failed to update payment method' });
+  }
+});
+
+// Toggle payment method active status (admin only)
+app.put('/api/admin/payment-methods/:id/toggle', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_active } = req.body;
+
+    await db.execute('UPDATE payment_methods SET is_active = ? WHERE id = ?', [is_active, id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Toggle payment method error:', error);
+    res.status(500).json({ error: 'Failed to toggle payment method status' });
+  }
+});
+
+// Delete payment method (admin only)
+app.delete('/api/admin/payment-methods/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.execute('DELETE FROM payment_methods WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete payment method error:', error);
+    res.status(500).json({ error: 'Failed to delete payment method' });
   }
 });
 

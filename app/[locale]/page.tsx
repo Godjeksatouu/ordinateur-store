@@ -274,7 +274,7 @@ export default function Page(props: {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
                 <div className="flex items-center mb-4">
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg">
+                  <div className="p-3 rounded-xl shadow-lg" style={{background: 'linear-gradient(to right, #3a4956, #2a3440)'}}>
                     <ClockIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function Page(props: {
               </div>
               <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
                 <div className="flex items-center mb-4">
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg">
+                  <div className="p-3 rounded-xl shadow-lg" style={{background: 'linear-gradient(to right, #3a4956, #2a3440)'}}>
                     <TruckIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
@@ -292,7 +292,7 @@ export default function Page(props: {
               </div>
               <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
                 <div className="flex items-center mb-4">
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-xl shadow-lg">
+                  <div className="p-3 rounded-xl shadow-lg" style={{background: 'linear-gradient(to right, #3a4956, #2a3440)'}}>
                     <CurrencyDollarIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>

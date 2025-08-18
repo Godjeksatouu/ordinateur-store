@@ -53,7 +53,8 @@ export function LanguageSwitcher() {
             <button
               key={l.code}
               onClick={() => onSelect(l.code)}
-              className={`w-full text-right px-3 py-2 text-sm hover:bg-gray-50 ${current === l.code ? 'text-amber-600 font-semibold' : 'text-gray-700'}`}
+              className={`w-full text-right px-3 py-2 text-sm hover:bg-gray-50 ${current === l.code ? 'font-semibold' : 'text-gray-700'}`}
+              style={current === l.code ? {color: '#3a4956'} : {}}
             >
               {l.label}
             </button>

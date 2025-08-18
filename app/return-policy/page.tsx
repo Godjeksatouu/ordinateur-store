@@ -17,7 +17,7 @@ export default function ReturnPolicyPage() {
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               {t('returnPolicyPage')}
             </h1>
-            <div className="w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto mt-8"></div>
+            <div className="w-32 h-1 mx-auto mt-8" style={{background: 'linear-gradient(to right, #3a4956, #3a4956)'}}></div>
           </div>
         </div>
 
@@ -28,9 +28,9 @@ export default function ReturnPolicyPage() {
                 <div className="prose prose-lg max-w-none text-right" dir="rtl">
                   <h2 className="text-3xl font-bold text-gray-900 mb-6">سياسة الاستبدال والاسترجاع</h2>
                   
-                  <div className="bg-amber-50 border-r-4 border-amber-500 p-6 mb-8">
-                    <h3 className="text-xl font-bold text-amber-800 mb-3">ملخص السياسة</h3>
-                    <p className="text-amber-700">
+                  <div className="bg-slate-50 border-r-4 p-6 mb-8" style={{borderColor: '#3a4956'}}>
+                    <h3 className="text-xl font-bold mb-3" style={{color: '#3a4956'}}>ملخص السياسة</h3>
+                    <p style={{color: '#3a4956'}}>
                       الإستبدال والإسترجاع حق مضمون لكل عملائنا وهو يشمل جميع المنتجات التي نعرضها على متجرنا.
                     </p>
                   </div>
@@ -81,9 +81,9 @@ export default function ReturnPolicyPage() {
                     </div>
                   </div>
 
-                  <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <h4 className="font-bold text-yellow-800 mb-2">ملاحظة مهمة</h4>
-                    <p className="text-yellow-700 text-sm">
+                  <div className="mt-8 p-6 bg-slate-50 border border-slate-200 rounded-xl">
+                    <h4 className="font-bold text-slate-800 mb-2">ملاحظة مهمة</h4>
+                    <p className="text-slate-700 text-sm">
                       هذه السياسة قابلة للتغيير دون إشعار مسبق. يرجى مراجعة هذه الصفحة بانتظام للاطلاع على أي تحديثات.
                     </p>
                   </div>

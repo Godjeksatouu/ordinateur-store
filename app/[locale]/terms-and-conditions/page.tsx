@@ -17,7 +17,7 @@ export default function LocalizedTermsAndConditionsPage() {
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               {t('termsAndConditions')}
             </h1>
-            <div className="w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto mt-8"></div>
+            <div className="w-32 h-1 mx-auto mt-8" style={{background: 'linear-gradient(to right, #3a4956, #3a4956)'}}></div>
           </div>
         </div>
 
