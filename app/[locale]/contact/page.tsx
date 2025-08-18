@@ -1,8 +1,13 @@
+'use client';
+
 import React from 'react';
 import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';
+import { useTranslations } from '@/hooks/use-translations';
 
-export default function ContactPage() {
+export default function LocalizedContactPage() {
+  const { t } = useTranslations();
+
   return (
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white" suppressHydrationWarning={true}>
@@ -10,7 +15,7 @@ export default function ContactPage() {
       <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-20" suppressHydrationWarning={true}>
         <div className="max-w-7xl mx-auto px-4 text-center" suppressHydrationWarning={true}>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            اتصل بنا
+            {t('contactUs')}
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             نحن هنا لمساعدتك في العثور على الجهاز المثالي لاحتياجاتك
@@ -27,7 +32,7 @@ export default function ContactPage() {
               <div className="bg-white rounded-2xl shadow-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                   <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
-                  معلومات الاتصال
+                  {t('contactInfo')}
                 </h2>
                 <div className="space-y-6">
                   <div className="flex items-center space-x-4 p-4 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors duration-300">
@@ -35,7 +40,7 @@ export default function ContactPage() {
                       📞
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">الهاتف</p>
+                      <p className="font-semibold text-gray-900">{t('phone')}</p>
                       <p className="text-amber-600 font-medium">+212 661-585396</p>
                     </div>
                   </div>
@@ -45,7 +50,7 @@ export default function ContactPage() {
                       ✉️
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">البريد الإلكتروني</p>
+                      <p className="font-semibold text-gray-900">{t('email')}</p>
                       <p className="text-blue-600 font-medium">info@laptopstore.ma</p>
                     </div>
                   </div>
@@ -55,8 +60,8 @@ export default function ContactPage() {
                       📍
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">العنوان</p>
-                      <p className="text-green-600 font-medium">الدار البيضاء، المغرب</p>
+                      <p className="font-semibold text-gray-900">{t('address')}</p>
+                      <p className="text-green-600 font-medium">{t('storeLocation')}</p>
                     </div>
                   </div>
                 </div>
@@ -65,16 +70,16 @@ export default function ContactPage() {
               <div className="bg-white rounded-2xl shadow-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                   <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
-                  ساعات العمل
+                  {t('workingHours')}
                 </h2>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
-                    <span className="font-semibold text-gray-900">السبت - الخميس</span>
+                    <span className="font-semibold text-gray-900">{t('saturdayToThursday')}</span>
                     <span className="text-amber-600 font-medium">9:00 ص - 6:00 م</span>
                   </div>
                   <div className="flex justify-between items-center p-4 bg-red-50 rounded-xl">
-                    <span className="font-semibold text-gray-900">الجمعة</span>
-                    <span className="text-red-600 font-medium">مغلق</span>
+                    <span className="font-semibold text-gray-900">{t('friday')}</span>
+                    <span className="text-red-600 font-medium">{t('closed')}</span>
                   </div>
                 </div>
               </div>
@@ -84,26 +89,26 @@ export default function ContactPage() {
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                 <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
-                أرسل لنا رسالة
+                {t('sendMessage')}
               </h2>
 
               <form className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                      الاسم الكامل
+                      {t('fullName')}
                     </label>
                     <input
                       type="text"
                       id="name"
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white"
-                      placeholder="أدخل اسمك الكامل"
+                      placeholder={t('fullName')}
                     />
                   </div>
 
                   <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                      البريد الإلكتروني
+                      {t('email')}
                     </label>
                     <input
                       type="email"
@@ -116,25 +121,25 @@ export default function ContactPage() {
 
                 <div>
                   <label htmlFor="subject" className="block text-sm font-semibold text-gray-700 mb-2">
-                    الموضوع
+                    {t('subject')}
                   </label>
                   <input
                     type="text"
                     id="subject"
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white"
-                    placeholder="موضوع الرسالة"
+                    placeholder={t('subject')}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
-                    الرسالة
+                    {t('message')}
                   </label>
                   <textarea
                     id="message"
                     rows={6}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white resize-none"
-                    placeholder="اكتب رسالتك هنا..."
+                    placeholder={t('message')}
                   />
                 </div>
 
@@ -142,7 +147,7 @@ export default function ContactPage() {
                   type="submit"
                   className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
-                  📧 إرسال الرسالة
+                  📧 {t('sendMessageBtn')}
                 </button>
               </form>
             </div>

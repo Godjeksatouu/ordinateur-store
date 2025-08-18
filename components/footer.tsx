@@ -2,9 +2,10 @@
 
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '@/hooks/use-translations';
+import Link from 'next/link';
 
 export function Footer() {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
   return (
     <footer className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -42,18 +43,6 @@ export function Footer() {
                   <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
                     <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
                     {t('aboutStore')}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
-                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
-                    {t('termsConditions')}
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-300 hover:text-amber-400 transition-colors duration-300 flex items-center">
-                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
-                    {t('shippingPolicy')}
                   </a>
                 </li>
               </ul>
@@ -105,15 +94,24 @@ export function Footer() {
             </p>
 
             <div className="flex space-x-6 text-sm">
-              <a href="#" className="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+              <Link
+                href={locale === 'ar' ? '/confidentiality' : `/${locale}/confidentiality`}
+                className="text-gray-400 hover:text-amber-400 transition-colors duration-300"
+              >
                 {t('privacyPolicy')}
-              </a>
-              <a href="#" className="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+              </Link>
+              <Link
+                href={locale === 'ar' ? '/terms-and-conditions' : `/${locale}/terms-and-conditions`}
+                className="text-gray-400 hover:text-amber-400 transition-colors duration-300"
+              >
                 {t('termsConditions')}
-              </a>
-              <a href="#" className="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+              </Link>
+              <Link
+                href={locale === 'ar' ? '/return-policy' : `/${locale}/return-policy`}
+                className="text-gray-400 hover:text-amber-400 transition-colors duration-300"
+              >
                 {t('returnPolicy')}
-              </a>
+              </Link>
             </div>
           </div>
         </div>

@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function ProductCardModern({ product, showCTA = true }: Props) {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
   const hasDiscount = !!product.old_price && product.old_price > product.new_price;
   const discountPct = hasDiscount
     ? Math.round(((product.old_price! - product.new_price) / product.old_price!) * 100)
@@ -97,7 +97,7 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
 
           {showCTA && (
             <Link
-              href={`/product/${product.id}`}
+              href={locale === 'ar' ? `/product/${product.id}` : `/${locale}/product/${product.id}`}
               className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-light shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-light hover:brightness-95"
             >
               {t('orderNow')}

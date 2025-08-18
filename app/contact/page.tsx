@@ -1,8 +1,13 @@
+'use client';
+
 import React from 'react';
 import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';
+import { useTranslations } from '@/hooks/use-translations';
 
 export default function ContactPage() {
+  const { t } = useTranslations();
+
   return (
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white" suppressHydrationWarning={true}>
@@ -10,7 +15,7 @@ export default function ContactPage() {
       <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-20" suppressHydrationWarning={true}>
         <div className="max-w-7xl mx-auto px-4 text-center" suppressHydrationWarning={true}>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-            اتصل بنا
+            {t('contactUs')}
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             نحن هنا لمساعدتك في العثور على الجهاز المثالي لاحتياجاتك
@@ -27,7 +32,7 @@ export default function ContactPage() {
               <div className="bg-white rounded-2xl shadow-lg p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                   <span className="w-1 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full mr-3"></span>
-                  معلومات الاتصال
+                  {t('contactInfo')}
                 </h2>
                 <div className="space-y-6">
                   <div className="flex items-center space-x-4 p-4 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors duration-300">
@@ -35,7 +40,7 @@ export default function ContactPage() {
                       📞
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">الهاتف</p>
+                      <p className="font-semibold text-gray-900">{t('phone')}</p>
                       <p className="text-amber-600 font-medium">+212 661-585396</p>
                     </div>
                   </div>
@@ -45,7 +50,7 @@ export default function ContactPage() {
                       ✉️
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">البريد الإلكتروني</p>
+                      <p className="font-semibold text-gray-900">{t('email')}</p>
                       <p className="text-blue-600 font-medium">info@laptopstore.ma</p>
                     </div>
                   </div>
@@ -55,8 +60,8 @@ export default function ContactPage() {
                       📍
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">العنوان</p>
-                      <p className="text-green-600 font-medium">الدار البيضاء، المغرب</p>
+                      <p className="font-semibold text-gray-900">{t('address')}</p>
+                      <p className="text-green-600 font-medium">{t('storeLocation')}</p>
                     </div>
                   </div>
                 </div>

@@ -147,8 +147,8 @@ function hasAccess(userRole: string, section: string) {
 }
 
 function ProductsManager() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', category_id: ''
@@ -251,8 +251,8 @@ function ProductsManager() {
         alert(`خطأ في ${editingId ? 'تحديث' : 'إنشاء'} المنتج: ${errorMessage}`);
       }
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert(`خطأ في ${editingId ? 'تحديث' : 'إنشاء'} المنتج: ${error.message || 'خطأ في الاتصال'}`);
+      const errorMessage = error instanceof Error ? error.message : 'خطأ في الاتصال';
+      alert(`خطأ في ${editingId ? 'تحديث' : 'إنشاء'} المنتج: ${errorMessage}`);
     }
   };
 
@@ -554,7 +554,7 @@ function ProductsManager() {
 }
 
 function OrdersManager() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -573,7 +573,6 @@ function OrdersManager() {
       // Ensure data is an array
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
       setOrders([]); // Set empty array on error
     } finally {
       setLoading(false);
@@ -593,7 +592,7 @@ function OrdersManager() {
       });
       fetchOrders();
     } catch (error) {
-      console.error('Error updating order status:', error);
+      // Handle error silently
     }
   };
 
@@ -834,7 +833,7 @@ function SuperAdminDashboard() {
 }
 
 function ClientsManager() {
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -851,7 +850,6 @@ function ClientsManager() {
       const data = await response.json();
       setClients(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching clients:', error);
       setClients([]);
     } finally {
       setLoading(false);
@@ -918,7 +916,7 @@ function ClientsManager() {
 }
 
 function UsersManager() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
@@ -943,7 +941,6 @@ function UsersManager() {
       // Ensure data is an array
       setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching users:', error);
       setUsers([]); // Set empty array on error
     } finally {
       setLoading(false);
@@ -980,7 +977,6 @@ function UsersManager() {
         alert(error.error || 'حدث خطأ');
       }
     } catch (error) {
-      console.error('Error saving user:', error);
       alert('حدث خطأ في الاتصال');
     }
   };
@@ -1015,7 +1011,6 @@ function UsersManager() {
         alert(error.error || 'حدث خطأ');
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
       alert('حدث خطأ في الاتصال');
     }
   };
@@ -1168,8 +1163,8 @@ function UsersManager() {
 }
 
 function PromoManager() {
-  const [promos, setPromos] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [promos, setPromos] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPromo, setEditingPromo] = useState<any>(null);
@@ -1200,7 +1195,6 @@ function PromoManager() {
       const data = await response.json();
       setPromos(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching promos:', error);
       setPromos([]);
     } finally {
       setLoading(false);
@@ -1213,7 +1207,6 @@ function PromoManager() {
       const data = await response.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching products:', error);
       setProducts([]);
     }
   };
@@ -1245,7 +1238,7 @@ function PromoManager() {
         setEditingPromo(null);
       }
     } catch (error) {
-      console.error('Error saving promo:', error);
+      // Handle error silently
     }
   };
 
@@ -1277,7 +1270,7 @@ function PromoManager() {
       });
       fetchPromos();
     } catch (error) {
-      console.error('Error deleting promo:', error);
+      // Handle error silently
     }
   };
 
@@ -1294,7 +1287,7 @@ function PromoManager() {
       });
       fetchPromos();
     } catch (error) {
-      console.error('Error toggling promo status:', error);
+      // Handle error silently
     }
   };
 
@@ -1495,7 +1488,7 @@ function PromoManager() {
 }
 
 function CategoryManager() {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -1513,7 +1506,6 @@ function CategoryManager() {
       const data = await response.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching categories:', error);
       setCategories([]);
     } finally {
       setLoading(false);
@@ -1547,7 +1539,6 @@ function CategoryManager() {
         alert(errorData.error || 'حدث خطأ في حفظ الفئة');
       }
     } catch (error) {
-      console.error('Error saving category:', error);
       alert('حدث خطأ في حفظ الفئة');
     }
   };
@@ -1577,7 +1568,6 @@ function CategoryManager() {
         alert(errorData.error || 'حدث خطأ في حذف الفئة');
       }
     } catch (error) {
-      console.error('Error deleting category:', error);
       alert('حدث خطأ في حذف الفئة');
     }
   };

@@ -14,7 +14,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, showPrice = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
 
   // Calculate discount percentage
   const hasDiscount = product.old_price && product.old_price > product.new_price;
@@ -121,7 +121,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
 
           {/* Action Button */}
           <Link
-            href={`/product/${product.id}`}
+            href={locale === 'ar' ? `/product/${product.id}` : `/${locale}/product/${product.id}`}
             className="w-full bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-[#fdfefd] hover:from-[#262a2f] hover:to-[#6188a4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6188a4] focus:ring-offset-[#fdfefd] px-6 py-3 rounded-xl font-bold text-center block transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl cursor-pointer"
             prefetch={true}
           >

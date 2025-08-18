@@ -1,16 +1,15 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { useParams, usePathname } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';
 import { ProductCard } from '@/components/product-card';
 import { fetchProducts, Product } from '@/lib/products';
 import { useTranslations } from '@/hooks/use-translations';
 
-export default function CategoryPage() {
+export default function LocalizedCategoryPage() {
   const params = useParams();
-  const pathname = usePathname();
   const slug = params?.slug as string;
   const { t } = useTranslations();
   const [products, setProducts] = useState<Product[]>([]);
@@ -70,4 +69,3 @@ export default function CategoryPage() {
     </PublicLayout>
   );
 }
-

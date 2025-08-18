@@ -19,7 +19,7 @@ interface OrderForm {
   codePromo?: string;
 }
 
-export default function ProductDetailsPage() {
+export default function LocalizedProductDetailsPage() {
   const params = useParams();
   const productId = params.id as string;
   const { t, locale } = useTranslations();
@@ -454,8 +454,8 @@ export default function ProductDetailsPage() {
                 ) : (
                   <div className="space-y-6">
                     <div className="text-center">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">معلومات الزبون</h3>
-                      <p className="text-gray-600">املأ البيانات التالية لإتمام طلبك</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('customerInfo')}</h3>
+                      <p className="text-gray-600">{t('fillDetails')}</p>
                     </div>
 
                     <form onSubmit={handleSubmitOrder} className="space-y-6">
@@ -477,7 +477,7 @@ export default function ProductDetailsPage() {
 
                         <div>
                           <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-2">
-                            رقم الهاتف
+                            {t('phoneNumber')}
                           </label>
                           <input
                             type="tel"
@@ -495,7 +495,7 @@ export default function ProductDetailsPage() {
 
                       <div>
                         <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-2">
-                          المدينة
+                          {t('city')}
                         </label>
                         <input
                           type="text"
@@ -512,7 +512,7 @@ export default function ProductDetailsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
                             <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
-                              العنوان التفصيلي
+                              {t('detailedAddress')}
                             </label>
                             <textarea
                               id="address"
@@ -526,7 +526,7 @@ export default function ProductDetailsPage() {
                           </div>
                           <div>
                             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                              البريد الإلكتروني
+                              {t('email')}
                             </label>
                             <input
                               type="email"
@@ -574,7 +574,7 @@ export default function ProductDetailsPage() {
 
                         <div className="mt-6">
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            طرق الدفع
+                            {t('paymentMethods')}
                           </label>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cashplus' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
@@ -604,7 +604,7 @@ export default function ProductDetailsPage() {
                               <div>
                                 <div className="font-semibold text-gray-900">Virement bancaire</div>
                                 <div className="text-sm text-gray-600">RIB: 987 654 321 000 000 000 34</div>
-                                <div className="text-xs text-green-700 mt-1">خصم تلقائي: -100 درهم</div>
+                                <div className="text-xs text-green-700 mt-1">{t('automaticDiscount')}</div>
                               </div>
                             </label>
 
@@ -619,8 +619,8 @@ export default function ProductDetailsPage() {
                               />
                               <div>
                                 <div className="font-semibold text-gray-900">Retrait au Magasin</div>
-                                <div className="text-sm text-gray-600">استلام من المتجر</div>
-                                <div className="text-xs text-blue-700 mt-1">دفع عند الاستلام</div>
+                                <div className="text-sm text-gray-600">{t('pickupFromStore')}</div>
+                                <div className="text-xs text-blue-700 mt-1">{t('payOnPickup')}</div>
                               </div>
                             </label>
 
@@ -654,17 +654,17 @@ export default function ProductDetailsPage() {
                             required
                           />
                           <label htmlFor="marketingConsent" className="text-gray-700">
-                            أوافق على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني
+                            {t('marketingConsent')}
                           </label>
                         </div>
 
                         {/* Dynamic Price Display */}
                         <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <div className="text-sm text-gray-600 mb-2">تفاصيل السعر:</div>
+                          <div className="text-sm text-gray-600 mb-2">{t('priceDetails')}</div>
                           <div className="space-y-2">
                             {/* Original Price */}
                             <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">السعر الأصلي:</span>
+                              <span className="text-sm text-gray-600">{t('originalPrice')}</span>
                               <span className="text-sm font-medium">
                                 {product.new_price.toLocaleString()} {t('currency')}
                               </span>
@@ -673,7 +673,7 @@ export default function ProductDetailsPage() {
                             {/* Promo Code Discount */}
                             {promoValidation?.isValid && (
                               <div className="flex justify-between items-center text-green-600">
-                                <span className="text-sm">خصم كود التخفيض:</span>
+                                <span className="text-sm">{t('promoDiscount')}</span>
                                 <span className="text-sm font-medium">
                                   -{(promoValidation.discountType === 'percentage' ?
                                     (product.new_price * promoValidation.discount / 100) :
@@ -685,7 +685,7 @@ export default function ProductDetailsPage() {
                             {/* Virement Bancaire Discount */}
                             {orderForm.paymentMethod === 'Virement bancaire' && (
                               <div className="flex justify-between items-center text-green-600">
-                                <span className="text-sm">خصم التحويل البنكي:</span>
+                                <span className="text-sm">{t('bankTransferDiscount')}</span>
                                 <span className="text-sm font-medium">-100 {t('currency')}</span>
                               </div>
                             )}
@@ -697,7 +697,7 @@ export default function ProductDetailsPage() {
 
                             {/* Final Price */}
                             <div className="flex justify-between items-center">
-                              <span className="text-lg font-semibold text-gray-900">المجموع النهائي:</span>
+                              <span className="text-lg font-semibold text-gray-900">{t('finalTotal')}</span>
                               <span className="text-xl font-bold text-[#6188a4]">
                                 {finalPrice.toLocaleString()} {t('currency')}
                               </span>
@@ -706,7 +706,7 @@ export default function ProductDetailsPage() {
                             {/* Savings Summary */}
                             {finalPrice !== product.new_price && (
                               <div className="text-sm text-green-700 font-medium bg-green-50 p-2 rounded">
-                                وفرت: {(product.new_price - finalPrice).toLocaleString()} {t('currency')}
+                                {t('youSaved')} {(product.new_price - finalPrice).toLocaleString()} {t('currency')}
                               </div>
                             )}
                           </div>
@@ -718,14 +718,14 @@ export default function ProductDetailsPage() {
                           type="submit"
                           className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                         >
-                          اضغط هنا للطلب
+                          {t('clickToOrder')}
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowOrderForm(false)}
                           className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-300"
                         >
-                          إلغاء
+                          {t('cancel')}
                         </button>
                       </div>
                     </form>

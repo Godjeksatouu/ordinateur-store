@@ -206,7 +206,6 @@ function MobileProductsManager() {
       const data = await response.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching products:', error);
       setProducts([]);
     } finally {
       setLoading(false);
