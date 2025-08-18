@@ -139,11 +139,8 @@ export const translations = {
 
     // Contact Page
     contactInfo: 'معلومات الاتصال',
-    email: 'البريد الإلكتروني',
-    address: 'العنوان',
     workingHours: 'ساعات العمل',
     sendMessage: 'أرسل لنا رسالة',
-    fullName: 'الاسم الكامل',
     subject: 'الموضوع',
     message: 'الرسالة',
     sendMessageBtn: 'إرسال الرسالة',
@@ -154,7 +151,6 @@ export const translations = {
 
     // Category Page
     category: 'الفئة',
-    loadingProducts: 'جاري التحميل...',
     noProductsInCategory: 'لا توجد منتجات في هذه الفئة حالياً',
 
     // Product Page
@@ -173,36 +169,17 @@ export const translations = {
     securePayment: 'دفع آمن',
     customerInfo: 'معلومات الزبون',
     fillDetails: 'املأ البيانات التالية لإتمام طلبك',
-    phoneNumber: 'رقم الهاتف',
-    city: 'المدينة',
     detailedAddress: 'العنوان التفصيلي',
     paymentMethods: 'طرق الدفع',
     automaticDiscount: 'خصم تلقائي: -100 درهم',
     pickupFromStore: 'استلام من المتجر',
     payOnPickup: 'دفع عند الاستلام',
-    marketingConsent: 'أوافق على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني',
     priceDetails: 'تفاصيل السعر:',
-    originalPrice: 'السعر الأصلي:',
     promoDiscount: 'خصم كود التخفيض:',
     bankTransferDiscount: 'خصم التحويل البنكي:',
     finalTotal: 'المجموع النهائي:',
-    youSaved: 'وفرت:',
     clickToOrder: 'اضغط هنا للطلب',
-    cancel: 'إلغاء',
-    promoCodeOptional: 'كود التخفيض (اختياري)',
-    promoCodePlaceholder: 'أدخل كود التخفيض',
-    promoCodeValid: 'كود صحيح! خصم {amount} درهم',
-    promoCodeInvalid: 'كود التخفيض غير صحيح',
-    promoCodeError: 'خطأ في التحقق من كود التخفيض',
     newBadge: 'جديد',
-
-    // Services
-    fastDelivery: 'التوصيل السريع',
-    fastDeliveryDesc: 'خدمة التوصيل السريع في جميع انحاء المدن',
-    cashOnDelivery: 'خدمة الدفع عند الاستلام',
-    cashOnDeliveryDesc: 'التسوق اون لاين من المتجر ودفع المال عند التوصيل.',
-    smartWatch: 'اكتشف عالم جديد من الذكاء',
-    smartWatchDesc: 'اجعل كل يوم أفضل مع ساعة ذكية مبتكرة!',
 
     // New Pages
     termsAndConditions: 'الشروط والأحكام',
@@ -353,11 +330,8 @@ export const translations = {
 
     // Contact Page
     contactInfo: 'Contact Information',
-    email: 'Email',
-    address: 'Address',
     workingHours: 'Working Hours',
     sendMessage: 'Send us a message',
-    fullName: 'Full Name',
     subject: 'Subject',
     message: 'Message',
     sendMessageBtn: 'Send Message',
@@ -368,7 +342,6 @@ export const translations = {
 
     // Category Page
     category: 'Category',
-    loadingProducts: 'Loading...',
     noProductsInCategory: 'No products available in this category',
 
     // Product Page
@@ -387,36 +360,17 @@ export const translations = {
     securePayment: 'Secure Payment',
     customerInfo: 'Customer Information',
     fillDetails: 'Fill in the following details to complete your order',
-    phoneNumber: 'Phone Number',
-    city: 'City',
     detailedAddress: 'Detailed Address',
     paymentMethods: 'Payment Methods',
     automaticDiscount: 'Automatic discount: -100 DH',
     pickupFromStore: 'Pickup from Store',
     payOnPickup: 'Pay on Pickup',
-    marketingConsent: 'I agree to receive the latest offers and products via email',
     priceDetails: 'Price Details:',
-    originalPrice: 'Original Price:',
     promoDiscount: 'Promo Code Discount:',
     bankTransferDiscount: 'Bank Transfer Discount:',
     finalTotal: 'Final Total:',
-    youSaved: 'You Saved:',
     clickToOrder: 'Click to Order',
-    cancel: 'Cancel',
-    promoCodeOptional: 'Promo Code (Optional)',
-    promoCodePlaceholder: 'Enter promo code',
-    promoCodeValid: 'Valid code! Discount {amount} DH',
-    promoCodeInvalid: 'Invalid promo code',
-    promoCodeError: 'Error validating promo code',
     newBadge: 'New',
-
-    // Services
-    fastDelivery: 'Fast Delivery',
-    fastDeliveryDesc: 'Fast delivery service in all cities',
-    cashOnDelivery: 'Cash on Delivery Service',
-    cashOnDeliveryDesc: 'Shop online from the store and pay cash on delivery.',
-    smartWatch: 'Discover a New World of Intelligence',
-    smartWatchDesc: 'Make every day better with an innovative smartwatch!',
 
     // New Pages
     termsAndConditions: 'Terms and Conditions',
