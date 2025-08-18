@@ -8,6 +8,7 @@ import { PublicLayout } from '@/components/public-layout';
 import { getProductById, Product } from '@/lib/products';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '@/hooks/use-translations';
+import { API_BASE_URL } from '@/lib/config';
 
 interface OrderForm {
   fullName: string;
@@ -170,7 +171,7 @@ export default function LocalizedProductDetailsPage() {
 
     setIsValidatingPromo(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/promos/validate`, {
+      const response = await fetch(`${API_BASE_URL}/api/promos/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +240,7 @@ export default function LocalizedProductDetailsPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -300,7 +301,7 @@ export default function LocalizedProductDetailsPage() {
                     {/* Main Image with Zoom on Hover */}
                     <div className="h-full w-full overflow-hidden">
                       <Image
-                        src={product.images && product.images.length > 0 ? `http://localhost:5000${product.images[activeIndex]}` : '/images/1.png'}
+                        src={product.images && product.images.length > 0 ? `${API_BASE_URL}${product.images[activeIndex]}` : '/images/1.png'}
                         alt={product.name}
                         fill
                         className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
@@ -330,7 +331,7 @@ export default function LocalizedProductDetailsPage() {
                           aria-label={`صورة ${i + 1}`}
                         >
                           <Image
-                            src={`http://localhost:5000${src}`}
+                            src={`${API_BASE_URL}${src}`}
                             alt={`صورة ${i + 1}`}
                             fill
                             className="object-cover object-center"

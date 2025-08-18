@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from '@/hooks/use-translations';
 import { Product } from '@/lib/products';
+import { API_BASE_URL } from '@/lib/config';
 
 interface Props {
   product: Product;
@@ -32,7 +33,7 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
       <div className="relative aspect-[4/3] bg-muted/20">
         {product.images?.[0] ? (
           <Image
-            src={`http://localhost:5000${product.images[0]}`}
+            src={`${API_BASE_URL}${product.images[0]}`}
             alt={product.name}
             fill
             className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"

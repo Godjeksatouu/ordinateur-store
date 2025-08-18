@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Product } from '@/lib/products';
 import { ShoppingBagIcon, StarIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '@/hooks/use-translations';
+import { API_BASE_URL } from '@/lib/config';
 
 interface ProductCardProps {
   product: Product;
@@ -42,7 +43,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
         {product.images && product.images.length > 0 ? (
           <>
             <Image
-              src={`http://localhost:5000${product.images[0]}`}
+              src={`${API_BASE_URL}${product.images[0]}`}
               alt={product.name}
               fill
               className="object-cover object-center transition-transform duration-300 group-hover:scale-105"

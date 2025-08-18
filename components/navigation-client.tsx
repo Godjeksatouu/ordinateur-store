@@ -3,6 +3,7 @@
 import { useTranslations } from '@/hooks/use-translations';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/lib/config';
 
 interface NavigationItem {
   name: string;
@@ -14,7 +15,7 @@ export function NavigationClient() {
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/categories')
+    fetch(`${API_BASE_URL}/api/categories`)
       .then(res => res.json())
       .then((data) => setCategories(Array.isArray(data) ? data : []))
       .catch(() => setCategories([]));

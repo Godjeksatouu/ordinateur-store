@@ -2,9 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { Cart, CartItem } from '@/components/utils/cart-types';
-
-// Using local backend URL
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+import { API_BASE_URL } from './config';
 
 export async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

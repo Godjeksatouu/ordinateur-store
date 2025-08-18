@@ -7,6 +7,7 @@ import { PublicLayout } from '@/components/public-layout';
 import { ProductCard } from '@/components/product-card';
 import { fetchProducts, Product } from '@/lib/products';
 import { useTranslations } from '@/hooks/use-translations';
+import { API_BASE_URL } from '@/lib/config';
 
 export default function LocalizedCategoryPage() {
   const params = useParams();
@@ -19,7 +20,7 @@ export default function LocalizedCategoryPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/categories');
+        const res = await fetch(`${API_BASE_URL}/api/categories`);
         const cats = await res.json();
         const cat = Array.isArray(cats) ? cats.find((c: any) => String(c.slug || c.id) === slug) : null;
         setCategory(cat || null);

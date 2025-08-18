@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Main } from '@/components/main';
 import { useTranslations } from '@/hooks/use-translations';
+import { API_BASE_URL } from '@/lib/config';
 
 const roles = [
   { key: 'products', label: 'Products', icon: '📦' },
@@ -166,7 +167,7 @@ function ProductsManager() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(`${API_BASE_URL}/api/products`);
       const data = await response.json();
       // Ensure data is an array
       setProducts(Array.isArray(data) ? data : []);
@@ -179,7 +180,7 @@ function ProductsManager() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/categories');
+      const response = await fetch(`${API_BASE_URL}/api/categories`);
       const data = await response.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -222,7 +223,7 @@ function ProductsManager() {
     }
 
     try {
-      const url = editingId ? `http://localhost:5000/api/products/${editingId}` : 'http://localhost:5000/api/products';
+      const url = editingId ? `${API_BASE_URL}/api/products/${editingId}` : `${API_BASE_URL}/api/products`;
       const method = editingId ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -279,7 +280,7 @@ function ProductsManager() {
 
     const token = localStorage.getItem('adminToken');
     try {
-      await fetch(`http://localhost:5000/api/products/${id}`, {
+      await fetch(`${API_BASE_URL}/api/products/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -573,7 +574,7 @@ function OrdersManager() {
     console.log(order.id)
 
     const token = localStorage.getItem('adminToken');
-    fetch(`http://localhost:5000/api/orders/${order.id}/facture`, {
+    fetch(`${API_BASE_URL}/api/orders/${order.id}/facture`, {
       method: "POST",
       headers: {
         'Authorization': `Bearer ${token}`
@@ -593,7 +594,7 @@ function OrdersManager() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -611,7 +612,7 @@ function OrdersManager() {
   const updateOrderStatus = async (orderId: number, status: string) => {
     try {
       const token = localStorage.getItem('adminToken');
-      await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -787,7 +788,7 @@ function SuperAdminDashboard() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/stats', {
+      const response = await fetch(`${API_BASE_URL}/api/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -881,7 +882,7 @@ function ClientsManager() {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/clients', {
+      const response = await fetch(`${API_BASE_URL}/api/clients`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -971,7 +972,7 @@ function UsersManager() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         }
@@ -992,8 +993,8 @@ function UsersManager() {
 
     try {
       const url = editingUser
-        ? `http://localhost:5000/api/users/${editingUser.id}`
-        : 'http://localhost:5000/api/users';
+        ? `${API_BASE_URL}/api/users/${editingUser.id}`
+        : `${API_BASE_URL}/api/users`;
       const method = editingUser ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -1035,7 +1036,7 @@ function UsersManager() {
 
     const token = localStorage.getItem('adminToken');
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1226,7 +1227,7 @@ function PromoManager() {
   const fetchPromos = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/promos', {
+      const response = await fetch(`${API_BASE_URL}/api/promos`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1242,7 +1243,7 @@ function PromoManager() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(`${API_BASE_URL}/api/products`);
       const data = await response.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -1255,7 +1256,7 @@ function PromoManager() {
     const token = localStorage.getItem('adminToken');
 
     try {
-      const url = editingPromo ? `http://localhost:5000/api/promos/${editingPromo.id}` : 'http://localhost:5000/api/promos';
+      const url = editingPromo ? `${API_BASE_URL}/api/promos/${editingPromo.id}` : `${API_BASE_URL}/api/promos`;
       const method = editingPromo ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -1301,7 +1302,7 @@ function PromoManager() {
 
     const token = localStorage.getItem('adminToken');
     try {
-      await fetch(`http://localhost:5000/api/promos/${id}`, {
+      await fetch(`${API_BASE_URL}/api/promos/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1316,7 +1317,7 @@ function PromoManager() {
   const toggleActive = async (id: number, isActive: boolean) => {
     const token = localStorage.getItem('adminToken');
     try {
-      await fetch(`http://localhost:5000/api/promos/${id}/toggle`, {
+      await fetch(`${API_BASE_URL}/api/promos/${id}/toggle`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1541,7 +1542,7 @@ function CategoryManager() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/categories');
+      const response = await fetch(`${API_BASE_URL}/api/categories`);
       const data = await response.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -1556,7 +1557,7 @@ function CategoryManager() {
     const token = localStorage.getItem('adminToken');
 
     try {
-      const url = editingCategory ? `http://localhost:5000/api/categories/${editingCategory.id}` : 'http://localhost:5000/api/categories';
+      const url = editingCategory ? `${API_BASE_URL}/api/categories/${editingCategory.id}` : `${API_BASE_URL}/api/categories`;
       const method = editingCategory ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -1593,7 +1594,7 @@ function CategoryManager() {
 
     const token = localStorage.getItem('adminToken');
     try {
-      const response = await fetch(`http://localhost:5000/api/categories/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1740,7 +1741,7 @@ function PaymentMethodsManager() {
   const fetchPaymentMethods = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/payment-methods', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/payment-methods`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1759,8 +1760,8 @@ function PaymentMethodsManager() {
     try {
       const token = localStorage.getItem('adminToken');
       const url = editingMethod
-        ? `http://localhost:5000/api/admin/payment-methods/${editingMethod.id}`
-        : 'http://localhost:5000/api/admin/payment-methods';
+        ? `${API_BASE_URL}/api/admin/payment-methods/${editingMethod.id}`
+        : `${API_BASE_URL}/api/admin/payment-methods`;
 
       const response = await fetch(url, {
         method: editingMethod ? 'PUT' : 'POST',
@@ -1795,7 +1796,7 @@ function PaymentMethodsManager() {
   const handleToggle = async (id: number, is_active: boolean) => {
     try {
       const token = localStorage.getItem('adminToken');
-      await fetch(`http://localhost:5000/api/admin/payment-methods/${id}/toggle`, {
+      await fetch(`${API_BASE_URL}/api/admin/payment-methods/${id}/toggle`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1813,7 +1814,7 @@ function PaymentMethodsManager() {
     if (confirm('هل أنت متأكد من حذف طريقة الدفع هذه؟')) {
       try {
         const token = localStorage.getItem('adminToken');
-        await fetch(`http://localhost:5000/api/admin/payment-methods/${id}`, {
+        await fetch(`${API_BASE_URL}/api/admin/payment-methods/${id}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
