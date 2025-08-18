@@ -169,7 +169,6 @@ function ProductsManager() {
       // Ensure data is an array
       setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching products:', error);
       setProducts([]); // Set empty array on error
     } finally {
       setLoading(false);
@@ -182,7 +181,6 @@ function ProductsManager() {
       const data = await response.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching categories:', error);
       setCategories([]);
     }
   };
@@ -287,7 +285,7 @@ function ProductsManager() {
       });
       fetchProducts();
     } catch (error) {
-      console.error('Error deleting product:', error);
+      // Handle error silently
     }
   };
 
@@ -741,7 +739,6 @@ function SuperAdminDashboard() {
       if (user.role === 'super_admin') {
         fetchStats();
       } else {
-        console.warn('User does not have super_admin role, skipping stats fetch');
         setLoading(false);
       }
     } else {
@@ -759,7 +756,6 @@ function SuperAdminDashboard() {
       });
 
       if (response.status === 403) {
-        console.warn('Access denied to stats endpoint. User may not have super_admin privileges.');
         setStats(null);
         return;
       }
@@ -771,7 +767,6 @@ function SuperAdminDashboard() {
       const data = await response.json();
       setStats(data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
       setStats(null);
     } finally {
       setLoading(false);

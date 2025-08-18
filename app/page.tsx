@@ -176,15 +176,12 @@ export default function Page() {
 
                     {/* Features grid: 2x2 */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Feature icon={<IconMemory className="h-5 w-5" />} label="16GB RAM" />
-                      <Feature icon={<IconStorage className="h-5 w-5" />} label="256GB SSD" />
+                      <Feature icon={<IconMemory className="h-5 w-5" />} label={t("slider.ram")} />
+                      <Feature icon={<IconStorage className="h-5 w-5" />} label={t("slider.ssd")} />
                       <Feature
                         icon={<IconScreen className="h-5 w-5" />}
                         label={
-                          idx === 0 ? '14″ Full HD' :
-                          idx === 1 ? '14″ Full HD' :
-                          idx === 2 ? '14″ FHD TACTILE' :
-                                       '14″ FHD (1920×1080)'
+                          idx === 2 ? t("slider.screenTouch") : t("slider.screenFHD")
                         }
                       />
                       <Feature icon={<IconBattery className="h-5 w-5" />} label="Batterie jusqu’à 4 heures" />

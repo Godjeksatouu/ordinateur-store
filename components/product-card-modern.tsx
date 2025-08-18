@@ -40,7 +40,7 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center text-dark/60">
-            <span className="text-sm">{t('imageNotAvailable') || 'صورة غير متوفرة'}</span>
+            <span className="text-sm">{t('imageNotAvailable')}</span>
           </div>
         )}
       </div>

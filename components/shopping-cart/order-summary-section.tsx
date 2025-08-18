@@ -1,6 +1,9 @@
+'use client';
+
 import { getCart } from '@/lib/actions';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { useTranslations } from '@/hooks/use-translations';
 
 function OrderSummaryFallback() {
   return (
@@ -21,6 +24,52 @@ function OrderSummaryFallback() {
   );
 }
 
+function OrderSummaryContentClient({
+  subtotal,
+  shipping,
+  total,
+  qualifyingForFreeDelivery,
+}: {
+  subtotal: number;
+  shipping: number;
+  total: number;
+  qualifyingForFreeDelivery: boolean;
+}) {
+  const { t } = useTranslations();
+
+  return (
+    <div className="mt-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-600">{t('subtotal')}</p>
+        <p className="text-sm font-medium text-gray-900">
+          {subtotal.toLocaleString()} {t('currency')}
+        </p>
+      </div>
+      <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+        <p className="text-sm text-gray-600">{t('shippingCost')}</p>
+        {qualifyingForFreeDelivery ? (
+          <p className="text-sm font-medium text-gray-900">
+            <span className="line-through font-normal">
+              {shipping.toLocaleString()} {t('currency')}
+            </span>{' '}
+            {t('free')}
+          </p>
+        ) : (
+          <p className="text-sm font-medium text-gray-900">
+            {shipping.toLocaleString()} {t('currency')}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+        <p className="text-base font-medium text-gray-900">{t('total')}</p>
+        <p className="text-base font-medium text-gray-900">
+          {total.toLocaleString()} {t('currency')}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 async function OrderSummaryContent({
   freeDelivery,
 }: {
@@ -34,35 +83,12 @@ async function OrderSummaryContent({
   const total = subtotal + shipping;
 
   return (
-    <div className="mt-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">المجموع الفرعي</p>
-        <p className="text-sm font-medium text-gray-900">
-          {subtotal.toLocaleString()} درهم
-        </p>
-      </div>
-      <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-        <p className="text-sm text-gray-600">تكلفة الشحن</p>
-        {qualifyingForFreeDelivery ? (
-          <p className="text-sm font-medium text-gray-900">
-            <span className="line-through font-normal">
-              {shipping.toLocaleString()} درهم
-            </span>{' '}
-            مجاني
-          </p>
-        ) : (
-          <p className="text-sm font-medium text-gray-900">
-            {shipping.toLocaleString()} درهم
-          </p>
-        )}
-      </div>
-      <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-        <p className="text-base font-medium text-gray-900">المجموع الكلي</p>
-        <p className="text-base font-medium text-gray-900">
-          {total.toLocaleString()} درهم
-        </p>
-      </div>
-    </div>
+    <OrderSummaryContentClient
+      subtotal={subtotal}
+      shipping={shipping}
+      total={total}
+      qualifyingForFreeDelivery={qualifyingForFreeDelivery}
+    />
   );
 }
 
@@ -73,9 +99,11 @@ export function OrderSummarySection({
   freeDelivery: boolean;
   proceedToCheckout: React.ReactNode;
 }) {
+  const { t } = useTranslations();
+
   return (
     <section className="mt-16 rounded-lg bg-gray-50 px-6 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
-      <h2 className="text-lg font-medium text-gray-900">ملخص الطلب</h2>
+      <h2 className="text-lg font-medium text-gray-900">{t('orderSummary')}</h2>
 
       <div className="mt-6">{proceedToCheckout}</div>
 
@@ -89,12 +117,12 @@ export function OrderSummarySection({
 
       <div className="mt-6 text-center text-sm text-gray-500">
         <p>
-          أو{' '}
+          {t('or')}{' '}
           <Link
             href="/"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
-            متابعة التسوق
+            {t('continueShopping')}
           </Link>
         </p>
       </div>

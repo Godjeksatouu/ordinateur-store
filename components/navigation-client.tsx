@@ -22,7 +22,6 @@ export function NavigationClient() {
 
   const navigation: NavigationItem[] = [
     { name: t('home'), href: locale === 'ar' ? '/' : `/${locale}` },
-    { name: t('laptops'), href: locale === 'ar' ? '/laptops' : `/${locale}/laptops` },
     { name: t('contact'), href: locale === 'ar' ? '/contact' : `/${locale}/contact` },
     ...categories.map((c) => ({ name: c.name, href: `/categories/${c.slug || c.id}` }))
   ];

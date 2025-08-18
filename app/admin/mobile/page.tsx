@@ -190,8 +190,8 @@ export default function MobileAdminPage() {
 
 // Mobile-optimized components
 function MobileProductsManager() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -219,7 +219,6 @@ function MobileProductsManager() {
       const data = await response.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching categories:', error);
       setCategories([]);
     }
   };

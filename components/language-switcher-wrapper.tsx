@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 
-const LanguageSwitcher = dynamic(() => import('./language-switcher').then(m => m.LanguageSwitcher), { 
+const LanguageSwitcher = dynamic(() => import('./language-switcher').then(m => m.LanguageSwitcher), {
   ssr: false,
   loading: () => (
     <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-700 shadow-sm">

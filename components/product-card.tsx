@@ -60,14 +60,14 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
             <div className="image-fallback absolute inset-0 flex-col items-center justify-center text-center p-4 hidden">
               <ShoppingBagIcon className="h-12 w-12 text-[#adb8c1] mb-2" />
               <div className="text-sm text-[#262a2f] font-medium">{product.name}</div>
-              <div className="text-xs text-[#adb8c1] mt-1">صورة غير متوفرة</div>
+              <div className="text-xs text-[#adb8c1] mt-1">{t('imageNotAvailable')}</div>
             </div>
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
             <ShoppingBagIcon className="h-12 w-12 text-[#adb8c1] group-hover:text-[#6188a4] transition-all duration-300 transform group-hover:scale-110 mb-2" />
             <div className="text-sm text-[#262a2f] font-medium">{product.name}</div>
-            <div className="text-xs text-[#adb8c1] mt-1">صورة غير متوفرة</div>
+            <div className="text-xs text-[#adb8c1] mt-1">{t('imageNotAvailable')}</div>
           </div>
         )}
       </div>

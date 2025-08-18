@@ -22,6 +22,13 @@ export const translations = {
     processor: 'المعالج',
     os: 'نظام التشغيل',
 
+    // Slider features
+    'slider.ram': '16GB RAM',
+    'slider.ssd': '256GB SSD',
+    'slider.screenFHD': '14″ Full HD',
+    'slider.screenTouch': '14″ FHD TACTILE',
+    'slider.battery': 'بطارية تصل إلى 4 ساعات',
+
     // Common
     loading: 'جاري التحميل...',
     noProducts: 'لا توجد منتجات متاحة حالياً',
@@ -33,6 +40,7 @@ export const translations = {
     confirm: 'تأكيد',
     yes: 'نعم',
     no: 'لا',
+    imageNotAvailable: 'صورة غير متوفرة',
 
     // Homepage
     heroTitle: 'تجربة أحسن حاسوب تنتظرك',
@@ -104,6 +112,21 @@ export const translations = {
     address: 'العنوان',
     storeAddress: 'الدار البيضاء، المغرب',
     allRightsReserved: 'جميع الحقوق محفوظة',
+
+    // WhatsApp & Contact
+    whatsappMessage: 'مرحبا، أريد الاستفسار عن أجهزة الكمبيوتر المحمولة المتوفرة لديكم',
+    whatsappTooltip: 'تواصل معنا عبر واتساب',
+    whatsappAriaLabel: 'تواصل معنا عبر واتساب',
+
+    // Shopping Cart
+    orderSummary: 'ملخص الطلب',
+    subtotal: 'المجموع الفرعي',
+    shippingCost: 'تكلفة الشحن',
+    total: 'المجموع',
+    free: 'مجاني',
+    continueShopping: 'متابعة التسوق',
+    or: 'أو',
+    proceedToCheckout: 'إتمام الطلب',
     
     // Admin
     dashboard: 'لوحة التحكم',
@@ -149,6 +172,13 @@ export const translations = {
     processor: 'Processor',
     os: 'Operating System',
 
+    // Slider features
+    'slider.ram': '16GB RAM',
+    'slider.ssd': '256GB SSD',
+    'slider.screenFHD': '14″ Full HD',
+    'slider.screenTouch': '14″ FHD TOUCH',
+    'slider.battery': 'Battery up to 4 hours',
+
     // Common
     loading: 'Loading...',
     noProducts: 'No products available',
@@ -160,6 +190,7 @@ export const translations = {
     confirm: 'Confirm',
     yes: 'Yes',
     no: 'No',
+    imageNotAvailable: 'Image not available',
 
     // Homepage
     heroTitle: 'Experience the Best Computer Awaits You',
@@ -223,6 +254,21 @@ export const translations = {
     address: 'Address',
     storeAddress: 'Casablanca, Morocco',
     allRightsReserved: 'All rights reserved',
+
+    // WhatsApp & Contact
+    whatsappMessage: 'Hello, I would like to inquire about the laptops available',
+    whatsappTooltip: 'Contact us via WhatsApp',
+    whatsappAriaLabel: 'Contact us via WhatsApp',
+
+    // Shopping Cart
+    orderSummary: 'Order Summary',
+    subtotal: 'Subtotal',
+    shippingCost: 'Shipping Cost',
+    total: 'Total',
+    free: 'Free',
+    continueShopping: 'Continue Shopping',
+    or: 'or',
+    proceedToCheckout: 'Proceed to Checkout',
     
     // Admin
     dashboard: 'Dashboard',
@@ -268,6 +314,13 @@ export const translations = {
     processor: 'Processeur',
     os: 'Système d\'Exploitation',
 
+    // Slider features
+    'slider.ram': '16GB RAM',
+    'slider.ssd': '256GB SSD',
+    'slider.screenFHD': '14″ Full HD',
+    'slider.screenTouch': '14″ FHD TACTILE',
+    'slider.battery': 'Batterie jusqu\'à 4 heures',
+
     // Common
     loading: 'Chargement...',
     noProducts: 'Aucun produit disponible',
@@ -279,6 +332,7 @@ export const translations = {
     confirm: 'Confirmer',
     yes: 'Oui',
     no: 'Non',
+    imageNotAvailable: 'Image non disponible',
 
     // Homepage
     heroTitle: 'Découvrez le Meilleur Ordinateur qui Vous Attend',
@@ -336,6 +390,21 @@ export const translations = {
     address: 'Adresse',
     storeAddress: 'Casablanca, Maroc',
     allRightsReserved: 'Tous droits réservés',
+
+    // WhatsApp & Contact
+    whatsappMessage: 'Bonjour, je voudrais me renseigner sur les ordinateurs portables disponibles',
+    whatsappTooltip: 'Contactez-nous via WhatsApp',
+    whatsappAriaLabel: 'Contactez-nous via WhatsApp',
+
+    // Shopping Cart
+    orderSummary: 'Résumé de Commande',
+    subtotal: 'Sous-total',
+    shippingCost: 'Frais de Livraison',
+    total: 'Total',
+    free: 'Gratuit',
+    continueShopping: 'Continuer les Achats',
+    or: 'ou',
+    proceedToCheckout: 'Finaliser la Commande',
     
     // Admin
     dashboard: 'Tableau de Bord',
@@ -378,11 +447,19 @@ export const translations = {
     graphics: 'Gráficos',
     processor: 'Procesador',
     os: 'Sistema Operativo',
+
+    // Slider features
+    'slider.ram': '16GB RAM',
+    'slider.ssd': '256GB SSD',
+    'slider.screenFHD': '14″ Full HD',
+    'slider.screenTouch': '14″ FHD TÁCTIL',
+    'slider.battery': 'Batería hasta 4 horas',
     
     // Common
     loading: 'Cargando...',
     noProducts: 'No hay productos disponibles',
     currency: 'DH',
+    imageNotAvailable: 'Imagen no disponible',
 
     // Price display
     productPrice: 'Precio del Producto',
@@ -420,6 +497,21 @@ export const translations = {
     address: 'Dirección',
     storeAddress: 'Casablanca, Marruecos',
     allRightsReserved: 'Todos los derechos reservados',
+
+    // WhatsApp & Contact
+    whatsappMessage: 'Hola, me gustaría consultar sobre las laptops disponibles',
+    whatsappTooltip: 'Contáctanos vía WhatsApp',
+    whatsappAriaLabel: 'Contáctanos vía WhatsApp',
+
+    // Shopping Cart
+    orderSummary: 'Resumen del Pedido',
+    subtotal: 'Subtotal',
+    shippingCost: 'Costo de Envío',
+    total: 'Total',
+    free: 'Gratis',
+    continueShopping: 'Continuar Comprando',
+    or: 'o',
+    proceedToCheckout: 'Proceder al Pago',
     
     // Admin
     dashboard: 'Panel de Control',

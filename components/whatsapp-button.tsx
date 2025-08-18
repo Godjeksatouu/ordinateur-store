@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from '@/hooks/use-translations';
 
 export function WhatsAppButton() {
   const [isHovered, setIsHovered] = useState(false);
-  
+  const { t } = useTranslations();
+
   const phoneNumber = '+212661585396';
-  const message = 'مرحبا، أريد الاستفسار عن أجهزة الكمبيوتر المحمولة المتوفرة لديكم';
+  const message = t('whatsappMessage');
   
   const handleWhatsAppClick = () => {
     const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
@@ -20,7 +22,7 @@ export function WhatsAppButton() {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className="group relative bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
-        aria-label="تواصل معنا عبر واتساب"
+        aria-label={t('whatsappAriaLabel')}
       >
         {/* WhatsApp Icon */}
         <svg
@@ -38,7 +40,7 @@ export function WhatsAppButton() {
             isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
           }`}
         >
-          تواصل معنا عبر واتساب
+          {t('whatsappTooltip')}
           <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
         </div>
         
