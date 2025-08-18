@@ -99,12 +99,11 @@ export default function AdminPage() {
                     <button
                       key={r.key}
                       onClick={() => setActiveRole(r.key)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-right transition-all duration-300 ${
-                        activeRole === r.key
-                          ? 'text-white shadow-lg'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      style={activeRole === r.key ? {background: 'linear-gradient(to right, #3a4956, #2a3440)'} : {}}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-right transition-all duration-300 ${activeRole === r.key
+                        ? 'text-white shadow-lg'
+                        : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      style={activeRole === r.key ? { background: 'linear-gradient(to right, #3a4956, #2a3440)' } : {}}
                     >
                       <span className="text-lg">{r.icon}</span>
                       <span className="font-medium">{r.label}</span>
@@ -303,258 +302,258 @@ function ProductsManager() {
           {editingId ? 'تعديل المنتج' : 'إضافة منتج جديد'}
         </h2>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            اسم المنتج (English) <span className="text-red-500">*</span>
-          </label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="Product Name"
-            value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">الذاكرة (RAM)</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="مثال: 16GB"
-            value={formData.ram}
-            onChange={(e) => setFormData({...formData, ram: e.target.value})}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">التخزين</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="مثال: 512GB SSD"
-            value={formData.storage}
-            onChange={(e) => setFormData({...formData, storage: e.target.value})}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">كرت الشاشة</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="مثال: NVIDIA GTX 1650"
-            value={formData.graphics}
-            onChange={(e) => setFormData({...formData, graphics: e.target.value})}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">المعالج (Processor)</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="مثال: Intel Core i5-1135G7"
-            value={formData.processor}
-            onChange={(e) => setFormData({...formData, processor: e.target.value})}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">نظام التشغيل</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="مثال: Windows 11"
-            value={formData.os}
-            onChange={(e) => setFormData({...formData, os: e.target.value})}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            الفئة <span className="text-red-500">*</span>
-          </label>
-          <select
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            value={formData.category_id}
-            onChange={(e) => setFormData({...formData, category_id: e.target.value})}
-            required
-          >
-            <option value="">اختر الفئة</option>
-            {categories.map((category: any) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">السعر القديم</label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300"
-            style={{'--tw-ring-color': '#3a4956'} as any}
-            placeholder="0"
-            type="number"
-            min="0"
-            value={formData.old_price}
-            onChange={(e) => setFormData({...formData, old_price: e.target.value})}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            السعر الجديد <span className="text-red-500">*</span>
-          </label>
-          <input
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300"
-            style={{'--tw-ring-color': '#3a4956'} as any}
-            placeholder="0"
-            type="number"
-            min="0"
-            value={formData.new_price}
-            onChange={(e) => setFormData({...formData, new_price: e.target.value})}
-            required
-          />
-        </div>
-        {/* Main Images Section */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">الصور الرئيسية</label>
-          <div className="border-2 border-dashed border-blue-300 rounded-xl p-4 hover:border-blue-400 transition-colors bg-blue-50">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              اسم المنتج (English) <span className="text-red-500">*</span>
+            </label>
             <input
-              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => setMainImages(e.target.files)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              placeholder="Product Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
             />
-            <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-              <span>الصور الرئيسية للمنتج (حد أقصى 3 صور)</span>
-              <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                {mainImages ? `تم اختيار ${mainImages.length} صور رئيسية` : 'لم يتم اختيار صور رئيسية'}
-              </span>
-            </div>
           </div>
-          {/* Main Images Previews */}
-          {mainImages && mainImages.length > 0 && (
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {Array.from(mainImages).map((file, idx) => (
-                <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-blue-200">
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={`main-preview-${idx}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
-                    رئيسية {idx + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Optional Images Section */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">الصور الاختيارية</label>
-          <div className="border-2 border-dashed border-green-300 rounded-xl p-4 hover:border-green-400 transition-colors bg-green-50">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">الذاكرة (RAM)</label>
             <input
-              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => setOptionalImages(e.target.files)}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              placeholder="مثال: 16GB"
+              value={formData.ram}
+              onChange={(e) => setFormData({ ...formData, ram: e.target.value })}
             />
-            <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
-              <span>صور إضافية للتفاصيل (حد أقصى 5 صور)</span>
-              <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                {optionalImages ? `تم اختيار ${optionalImages.length} صور اختيارية` : 'لم يتم اختيار صور اختيارية'}
-              </span>
-            </div>
           </div>
-          {/* Optional Images Previews */}
-          {optionalImages && optionalImages.length > 0 && (
-            <div className="mt-3 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
-              {Array.from(optionalImages).map((file, idx) => (
-                <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border border-green-200">
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={`optional-preview-${idx}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-1 left-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded">
-                    {idx + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">الوصف (English)</label>
-          <textarea
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
-            placeholder="Product description in English"
-            rows={4}
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-          />
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">التخزين</label>
+            <input
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              placeholder="مثال: 512GB SSD"
+              value={formData.storage}
+              onChange={(e) => setFormData({ ...formData, storage: e.target.value })}
+            />
+          </div>
 
-        <div className="md:col-span-2 flex gap-4">
-          <button
-            type="submit"
-            className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-6 py-3 rounded-xl font-semibold flex-1"
-          >
-            {editingId ? 'تحديث المنتج' : 'حفظ المنتج'}
-          </button>
-          {editingId && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditingId(null);
-                setFormData({
-                  name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', category_id: ''
-                });
-              }}
-              className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold"
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">كرت الشاشة</label>
+            <input
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              placeholder="مثال: NVIDIA GTX 1650"
+              value={formData.graphics}
+              onChange={(e) => setFormData({ ...formData, graphics: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">المعالج (Processor)</label>
+            <input
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              placeholder="مثال: Intel Core i5-1135G7"
+              value={formData.processor}
+              onChange={(e) => setFormData({ ...formData, processor: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">نظام التشغيل</label>
+            <input
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              placeholder="مثال: Windows 11"
+              value={formData.os}
+              onChange={(e) => setFormData({ ...formData, os: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              الفئة <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              value={formData.category_id}
+              onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+              required
             >
-              إلغاء
-            </button>
-          )}
-        </div>
-      </form>
+              <option value="">اختر الفئة</option>
+              {categories.map((category: any) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">السعر القديم</label>
+            <input
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300"
+              style={{ '--tw-ring-color': '#3a4956' } as any}
+              placeholder="0"
+              type="number"
+              min="0"
+              value={formData.old_price}
+              onChange={(e) => setFormData({ ...formData, old_price: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              السعر الجديد <span className="text-red-500">*</span>
+            </label>
+            <input
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300"
+              style={{ '--tw-ring-color': '#3a4956' } as any}
+              placeholder="0"
+              type="number"
+              min="0"
+              value={formData.new_price}
+              onChange={(e) => setFormData({ ...formData, new_price: e.target.value })}
+              required
+            />
+          </div>
+          {/* Main Images Section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">الصور الرئيسية</label>
+            <div className="border-2 border-dashed border-blue-300 rounded-xl p-4 hover:border-blue-400 transition-colors bg-blue-50">
+              <input
+                className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => setMainImages(e.target.files)}
+              />
+              <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
+                <span>الصور الرئيسية للمنتج (حد أقصى 3 صور)</span>
+                <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                  {mainImages ? `تم اختيار ${mainImages.length} صور رئيسية` : 'لم يتم اختيار صور رئيسية'}
+                </span>
+              </div>
+            </div>
+            {/* Main Images Previews */}
+            {mainImages && mainImages.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {Array.from(mainImages).map((file, idx) => (
+                  <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-blue-200">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`main-preview-${idx}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
+                      رئيسية {idx + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-right">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-3">الاسم</th>
-              <th className="px-4 py-3">السعر الجديد</th>
-              <th className="px-4 py-3">المواصفات</th>
-              <th className="px-4 py-3">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.isArray(products) && products.map((product: any) => (
-              <tr key={product.id} className="border-b">
-                <td className="px-4 py-3">{product.name}</td>
-                <td className="px-4 py-3">{product.new_price?.toLocaleString()} درهم</td>
-                <td className="px-4 py-3 text-sm">
-                  {product.ram} | {product.storage}
-                </td>
-                <td className="px-4 py-3 space-x-2 space-x-reverse">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="hover:underline"
-                    style={{color: '#3a4956'}}
-                  >
-                    تعديل
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    حذف
-                  </button>
-                </td>
+          {/* Optional Images Section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">الصور الاختيارية</label>
+            <div className="border-2 border-dashed border-green-300 rounded-xl p-4 hover:border-green-400 transition-colors bg-green-50">
+              <input
+                className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => setOptionalImages(e.target.files)}
+              />
+              <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
+                <span>صور إضافية للتفاصيل (حد أقصى 5 صور)</span>
+                <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                  {optionalImages ? `تم اختيار ${optionalImages.length} صور اختيارية` : 'لم يتم اختيار صور اختيارية'}
+                </span>
+              </div>
+            </div>
+            {/* Optional Images Previews */}
+            {optionalImages && optionalImages.length > 0 && (
+              <div className="mt-3 grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                {Array.from(optionalImages).map((file, idx) => (
+                  <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border border-green-200">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`optional-preview-${idx}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-1 left-1 bg-green-500 text-white text-xs px-1 py-0.5 rounded">
+                      {idx + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">الوصف (English)</label>
+            <textarea
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
+              placeholder="Product description in English"
+              rows={4}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
+
+          <div className="md:col-span-2 flex gap-4">
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-white px-6 py-3 rounded-xl font-semibold flex-1"
+            >
+              {editingId ? 'تحديث المنتج' : 'حفظ المنتج'}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setFormData({
+                    name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', category_id: ''
+                  });
+                }}
+                className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold"
+              >
+                إلغاء
+              </button>
+            )}
+          </div>
+        </form>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-right">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-4 py-3">الاسم</th>
+                <th className="px-4 py-3">السعر الجديد</th>
+                <th className="px-4 py-3">المواصفات</th>
+                <th className="px-4 py-3">إجراءات</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
+            </thead>
+            <tbody>
+              {Array.isArray(products) && products.map((product: any) => (
+                <tr key={product.id} className="border-b">
+                  <td className="px-4 py-3">{product.name}</td>
+                  <td className="px-4 py-3">{product.new_price?.toLocaleString()} درهم</td>
+                  <td className="px-4 py-3 text-sm">
+                    {product.ram} | {product.storage}
+                  </td>
+                  <td className="px-4 py-3 space-x-2 space-x-reverse">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="hover:underline"
+                      style={{ color: '#3a4956' }}
+                    >
+                      تعديل
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      حذف
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </React.Fragment>
   );
 }
@@ -566,6 +565,30 @@ function OrdersManager() {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  const sendFacture = async (order: any) => {
+    // TODO: send facture logic here
+    // 1: make api request
+    // 2: alert if sent or not
+    console.log(order.id)
+
+    const token = localStorage.getItem('adminToken');
+    fetch(`http://localhost:5000/api/orders/${order.id}/facture`, {
+      method: "POST",
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(res => res.message
+        ? alert(res.message)
+        : alert("Failed to send the facture. try again later !")
+      )
+      .catch(err => {
+        alert("Failed to send the facture. try again later !")
+        console.error(err)
+      })
+  }
 
   const fetchOrders = async () => {
     try {
@@ -709,6 +732,16 @@ function OrdersManager() {
                   <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(order.status)}`}>
                     {getStatusLabel(order.status)}
                   </span>
+                  {
+                    ["confirme", "livre"].includes(order.status.toLowerCase())
+                    &&
+                    <button
+                      onClick={() => sendFacture(order)}
+                      className="mt-2 px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200 text-sm transition-colors"
+                    >
+                      أرسل الفاتورة
+                    </button>
+                  }
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
@@ -1063,7 +1096,7 @@ function UsersManager() {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 required
               />
@@ -1075,7 +1108,7 @@ function UsersManager() {
               <input
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 required={!editingUser}
               />
@@ -1086,7 +1119,7 @@ function UsersManager() {
               </label>
               <select
                 value={formData.role}
-                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 required
               >
@@ -1321,7 +1354,7 @@ function PromoManager() {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
                 required
               />
@@ -1331,7 +1364,7 @@ function PromoManager() {
               <input
                 type="text"
                 value={formData.code}
-                onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
+                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
                 required
               />
@@ -1340,7 +1373,7 @@ function PromoManager() {
               <label className="block text-sm font-medium text-gray-700 mb-2">نوع الخصم</label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({...formData, type: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
               >
                 <option value="percentage">نسبة مئوية (%)</option>
@@ -1352,7 +1385,7 @@ function PromoManager() {
               <input
                 type="number"
                 value={formData.value}
-                onChange={(e) => setFormData({...formData, value: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, value: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
                 required
               />
@@ -1362,7 +1395,7 @@ function PromoManager() {
               <input
                 type="text"
                 value={formData.commercial_name}
-                onChange={(e) => setFormData({...formData, commercial_name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, commercial_name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
               />
             </div>
@@ -1370,7 +1403,7 @@ function PromoManager() {
               <label className="block text-sm font-medium text-gray-700 mb-2">ينطبق على</label>
               <select
                 value={formData.applies_to}
-                onChange={(e) => setFormData({...formData, applies_to: e.target.value, product_ids: []})}
+                onChange={(e) => setFormData({ ...formData, applies_to: e.target.value, product_ids: [] })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
               >
                 <option value="all">جميع المنتجات</option>
@@ -1390,9 +1423,9 @@ function PromoManager() {
                       checked={formData.product_ids.includes(product.id)}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setFormData({...formData, product_ids: [...formData.product_ids, product.id]});
+                          setFormData({ ...formData, product_ids: [...formData.product_ids, product.id] });
                         } else {
-                          setFormData({...formData, product_ids: formData.product_ids.filter(id => id !== product.id)});
+                          setFormData({ ...formData, product_ids: formData.product_ids.filter(id => id !== product.id) });
                         }
                       }}
                       className="rounded"
@@ -1602,7 +1635,7 @@ function CategoryManager() {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6188a4]"
                 placeholder="مثال: أجهزة كمبيوتر محمولة"
                 required
@@ -1820,7 +1853,7 @@ function PaymentMethodsManager() {
                 type="text"
                 placeholder="الاسم"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="border rounded px-3 py-2"
                 required
               />
@@ -1828,7 +1861,7 @@ function PaymentMethodsManager() {
                 type="text"
                 placeholder="الاسم بالعربية"
                 value={formData.name_ar}
-                onChange={(e) => setFormData({...formData, name_ar: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })}
                 className="border rounded px-3 py-2"
                 required
               />
@@ -1836,7 +1869,7 @@ function PaymentMethodsManager() {
                 type="text"
                 placeholder="الاسم بالإنجليزية"
                 value={formData.name_en}
-                onChange={(e) => setFormData({...formData, name_en: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
                 className="border rounded px-3 py-2"
                 required
               />
@@ -1844,14 +1877,14 @@ function PaymentMethodsManager() {
                 type="number"
                 placeholder="مبلغ الخصم"
                 value={formData.discount_amount}
-                onChange={(e) => setFormData({...formData, discount_amount: parseFloat(e.target.value) || 0})}
+                onChange={(e) => setFormData({ ...formData, discount_amount: parseFloat(e.target.value) || 0 })}
                 className="border rounded px-3 py-2"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <select
                 value={formData.discount_type}
-                onChange={(e) => setFormData({...formData, discount_type: e.target.value as 'fixed' | 'percentage'})}
+                onChange={(e) => setFormData({ ...formData, discount_type: e.target.value as 'fixed' | 'percentage' })}
                 className="border rounded px-3 py-2"
               >
                 <option value="fixed">مبلغ ثابت</option>
@@ -1861,7 +1894,7 @@ function PaymentMethodsManager() {
                 <input
                   type="checkbox"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                   className="mr-2"
                 />
                 نشط
@@ -1870,7 +1903,7 @@ function PaymentMethodsManager() {
             <textarea
               placeholder="الوصف بالعربية"
               value={formData.description_ar}
-              onChange={(e) => setFormData({...formData, description_ar: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })}
               className="w-full border rounded px-3 py-2"
               rows={3}
             />

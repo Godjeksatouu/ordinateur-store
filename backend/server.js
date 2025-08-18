@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
+const { default: sendFactureMail } = require('./utils/mail/templates/send-facture');
+const { default: sendOrderMadeMail } = require('./utils/mail/templates/order-made');
 require('dotenv').config();
 
 const app = express();
@@ -640,7 +642,18 @@ app.post('/api/orders', async (req, res) => {
       ]
     );
 
-    // Order created successfully - email functionality removed
+    const [[order]] = await db.execute(
+      `SELECT * FROM orders WHERE id = ${Number(orderResult.insertId)}`,
+    );
+
+    const [[client]] = await db.execute(
+      `SELECT * from clients WHERE id = ${order.client_id}`,
+    );
+    const [[product]] = await db.execute(
+      `SELECT * from products WHERE id = ${order.product_id}`,
+    );
+
+    await sendOrderMadeMail(client, order, product)
 
     res.json({
       success: true,
@@ -666,6 +679,30 @@ app.get('/api/orders', authenticateToken, requireRole(['gestion_commandes', 'sup
   } catch (error) {
     console.error('Get orders error:', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+app.post('/api/orders/:id/facture', authenticateToken, requireRole(['gestion_commandes', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [[order]] = await db.execute(
+      `SELECT * FROM orders WHERE id = ${Number(id)}`,
+    );
+
+    const [[client]] = await db.execute(
+      `SELECT * from clients WHERE id = ${order.client_id}`,
+    );
+    const [[product]] = await db.execute(
+      `SELECT * from products WHERE id = ${order.product_id}`,
+    );
+
+    await sendFactureMail(client, order, product)
+
+    res.json({ success: true, message: 'Facture sent !' });
+  } catch (error) {
+    console.error('Update order status error:', error);
+    res.status(500).json({ error: 'Failed to update order status' });
   }
 });
 
