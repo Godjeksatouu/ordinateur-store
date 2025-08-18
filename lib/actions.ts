@@ -1,11 +1,19 @@
-'use server';
+// 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { Cart, CartItem } from '@/components/utils/cart-types';
-import { API_BASE_URL } from './config';
+import { CartItem } from "@/components/utils/cart-types";
 
-export async function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+// import { revalidatePath } from 'next/cache';
+// import { Cart, CartItem } from '@/components/utils/cart-types';
+// import { API_BASE_URL } from './config';
+
+// export async function delay(ms: number) {
+//   return new Promise((resolve) => setTimeout(resolve, ms));
+// }
+
+
+type Cart = {
+  items: CartItem[];
+  total: number;
 }
 
 export async function getCart(): Promise<Cart> {
@@ -16,12 +24,12 @@ export async function getCart(): Promise<Cart> {
   };
 }
 
-export async function addToCart(item: CartItem) {
-  // Cart functionality can be implemented with local storage or backend
-  revalidatePath('/cart');
-}
+// export async function addToCart(item: CartItem) {
+//   // Cart functionality can be implemented with local storage or backend
+//   revalidatePath('/cart');
+// }
 
-export async function removeFromCart(item: CartItem) {
-  // Cart functionality can be implemented with local storage or backend
-  revalidatePath('/cart');
-}
+// export async function removeFromCart(item: CartItem) {
+//   // Cart functionality can be implemented with local storage or backend
+//   revalidatePath('/cart');
+// }

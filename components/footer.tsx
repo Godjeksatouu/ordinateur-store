@@ -41,13 +41,13 @@ export function Footer() {
               <h4 className="text-lg font-bold text-white mb-6">{t('quickLinks')}</h4>
               <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-gray-300 transition-colors duration-300 flex items-center" style={{'&:hover': {color: '#3a4956'}}}>
+                  <a href="#" className="text-gray-300 transition-colors duration-300 flex items-center hover:text-[#3a4956]">
                     <span className="w-2 h-2 rounded-full mr-3" style={{backgroundColor: '#3a4956'}}></span>
                     {t('home')}
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-300 transition-colors duration-300 flex items-center" style={{'&:hover': {color: '#3a4956'}}}>
+                  <a href="#" className="text-gray-300 transition-colors duration-300 flex items-center  hover:text-[#3a4956]">
                     <span className="w-2 h-2 rounded-full mr-3" style={{backgroundColor: '#3a4956'}}></span>
                     {t('aboutStore')}
                   </a>
