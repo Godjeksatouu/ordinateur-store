@@ -329,6 +329,7 @@ export default function ProductDetailsPage() {
                         className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
                         sizes="(max-width: 768px) 100vw, 50vw"
                         priority
+                        unoptimized
                       />
                     </div>
 
@@ -358,6 +359,7 @@ export default function ProductDetailsPage() {
                             fill
                             className="object-cover object-center"
                             sizes="(max-width: 768px) 20vw, 10vw"
+                            unoptimized
                           />
                         </button>
                       ))}

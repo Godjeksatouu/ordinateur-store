@@ -22,6 +22,7 @@ export function Footer() {
                     fill
                     className="object-contain"
                     sizes="48px"
+                    unoptimized
                   />
                 </div>
                 <div>

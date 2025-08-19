@@ -187,6 +187,7 @@ export default function Page(props: {
                       fill
                       className="object-contain drop-shadow-2xl"
                       priority={idx === currentSlide}
+                      unoptimized
                     />
                   </div>
                 </div>

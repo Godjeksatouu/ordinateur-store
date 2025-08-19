@@ -195,6 +195,7 @@ export default function Page() {
                       fill
                       className="object-contain drop-shadow-2xl"
                       priority={idx === currentSlide}
+                      unoptimized
                     />
                   </div>
                 </div>
@@ -296,6 +297,7 @@ export default function Page() {
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 66vw"
                     priority
+                    unoptimized
                   />
                 </div>
                 {/* Right: two stacked images (1/3 width) */}
@@ -307,6 +309,7 @@ export default function Page() {
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 33vw"
+                      unoptimized
                     />
                   </div>
                   <div className="relative overflow-hidden rounded-2xl" suppressHydrationWarning>
@@ -316,6 +319,7 @@ export default function Page() {
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 33vw"
+                      unoptimized
                     />
                   </div>
                 </div>

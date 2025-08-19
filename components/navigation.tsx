@@ -52,6 +52,7 @@ export function Navigation() {
                   fill
                   className="object-contain"
                   sizes="40px"
+                  unoptimized
                 />
               </div>
             </Link>
@@ -71,6 +72,7 @@ export function Navigation() {
                   className="object-contain"
                   sizes="48px"
                   priority
+                  unoptimized
                 />
               </div>
             </Link>
