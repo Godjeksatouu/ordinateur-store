@@ -11,6 +11,7 @@ import sendFactureMail from './utils/mail/templates/send-facture.js';
 import sendOrderMadeMail from './utils/mail/templates/order-made.js';
 
 import dotenv from 'dotenv';
+import sendInformOrderMail from './utils/mail/templates/inform-order-made.js';
 dotenv.config();
 
 
@@ -747,6 +748,14 @@ app.post('/api/orders', async (req, res) => {
       console.log('✅ Order confirmation email sent successfully');
     } catch (emailError) {
       console.warn('⚠️ Failed to send order confirmation email:', emailError.message);
+      // Continue with order creation even if email fails
+    }
+    // Try to inform admin with the order, but don't fail the order if email fails
+    try {
+      await sendInformOrderMail(client, order, product);
+      console.log('✅ Order confirmation email sent successfully');
+    } catch (emailError) {
+      console.warn('⚠️ Failed to inform the admin: ', emailError.message);
       // Continue with order creation even if email fails
     }
 
