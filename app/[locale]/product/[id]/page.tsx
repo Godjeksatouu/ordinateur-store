@@ -54,6 +54,9 @@ export default function LocalizedProductDetailsPage() {
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
+  // Check if this is an accessory (accessories don't have RAM/storage/processor)
+  const isAccessory = product && !product.ram && !product.storage && !product.processor;
+
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -401,45 +404,48 @@ export default function LocalizedProductDetailsPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
-                  {t('technicalSpecs')}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {product.ram && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('ram')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
-                    </div>
-                  )}
-                  {product.storage && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('storage')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
-                    </div>
-                  )}
-                  {product.screen && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('screen')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
-                    </div>
-                  )}
-                  {product.processor && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('graphics')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
-                    </div>
-                  )}
-                  {product.os && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('os')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.os}</span>
-                    </div>
-                  )}
+              {/* Technical Specifications - Hidden for accessories */}
+              {!isAccessory && (
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
+                    {t('technicalSpecs')}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {product.ram && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('ram')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
+                      </div>
+                    )}
+                    {product.storage && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('storage')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
+                      </div>
+                    )}
+                    {product.screen && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('screen')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
+                      </div>
+                    )}
+                    {product.processor && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('graphics')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
+                      </div>
+                    )}
+                    {product.os && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('os')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.os}</span>
+                      </div>
+                    )}
 
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
@@ -512,7 +518,7 @@ export default function LocalizedProductDetailsPage() {
                             value={orderForm.phoneNumber}
                             onChange={(e) => handleInputChange('phoneNumber', e.target.value.replace(/[^0-9]/g, ''))}
                             className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder="مثال: 0612345678"
+                            placeholder={t('phoneExample')}
                           />
                         </div>
                       </div>
@@ -528,7 +534,7 @@ export default function LocalizedProductDetailsPage() {
                           value={orderForm.city}
                           onChange={(e) => handleInputChange('city', e.target.value)}
                           className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                          placeholder="أدخل اسم المدينة"
+                          placeholder={t('cityPlaceholder')}
                         />
                       </div>
 
@@ -545,7 +551,7 @@ export default function LocalizedProductDetailsPage() {
                               value={orderForm.address}
                               onChange={(e) => handleInputChange('address', e.target.value)}
                               className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white resize-none"
-                              placeholder="أدخل عنوانك التفصيلي..."
+                              placeholder={t('addressPlaceholder')}
                             />
                           </div>
                           <div>
@@ -818,8 +824,8 @@ function ProductReviews({ productId }: { productId: string }) {
     return (
       <section className="py-12 bg-gray-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">⭐ آراء العملاء</h2>
-          <p className="text-gray-600">لا توجد مراجعات لهذا المنتج بعد</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">⭐ {t('customerReviews')}</h2>
+          <p className="text-gray-600">{t('noReviews')}</p>
         </div>
       </section>
     );
@@ -829,13 +835,13 @@ function ProductReviews({ productId }: { productId: string }) {
     <section className="py-12 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">⭐ آراء العملاء</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">⭐ {t('customerReviews')}</h2>
           <div className="flex items-center justify-center gap-2 mb-2">
             <div className="flex">{renderStars(Math.round(averageRating))}</div>
             <span className="text-lg font-semibold text-gray-700">
-              {averageRating.toFixed(1)} من 5
+              {averageRating.toFixed(1)} {locale === 'ar' ? 'من 5' : locale === 'fr' ? 'sur 5' : locale === 'es' ? 'de 5' : 'out of 5'}
             </span>
-            <span className="text-gray-500">({reviews.length} مراجعة)</span>
+            <span className="text-gray-500">({reviews.length} {locale === 'ar' ? 'مراجعة' : locale === 'fr' ? 'avis' : locale === 'es' ? 'reseñas' : 'reviews'})</span>
           </div>
         </div>
 
@@ -845,11 +851,15 @@ function ProductReviews({ productId }: { productId: string }) {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="font-semibold text-gray-900">{review.name || 'عميل'}</span>
+                    <span className="font-semibold text-gray-900">{review.name || t('customer')}</span>
                     <div className="flex">{renderStars(review.rating)}</div>
                   </div>
                   <p className="text-sm text-gray-500">
-                    {new Date(review.created_at).toLocaleDateString('ar-SA')}
+                    {new Date(review.created_at).toLocaleDateString(
+                      locale === 'ar' ? 'ar-SA' :
+                      locale === 'fr' ? 'fr-FR' :
+                      locale === 'es' ? 'es-ES' : 'en-US'
+                    )}
                   </p>
                 </div>
               </div>

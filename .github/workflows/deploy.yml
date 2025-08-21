@@ -32,11 +32,11 @@ jobs:
       - name: Ensure target folder exists
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ vars.SERVER_HOST }}
-          username: ${{ vars.SERVER_USER }}
-          key: ${{ vars.SERVER_SSH_KEY }}
+          host: ${{ env.SERVER_HOST }}
+          username: ${{ env.SERVER_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
           script: |
-            mkdir -p ${{ vars.SERVER_TARGET_PATH }}
+            mkdir -p ${{ env.SERVER_TARGET_PATH }}
 
       - name: Setup Project
         uses: appleboy/ssh-action@v1.0.0

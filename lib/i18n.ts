@@ -42,6 +42,11 @@ export const translations = {
     no: 'لا',
     imageNotAvailable: 'صورة غير متوفرة',
 
+    // Reviews
+    customerReviews: 'آراء العملاء',
+    noReviews: 'لا توجد مراجعات لهذا المنتج بعد',
+    customer: 'عميل',
+
     // Pagination
     previous: 'السابق',
     next: 'التالي',
@@ -72,8 +77,11 @@ export const translations = {
     // Checkout & Orders
     fullName: 'اسمك بالكامل',
     phoneNumber: 'رقم الهاتف',
+    phoneExample: 'مثال: 0612345678',
     city: 'المدينة',
+    cityPlaceholder: 'أدخل اسم المدينة',
     address: 'العنوان',
+    addressPlaceholder: 'أدخل عنوانك التفصيلي...',
     email: 'البريد الإلكتروني',
     paymentMethod: 'طرق الدفع',
     promoCode: 'كود التخفيض',
@@ -291,6 +299,11 @@ export const translations = {
     no: 'No',
     imageNotAvailable: 'Image not available',
 
+    // Reviews
+    customerReviews: 'Customer Reviews',
+    noReviews: 'No reviews for this product yet',
+    customer: 'Customer',
+
     // Pagination
     previous: 'Previous',
     next: 'Next',
@@ -307,8 +320,11 @@ export const translations = {
     // Checkout & Orders
     fullName: 'Full Name',
     phoneNumber: 'Phone Number',
+    phoneExample: 'Example: 0612345678',
     city: 'City',
+    cityPlaceholder: 'Enter city name',
     address: 'Address',
+    addressPlaceholder: 'Enter your detailed address...',
     email: 'Email',
     paymentMethod: 'Payment Method',
     promoCode: 'Promo Code',
@@ -543,6 +559,11 @@ export const translations = {
     no: 'Non',
     imageNotAvailable: 'Image non disponible',
 
+    // Reviews
+    customerReviews: 'Avis Clients',
+    noReviews: 'Aucun avis pour ce produit pour le moment',
+    customer: 'Client',
+
     // Pagination
     previous: 'Précédent',
     next: 'Suivant',
@@ -556,8 +577,11 @@ export const translations = {
     // Checkout & Orders
     fullName: 'Nom Complet',
     phoneNumber: 'Numéro de Téléphone',
+    phoneExample: 'Exemple: 0612345678',
     city: 'Ville',
+    cityPlaceholder: 'Entrez le nom de la ville',
     address: 'Adresse',
+    addressPlaceholder: 'Entrez votre adresse détaillée...',
     email: 'Email',
     paymentMethod: 'Méthode de Paiement',
     promoCode: 'Code Promo',
@@ -723,6 +747,11 @@ export const translations = {
     noProducts: 'No hay productos disponibles',
     currency: 'DH',
     imageNotAvailable: 'Imagen no disponible',
+
+    // Reviews
+    customerReviews: 'Reseñas de Clientes',
+    noReviews: 'No hay reseñas para este producto aún',
+    customer: 'Cliente',
 
     // Pagination
     previous: 'Anterior',
