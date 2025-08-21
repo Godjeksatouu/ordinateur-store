@@ -562,7 +562,7 @@ export default function ProductDetailsPage() {
                             value={orderForm.fullName}
                             onChange={(e) => handleInputChange('fullName', e.target.value)}
                             className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder="اسمك بالكامل"
+                            placeholder={t('fullName')}
                           />
                         </div>
 
@@ -579,7 +579,7 @@ export default function ProductDetailsPage() {
                             value={orderForm.phoneNumber}
                             onChange={(e) => handleInputChange('phoneNumber', e.target.value.replace(/[^0-9]/g, ''))}
                             className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder="مثال: 0612345678"
+                            placeholder={t('phoneExample')}
                           />
                         </div>
                       </div>
@@ -595,7 +595,7 @@ export default function ProductDetailsPage() {
                           value={orderForm.city}
                           onChange={(e) => handleInputChange('city', e.target.value)}
                           className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                          placeholder="أدخل اسم المدينة"
+                          placeholder={t('cityPlaceholder')}
                         />
                       </div>
 
@@ -612,7 +612,7 @@ export default function ProductDetailsPage() {
                               value={orderForm.address}
                               onChange={(e) => handleInputChange('address', e.target.value)}
                               className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white resize-none"
-                              placeholder="أدخل عنوانك التفصيلي..."
+                              placeholder={t('addressPlaceholder')}
                             />
                           </div>
                           <div>
@@ -647,7 +647,7 @@ export default function ProductDetailsPage() {
                                   ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:border-red-500'
                                   : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white focus:ring-[#6188a4] focus:border-[#6188a4]'
                               }`}
-                              placeholder="مثال: SAVE10"
+                              placeholder={t('promoCodePlaceholder')}
                               disabled={isValidatingPromo}
                             />
                             {isValidatingPromo && (
@@ -831,7 +831,7 @@ export default function ProductDetailsPage() {
         </div>
 
         {/* Reviews Section */}
-        <ProductReviews productId={productId} />
+        <ProductReviews productId={productId} locale={locale} />
         </HydrationSafe>
       </Main>
       </div>
@@ -840,7 +840,7 @@ export default function ProductDetailsPage() {
 }
 
 // Reviews Component
-function ProductReviews({ productId }: { productId: string }) {
+function ProductReviews({ productId, locale }: { productId: string; locale: string }) {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslations();
@@ -889,8 +889,8 @@ function ProductReviews({ productId }: { productId: string }) {
     return (
       <section className="py-12 bg-gray-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">⭐ آراء العملاء</h2>
-          <p className="text-gray-600">لا توجد مراجعات لهذا المنتج بعد</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">⭐ {t('customerReviews')}</h2>
+          <p className="text-gray-600">{t('noReviews')}</p>
         </div>
       </section>
     );
@@ -900,13 +900,13 @@ function ProductReviews({ productId }: { productId: string }) {
     <section className="py-12 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">⭐ آراء العملاء</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">⭐ {t('customerReviews')}</h2>
           <div className="flex items-center justify-center gap-2 mb-2">
             <div className="flex">{renderStars(Math.round(averageRating))}</div>
             <span className="text-lg font-semibold text-gray-700">
-              {averageRating.toFixed(1)} من 5
+              {averageRating.toFixed(1)} {locale === 'ar' ? 'من 5' : locale === 'fr' ? 'sur 5' : locale === 'es' ? 'de 5' : 'out of 5'}
             </span>
-            <span className="text-gray-500">({reviews.length} مراجعة)</span>
+            <span className="text-gray-500">({reviews.length} {locale === 'ar' ? 'مراجعة' : locale === 'fr' ? 'avis' : locale === 'es' ? 'reseñas' : 'reviews'})</span>
           </div>
         </div>
 
@@ -916,11 +916,15 @@ function ProductReviews({ productId }: { productId: string }) {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="font-semibold text-gray-900">{review.name || 'عميل'}</span>
+                    <span className="font-semibold text-gray-900">{review.name || t('customer')}</span>
                     <div className="flex">{renderStars(review.rating)}</div>
                   </div>
                   <p className="text-sm text-gray-500">
-                    {new Date(review.created_at).toLocaleDateString('ar-SA')}
+                    {new Date(review.created_at).toLocaleDateString(
+                      locale === 'ar' ? 'ar-SA' :
+                      locale === 'fr' ? 'fr-FR' :
+                      locale === 'es' ? 'es-ES' : 'en-US'
+                    )}
                   </p>
                 </div>
               </div>

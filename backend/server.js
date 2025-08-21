@@ -1679,6 +1679,7 @@ app.delete('/api/users/:id', authenticateToken, requireRole(['super_admin']), as
 app.get('/api/stats', authenticateToken, requireRole(['super_admin']), async (req, res) => {
   try {
     const [productCount] = await db.execute('SELECT COUNT(*) as count FROM products');
+    const [accessoireCount] = await db.execute('SELECT COUNT(*) as count FROM accessoires');
     const [orderCount] = await db.execute('SELECT COUNT(*) as count FROM orders');
     const [clientCount] = await db.execute('SELECT COUNT(*) as count FROM clients');
     const [confirmedOrders] = await db.execute('SELECT COUNT(*) as count FROM orders WHERE status = "confirme"');
@@ -1689,7 +1690,7 @@ app.get('/api/stats', authenticateToken, requireRole(['super_admin']), async (re
     const [returnedOrders] = await db.execute('SELECT COUNT(*) as count FROM orders WHERE status = "retour"');
 
     res.json({
-      products: productCount[0].count,
+      products: productCount[0].count + accessoireCount[0].count, // Combined total
       orders: orderCount[0].count,
       clients: clientCount[0].count,
       confirmed: confirmedOrders[0].count,
