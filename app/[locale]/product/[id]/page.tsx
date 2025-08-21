@@ -59,6 +59,16 @@ export default function LocalizedProductDetailsPage() {
         const fetchedProduct = await getProductById(productId);
         setProduct(fetchedProduct || null);
         setFinalPrice(fetchedProduct?.new_price || 0);
+
+        // Track Facebook Pixel view content event
+        if (fetchedProduct) {
+          const { currency } = useCurrency();
+          FacebookPixel.viewContent(fetchedProduct.new_price, currency, {
+            content_ids: [fetchedProduct.id.toString()],
+            content_name: fetchedProduct.name,
+            content_type: 'product'
+          });
+        }
       } catch (error) {
         console.error('Error loading product:', error);
       } finally {

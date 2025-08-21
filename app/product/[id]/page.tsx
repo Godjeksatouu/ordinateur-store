@@ -65,6 +65,15 @@ export default function ProductDetailsPage() {
         const fetchedProduct = await getProductById(productId);
         setProduct(fetchedProduct || null);
         setFinalPrice(fetchedProduct?.new_price || 0);
+
+        // Track Facebook Pixel view content event
+        if (fetchedProduct) {
+          FacebookPixel.viewContent(fetchedProduct.new_price, currency, {
+            content_ids: [fetchedProduct.id.toString()],
+            content_name: fetchedProduct.name,
+            content_type: 'product'
+          });
+        }
       } catch (error) {
         console.error('Error loading product:', error);
       } finally {
@@ -75,7 +84,7 @@ export default function ProductDetailsPage() {
     if (productId) {
       loadProduct();
     }
-  }, [productId]);
+  }, [productId, currency]);
 
   useEffect(() => {
     const loadPaymentMethods = async () => {
