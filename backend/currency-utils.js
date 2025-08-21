@@ -7,6 +7,14 @@ const CURRENCY_SYMBOLS = {
   XOF: 'CFA'
 };
 
+// Exchange rates (DH as base currency)
+const EXCHANGE_RATES = {
+  DH: 1,        // Base currency (Moroccan Dirham)
+  EUR: 0.094,   // 1 DH = 0.094 EUR
+  USD: 0.10,    // 1 DH = 0.10 USD
+  XOF: 60.5,    // 1 DH = 60.5 XOF (West African CFA franc)
+};
+
 const CURRENCY_NAMES = {
   DH: {
     ar: 'درهم مغربي',
@@ -68,10 +76,35 @@ function getCurrencySymbol(currency = 'DH') {
   return CURRENCY_SYMBOLS[currency] || 'DH';
 }
 
+// Convert from DH to target currency
+function convertFromDH(amount, targetCurrency = 'DH') {
+  const rate = EXCHANGE_RATES[targetCurrency] || 1;
+  return Math.round(amount * rate * 100) / 100; // Round to 2 decimal places
+}
+
+// Convert from any currency to DH
+function convertToDH(amount, fromCurrency = 'DH') {
+  const rate = EXCHANGE_RATES[fromCurrency] || 1;
+  return Math.round((amount / rate) * 100) / 100;
+}
+
+// Convert between any two currencies
+function convertCurrency(amount, fromCurrency = 'DH', toCurrency = 'DH') {
+  if (fromCurrency === toCurrency) return amount;
+
+  // Convert to DH first, then to target currency
+  const dhAmount = convertToDH(amount, fromCurrency);
+  return convertFromDH(dhAmount, toCurrency);
+}
+
 export {
   formatCurrency,
   getCurrencyName,
   getCurrencySymbol,
+  convertFromDH,
+  convertToDH,
+  convertCurrency,
   CURRENCY_SYMBOLS,
-  CURRENCY_NAMES
+  CURRENCY_NAMES,
+  EXCHANGE_RATES
 };

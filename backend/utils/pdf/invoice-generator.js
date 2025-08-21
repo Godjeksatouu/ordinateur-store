@@ -107,7 +107,8 @@ function generateInvoiceHTML(client, order, product) {
         <tbody>
           <tr class="border-b">
             <td class="px-6 py-4">
-              <p class="font-medium">${product.name}</p>
+              <p class="font-medium">${product?.name || 'Produit'}</p>
+              ${(product?.ram || product?.storage || product?.graphics || product?.processor || product?.os) ? `
               <ul class="list-disc list-inside text-gray-600 text-xs mt-1">
                 ${product.ram ? `<li>Mémoire: ${product.ram}</li>` : ""}
                 ${product.storage ? `<li>Stockage: ${product.storage}</li>` : ""}
@@ -115,6 +116,9 @@ function generateInvoiceHTML(client, order, product) {
                 ${product.processor ? `<li>Processeur: ${product.processor}</li>` : ""}
                 ${product.os ? `<li>Système: ${product.os}</li>` : ""}
               </ul>
+              ` : `
+              <p class="text-gray-600 text-xs mt-1">${product?.description || 'Accessoire de qualité'}</p>
+              `}
               <p class="text-xs text-gray-500 mt-1">Garantie: 12 mois</p>
             </td>
             <td class="px-6 py-4 text-right">${order.quantity}</td>

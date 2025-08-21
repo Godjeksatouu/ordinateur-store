@@ -30,7 +30,7 @@ export default async function sendFactureMail(client, order, product, reviewLink
             <!-- Order Summary -->
             <div style="background:#f8fafc; padding:18px; border-radius:8px; margin-bottom:20px; text-align:center;">
               <h4 style="color:#374151; margin:0 0 12px; font-size:16px;">Order #${order.id}</h4>
-              <p style="margin:0; font-size:17px; color:#2563eb; font-weight:bold;">${product.name}</p>
+              <p style="margin:0; font-size:17px; color:#2563eb; font-weight:bold;">${product?.name || 'Produit'}</p>
               <p style="margin:8px 0 0; font-size:18px; color:#059669; font-weight:bold;">Total: ${formatCurrency(order.final_price, order.currency || 'DH', 'en')}</p>
             </div>
 

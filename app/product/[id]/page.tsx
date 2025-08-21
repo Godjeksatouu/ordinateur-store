@@ -471,45 +471,47 @@ export default function ProductDetailsPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
-                  {t('technicalSpecs')}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {product.ram && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('ram')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
-                    </div>
-                  )}
-                  {product.storage && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('storage')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
-                    </div>
-                  )}
-                  {product.screen && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('screen')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
-                    </div>
-                  )}
-                  {product.processor && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('graphics')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
-                    </div>
-                  )}
-                  {product.os && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('os')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.os}</span>
-                    </div>
-                  )}
-
+              {/* Technical Specifications - Only show for products with technical specs (not accessories) */}
+              {(product.ram || product.storage || product.screen || product.processor || product.os || product.graphics) && (
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
+                    {t('technicalSpecs')}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {product.ram && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('ram')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
+                      </div>
+                    )}
+                    {product.storage && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('storage')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
+                      </div>
+                    )}
+                    {product.screen && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('screen')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
+                      </div>
+                    )}
+                    {product.processor && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('graphics')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
+                      </div>
+                    )}
+                    {product.os && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('os')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.os}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
@@ -781,7 +783,7 @@ export default function ProductDetailsPage() {
                               <div className="flex justify-between items-center text-green-600">
                                 <span className="text-sm">خصم تحويل بنكي:</span>
                                 <span className="text-sm font-medium">
-                                  -100 DH
+                                  -{mounted ? format(100) : '100 DH'}
                                 </span>
                               </div>
                             )}

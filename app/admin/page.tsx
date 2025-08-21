@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Main } from '@/components/main';
 import { useTranslations } from '@/hooks/use-translations';
 import { API_BASE_URL } from '@/lib/config';
+import { CurrencyConverter } from '@/lib/currency';
 
 const roles = [
   { key: 'products', label: 'Products', icon: '📦' },
@@ -1016,10 +1017,12 @@ function OrdersManager() {
                 </td>
                 <td className="px-2 py-2">
                   <div className="font-bold text-green-600 text-xs">
-                    {order.final_price}د
+                    {CurrencyConverter.format(order.final_price, order.currency || 'DH', 'ar')}
                   </div>
                   {order.original_price && order.original_price !== order.final_price && (
-                    <div className="text-xs text-gray-500 line-through">{order.original_price}د</div>
+                    <div className="text-xs text-gray-500 line-through">
+                      {CurrencyConverter.format(order.original_price, order.currency || 'DH', 'ar')}
+                    </div>
                   )}
                 </td>
                 <td className="px-2 py-2">

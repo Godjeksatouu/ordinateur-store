@@ -9,6 +9,7 @@ import crypto from 'crypto';
 
 import sendFactureMail from './utils/mail/templates/send-facture.js';
 import sendOrderMadeMail from './utils/mail/templates/order-made.js';
+import { convertFromDH } from './currency-utils.js';
 
 import dotenv from 'dotenv';
 import sendInformOrderMail from './utils/mail/templates/inform-order-made.js';
@@ -755,9 +756,9 @@ app.post('/api/orders', async (req, res) => {
       promoDiscount = discount;
     }
 
-    // Calculate Virement bancaire discount
+    // Calculate Virement bancaire discount (100 DH converted to order currency)
     if (paymentMethod === 'Virement bancaire' || paymentMethod === 'تحويل بنكي') {
-      virementDiscount = 100;
+      virementDiscount = convertFromDH(100, currency || 'DH');
     }
 
     totalDiscount = promoDiscount + virementDiscount;
@@ -920,9 +921,29 @@ app.post('/api/orders/:id/facture', authenticateToken, requireRole(['gestion_com
     const [[client]] = await db.execute(
       `SELECT * from clients WHERE id = ${order.client_id}`,
     );
-    const [[product]] = await db.execute(
-      `SELECT * from products WHERE id = ${order.product_id}`,
-    );
+
+    // Fetch product from correct table based on product_type
+    let product;
+    console.log(`📄 Fetching product for order ${order.id}, product_id: ${order.product_id}, product_type: ${order.product_type}`);
+
+    if (order.product_type === 'accessoire') {
+      const [[accessoire]] = await db.execute(
+        `SELECT * from accessoires WHERE id = ${order.product_id}`,
+      );
+      product = accessoire;
+      console.log('📄 Found accessoire:', accessoire ? accessoire.name : 'NOT FOUND');
+    } else {
+      const [[productData]] = await db.execute(
+        `SELECT * from products WHERE id = ${order.product_id}`,
+      );
+      product = productData;
+      console.log('📄 Found product:', productData ? productData.name : 'NOT FOUND');
+    }
+
+    if (!product) {
+      console.error('❌ Product not found for facture generation');
+      return res.json({ success: false, message: 'المنتج غير موجود. لا يمكن إنشاء الفاتورة.' });
+    }
 
     // Generate unique review token if not already generated
     let reviewToken = order.review_token;
