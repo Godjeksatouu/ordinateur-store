@@ -24,7 +24,11 @@ export function HydrationSafe({ children, fallback = null, className }: Hydratio
     return fallback ? <div className={className}>{fallback}</div> : null;
   }
 
-  return <div className={className} suppressHydrationWarning>{children}</div>;
+  return (
+    <div className={className} suppressHydrationWarning>
+      {children}
+    </div>
+  );
 }
 
 /**

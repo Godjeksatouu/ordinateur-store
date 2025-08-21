@@ -15,7 +15,9 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
         <HydrationSafe>
           <Navigation />
         </HydrationSafe>
-        {children}
+        <div suppressHydrationWarning>
+          {children}
+        </div>
         <HydrationSafe>
           <Footer />
         </HydrationSafe>

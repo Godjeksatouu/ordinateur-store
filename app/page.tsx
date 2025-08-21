@@ -3,6 +3,7 @@
 import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';
 import { HydrationSafe } from '@/components/hydration-safe';
+import { ClientOnly } from '@/components/client-only';
 import { useTranslations } from '@/hooks/use-translations';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -53,7 +54,7 @@ function IconBattery({ className = 'h-5 w-5' }: { className?: string }) {
 }
 function Feature({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-white">
+    <div className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-white" suppressHydrationWarning>
       <span className="text-primary">
         {icon}
       </span>
@@ -129,20 +130,20 @@ export default function Page() {
 
     loadProducts();
   }, []);
+
   return (
     <PublicLayout>
       <HydrationSafe>
         <div suppressHydrationWarning>
-          {/* Hero Section - Slider */}
-          <div className="relative h-[75vh] md:h-[85vh] overflow-hidden" suppressHydrationWarning>
+        {/* Hero Section - Slider */}
+        <div className="relative h-[75vh] md:h-[85vh] overflow-hidden">
           {/* Per-slide gradient backgrounds to match branding */}
-          <div className="absolute inset-0" suppressHydrationWarning>
+          <div className="absolute inset-0">
             {slides.map((_, idx) => (
               <div
                 key={`bg-${idx}`}
                 className={`absolute inset-0 transition-opacity duration-700 ${idx === currentSlide ? 'opacity-100' : 'opacity-0'}`}
                 aria-hidden={idx !== currentSlide}
-
               >
                 <div className={`w-full h-full ${
                   idx === 0 ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-black' :
@@ -153,6 +154,7 @@ export default function Page() {
               </div>
             ))}
           </div>
+
           {/* Slides */}
           <div className="absolute inset-0">
             {slides.map((slide, idx) => (
@@ -162,7 +164,6 @@ export default function Page() {
                   idx === currentSlide ? 'opacity-100' : 'opacity-0'
                 }`}
                 aria-hidden={idx !== currentSlide}
-
               >
                 <div className="max-w-7xl mx-auto h-full flex flex-col sm:flex-row items-center justify-between px-4 py-8 sm:py-12">
                   {/* Left: Text */}
@@ -175,20 +176,22 @@ export default function Page() {
                     </p>
 
                     {/* Features grid: 2x2 */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Feature icon={<IconMemory className="h-5 w-5" />} label={t("slider.ram")} />
-                      <Feature icon={<IconStorage className="h-5 w-5" />} label={t("slider.ssd")} />
-                      <Feature
-                        icon={<IconScreen className="h-5 w-5" />}
-                        label={
-                          idx === 2 ? t("slider.screenTouch") : t("slider.screenFHD")
-                        }
-                      />
-                      <Feature icon={<IconBattery className="h-5 w-5" />} label={t("slider.battery")} />
-                    </div>
+                    <ClientOnly>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Feature icon={<IconMemory className="h-5 w-5" />} label={t("slider.ram")} />
+                        <Feature icon={<IconStorage className="h-5 w-5" />} label={t("slider.ssd")} />
+                        <Feature
+                          icon={<IconScreen className="h-5 w-5" />}
+                          label={
+                            idx === 2 ? t("slider.screenTouch") : t("slider.screenFHD")
+                          }
+                        />
+                        <Feature icon={<IconBattery className="h-5 w-5" />} label={t("slider.battery")} />
+                      </div>
+                    </ClientOnly>
                   </div>
                   {/* Right: Image */}
-                  <div className="relative w-full sm:w-1/2 h-[30vh] sm:h-[45vh] order-1 sm:order-2 block mb-4 sm:mb-0">
+                  <div className="relative w-full sm:w-1/2 h-[30vh] sm:h-[45vh] order-1 sm:order-2 block mb-4 sm:mb-0" suppressHydrationWarning>
                     <Image
                       src={slide.image}
                       alt={slide.title}
@@ -200,7 +203,7 @@ export default function Page() {
                   </div>
                 </div>
                 {/* Subtle background vignette */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60 pointer-events-none" suppressHydrationWarning />
               </div>
             ))}
           </div>
@@ -239,10 +242,7 @@ export default function Page() {
             </>
           )}
         </div>
-        </div>
-      </HydrationSafe>
 
-      <div>
         {/* Categories Section */}
         <section className="py-6 bg-gray-50">
           <div className="px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
@@ -304,14 +304,14 @@ export default function Page() {
                 <p className="mt-4 text-gray-600 text-lg">{t('loading')}</p>
               </div>
             ) : products.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" suppressHydrationWarning>
+              <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12" suppressHydrationWarning>
-                <div className="text-gray-400 mb-4" suppressHydrationWarning>
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
                   <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 9h.01M15 9h.01M9 15h.01M15 15h.01" />
                   </svg>
@@ -323,7 +323,7 @@ export default function Page() {
         </section>
 
         {/* Services Section */}
-        <section className="bg-gradient-to-br from-gray-50 to-slate-100 py-12" suppressHydrationWarning>
+        <section className="bg-gradient-to-br from-gray-50 to-slate-100 py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
             <div className="text-center mb-8" suppressHydrationWarning>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
@@ -366,7 +366,7 @@ export default function Page() {
         </section>
 
         {/* Location Section */}
-        <section className="bg-white py-12" suppressHydrationWarning>
+        <section className="bg-white py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
             <div className="text-center mb-8" suppressHydrationWarning>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
@@ -391,7 +391,8 @@ export default function Page() {
             </div>
           </div>
         </section>
-      </div>
+        </div>
+      </HydrationSafe>
     </PublicLayout>
   );
 }
