@@ -765,18 +765,19 @@ export default function ProductDetailsPage() {
                             </div>
 
                             {/* Promo Code Discount */}
-                            {promoValidation?.isValid && (
-                              <div className="flex justify-between items-center text-green-600">
-                                <span className="text-sm">خصم كود التخفيض:</span>
-                                <span className="text-sm font-medium">
-                                  -{mounted ? format(promoValidation.discountType === 'percentage' ?
-                                    (product.new_price * promoValidation.discount / 100) :
-                                    promoValidation.discount) : `${(promoValidation.discountType === 'percentage' ?
-                                    (product.new_price * promoValidation.discount / 100) :
-                                    promoValidation.discount).toLocaleString()} DH`}
-                                </span>
-                              </div>
-                            )}
+                            {promoValidation?.isValid && (() => {
+                              const discountAmount = promoValidation.discountType === 'percentage' ?
+                                (product.new_price * promoValidation.discount / 100) :
+                                promoValidation.discount;
+                              return (
+                                <div className="flex justify-between items-center text-green-600">
+                                  <span className="text-sm">خصم كود التخفيض:</span>
+                                  <span className="text-sm font-medium">
+                                    -{mounted ? format(discountAmount) : `${discountAmount.toLocaleString()} DH`}
+                                  </span>
+                                </div>
+                              );
+                            })()}
 
                             {/* Payment Method Discount */}
                             {orderForm.paymentMethod === 'تحويل بنكي' && (

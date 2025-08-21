@@ -6,6 +6,7 @@ import { Main } from '@/components/main';
 import { useTranslations } from '@/hooks/use-translations';
 import { API_BASE_URL } from '@/lib/config';
 import { CurrencyConverter } from '@/lib/currency';
+import { useCurrency } from '@/components/currency-context';
 
 const roles = [
   { key: 'products', label: 'Products', icon: '📦' },
@@ -176,6 +177,7 @@ function ProductsManager() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [existingMainImages, setExistingMainImages] = useState<string[]>([]);
   const [existingOptionalImages, setExistingOptionalImages] = useState<string[]>([]);
+  const { format } = useCurrency();
 
   useEffect(() => {
     fetchProducts();
@@ -635,7 +637,7 @@ function ProductsManager() {
               {Array.isArray(products) && products.map((product: any) => (
                 <tr key={product.id} className="border-b">
                   <td className="px-4 py-3">{product.name}</td>
-                  <td className="px-4 py-3">{product.new_price?.toLocaleString()} درهم</td>
+                  <td className="px-4 py-3">{format(product.new_price || 0)}</td>
                   <td className="px-4 py-3 text-sm">
                     {product.ram} | {product.storage}
                   </td>
