@@ -34,10 +34,10 @@ export function CurrencyDropdown({ className = "" }: { className?: string }) {
       }
       aria-label="Currency selector"
     >
+      <option value="DH">DH</option>
       <option value="EUR">EUR</option>
       <option value="USD">USD</option>
       <option value="XOF">XOF</option>
-      <option value="DH">DH</option>
     </select>
   );
 }

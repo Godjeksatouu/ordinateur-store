@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 export type CurrencyCode = "DH" | "EUR" | "USD" | "XOF";
 
@@ -30,53 +30,29 @@ interface CurrencyContextValue {
 const CurrencyContext = createContext<CurrencyContextValue | undefined>(undefined);
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const [currency, setCurrencyState] = useState<CurrencyCode>("DH");
-  const [isClient, setIsClient] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [currency, setCurrency] = useState<CurrencyCode>("DH");
 
-  useEffect(() => {
-    setIsClient(true);
-    // Add a small delay to ensure hydration is complete
-    const timer = setTimeout(() => {
-      setIsHydrated(true);
-      try {
-        const saved = window.localStorage.getItem("selectedCurrency");
-        if (saved === "EUR" || saved === "USD" || saved === "XOF" || saved === "DH") {
-          setCurrencyState(saved);
-        }
-      } catch (error) {
-        console.warn("Failed to load currency from localStorage:", error);
-      }
-    }, 100);
+  const convert = (amountInDH: number) => {
+    const rate = RATE_PER_DH[currency] ?? 1;
+    return amountInDH * rate;
+  };
 
-    return () => clearTimeout(timer);
-  }, []);
+  const symbol = CURRENCY_SYMBOL[currency] ?? "";
 
-  const setCurrency = React.useCallback((c: CurrencyCode) => {
-    setCurrencyState(c);
-    if (isClient && isHydrated) {
-      try {
-        window.localStorage.setItem("selectedCurrency", c);
-      } catch (error) {
-        console.warn("Failed to save currency to localStorage:", error);
-      }
-    }
-  }, [isClient, isHydrated]);
+  const format = (amountInDH: number) => {
+    const converted = convert(amountInDH);
+    // Keep grouping similar to toLocaleString default
+    const rounded = Math.round((converted + Number.EPSILON) * 100) / 100;
+    return `${rounded.toLocaleString()} ${symbol}`;
+  };
 
-  const value = useMemo<CurrencyContextValue>(() => {
-    const convert = (amountInDH: number) => {
-      const rate = RATE_PER_DH[currency] ?? 1;
-      return amountInDH * rate;
-    };
-    const symbol = CURRENCY_SYMBOL[currency] ?? "";
-    const format = (amountInDH: number) => {
-      const converted = convert(amountInDH);
-      // Keep grouping similar to toLocaleString default
-      const rounded = Math.round((converted + Number.EPSILON) * 100) / 100;
-      return `${rounded.toLocaleString()} ${symbol}`;
-    };
-    return { currency, setCurrency, convert, symbol, format };
-  }, [currency, setCurrency]);
+  const value: CurrencyContextValue = {
+    currency,
+    setCurrency,
+    convert,
+    symbol,
+    format
+  };
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 }

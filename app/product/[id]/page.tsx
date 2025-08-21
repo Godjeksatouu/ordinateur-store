@@ -55,12 +55,7 @@ export default function ProductDetailsPage() {
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   const [finalPrice, setFinalPrice] = useState(0);
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
-  const [mounted, setMounted] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -448,21 +443,21 @@ export default function ProductDetailsPage() {
                 <div className="flex items-center space-x-4" suppressHydrationWarning>
                   {product.old_price && product.old_price > 0 && (
                     <div className="text-xl text-gray-500 line-through">
-                      {mounted ? format(product.old_price) : `${product.old_price.toLocaleString()} DH`}
+                      {format(product.old_price)}
                     </div>
                   )}
                   {promoValidation?.isValid && finalPrice !== product.new_price ? (
                     <div className="flex flex-col">
                       <div className="text-lg text-gray-500 line-through">
-                        {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
+                        {format(product.new_price)}
                       </div>
                       <div className="text-3xl font-bold text-green-600">
-                        {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
+                        {format(finalPrice)}
                       </div>
                     </div>
                   ) : (
                     <div className="text-3xl font-bold text-[#6188a4]">
-                      {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
+                      {format(finalPrice)}
                     </div>
                   )}
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -760,7 +755,7 @@ export default function ProductDetailsPage() {
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">السعر الأصلي:</span>
                               <span className="text-sm font-medium">
-                                {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
+                                {format(product.new_price)}
                               </span>
                             </div>
 
@@ -773,7 +768,7 @@ export default function ProductDetailsPage() {
                                 <div className="flex justify-between items-center text-green-600">
                                   <span className="text-sm">خصم كود التخفيض:</span>
                                   <span className="text-sm font-medium">
-                                    -{mounted ? format(discountAmount) : `${discountAmount.toLocaleString()} DH`}
+                                    -{format(discountAmount)}
                                   </span>
                                 </div>
                               );
@@ -784,7 +779,7 @@ export default function ProductDetailsPage() {
                               <div className="flex justify-between items-center text-green-600">
                                 <span className="text-sm">خصم تحويل بنكي:</span>
                                 <span className="text-sm font-medium">
-                                  -{mounted ? format(100) : '100 DH'}
+                                  -{format(100)}
                                 </span>
                               </div>
                             )}
@@ -798,14 +793,14 @@ export default function ProductDetailsPage() {
                             <div className="flex justify-between items-center">
                               <span className="text-lg font-semibold text-gray-900">المجموع النهائي:</span>
                               <span className="text-xl font-bold text-[#6188a4]">
-                                {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
+                                {format(finalPrice)}
                               </span>
                             </div>
 
                             {/* Savings Summary */}
                             {finalPrice !== product.new_price && (
                               <div className="text-sm text-green-700 font-medium bg-green-50 p-2 rounded">
-                                وفرت: {mounted ? format(product.new_price - finalPrice) : `${(product.new_price - finalPrice).toLocaleString()} DH`}
+                                وفرت: {format(product.new_price - finalPrice)}
                               </div>
                             )}
                           </div>
