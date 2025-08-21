@@ -15,7 +15,7 @@ export function LanguageSwitcher() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const current = languages.find(l => pathname?.startsWith(`/${l.code}`))?.code || 'ar';
+  const current = languages.find(l => pathname?.startsWith(`/${l.code}`))?.code || 'fr';
 
   const onSelect = (code: string) => {
     setOpen(false);
@@ -32,7 +32,7 @@ export function LanguageSwitcher() {
 
     // Construct new path
     const basePath = pathSegments.length > 0 ? `/${pathSegments.join('/')}` : '/';
-    const newPath = code === 'ar' ? basePath : `/${code}${basePath}`;
+    const newPath = code === 'fr' ? basePath : `/${code}${basePath}`;
 
     router.push(newPath);
   };

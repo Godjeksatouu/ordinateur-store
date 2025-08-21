@@ -42,6 +42,11 @@ export const translations = {
     no: 'لا',
     imageNotAvailable: 'صورة غير متوفرة',
 
+    // Pagination
+    previous: 'السابق',
+    next: 'التالي',
+    showingProducts: 'عرض {start} - {end} من أصل {total} منتج',
+
     // Homepage
     heroTitle: 'تجربة أحسن حاسوب تنتظرك',
     heroSubtitle: 'نقدم لك أفضل أجهزة الكمبيوتر المحمولة بأحدث التقنيات وأعلى معايير الجودة',
@@ -285,6 +290,11 @@ export const translations = {
     yes: 'Yes',
     no: 'No',
     imageNotAvailable: 'Image not available',
+
+    // Pagination
+    previous: 'Previous',
+    next: 'Next',
+    showingProducts: 'Showing {start} - {end} of {total} products',
 
     featuredCollectionDesc: 'Discover our handpicked selection of top laptops',
     ourServices: 'Our Premium Services',
@@ -533,6 +543,11 @@ export const translations = {
     no: 'Non',
     imageNotAvailable: 'Image non disponible',
 
+    // Pagination
+    previous: 'Précédent',
+    next: 'Suivant',
+    showingProducts: 'Affichage de {start} - {end} sur {total} produits',
+
     // Homepage
     heroTitle: 'Découvrez le Meilleur Ordinateur qui Vous Attend',
     heroSubtitle: 'Nous vous offrons les meilleurs ordinateurs portables avec les dernières technologies et les plus hauts standards de qualité',
@@ -709,6 +724,11 @@ export const translations = {
     currency: 'DH',
     imageNotAvailable: 'Imagen no disponible',
 
+    // Pagination
+    previous: 'Anterior',
+    next: 'Siguiente',
+    showingProducts: 'Mostrando {start} - {end} de {total} productos',
+
     featuredCollectionDesc: 'Descubre nuestra selección de las mejores laptops',
     ourServices: 'Nuestros Servicios Premium',
     ourServicesDesc: 'Te ofrecemos los mejores servicios para asegurar una excelente experiencia de compra',
@@ -842,9 +862,9 @@ export const translations = {
 };
 
 export function getTranslation(locale: string, key: string, params?: Record<string, string | number>): string {
-  const lang = locale in translations ? locale as keyof typeof translations : 'ar';
+  const lang = locale in translations ? locale as keyof typeof translations : 'fr';
   const t = translations[lang];
-  let text = (t as any)[key] || translations.ar[key as keyof typeof translations.ar] || key;
+  let text = (t as any)[key] || translations.fr[key as keyof typeof translations.fr] || key;
 
   // Simple parameter replacement
   if (params) {
