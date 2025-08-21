@@ -367,11 +367,13 @@ export default function ProductDetailsPage() {
           marketingConsent: false
         });
       } else {
-        // show inline error later if needed
-        console.error('Order submit failed');
+        // Show specific error message
+        console.error('Order submit failed:', data);
+        alert(`فشل في إرسال الطلب: ${data.error || 'خطأ غير معروف'}`);
       }
     } catch (error) {
       console.error('Error submitting order:', error);
+      alert('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.');
     }
   };
 

@@ -277,11 +277,11 @@ async function createTables() {
         client_id INT NOT NULL,
         product_id INT NOT NULL,
         product_name VARCHAR(255) NOT NULL,
+        product_type ENUM('product', 'accessoire') DEFAULT 'product',
         status ENUM('en_attente', 'confirme', 'declined', 'en_cours', 'livre', 'retour') DEFAULT 'en_attente',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (client_id) REFERENCES clients(id),
-        FOREIGN KEY (product_id) REFERENCES products(id)
+        FOREIGN KEY (client_id) REFERENCES clients(id)
       )
     `);
     // Ensure extra fields on orders
@@ -302,6 +302,26 @@ async function createTables() {
       }
     } catch (e) {
       console.warn('⚠️ Could not ensure orders.payment_method column exists:', e.message || e);
+    }
+
+    // Remove foreign key constraint if it exists
+    try {
+      await db.execute("ALTER TABLE orders DROP FOREIGN KEY orders_ibfk_2");
+      console.log('✅ Removed product_id foreign key constraint from orders');
+    } catch (error) {
+      console.log('⚠️ Foreign key constraint might not exist or already removed');
+    }
+
+    // Add product_type column
+    try {
+      const [productTypeCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'product_type'");
+      // @ts-ignore
+      if (Array.isArray(productTypeCol) && productTypeCol.length === 0) {
+        await db.execute("ALTER TABLE orders ADD COLUMN product_type ENUM('product', 'accessoire') DEFAULT 'product'");
+        console.log('✅ Added product_type column to orders');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.product_type column exists:', e.message || e);
     }
 
     // Add additional order details columns
@@ -692,6 +712,39 @@ app.post('/api/orders', async (req, res) => {
       quantity = 1, categoryId, currency = 'DH'
     } = req.body;
 
+    // Determine if this is a product or accessoire
+    let productType = 'product';
+    let productData = null;
+
+    // First try to find in products table
+    try {
+      const [[product]] = await db.execute('SELECT * FROM products WHERE id = ?', [productId]);
+      if (product) {
+        productData = product;
+        productType = 'product';
+      }
+    } catch (error) {
+      console.log('Product not found in products table, checking accessories...');
+    }
+
+    // If not found in products, try accessories
+    if (!productData) {
+      try {
+        const [[accessoire]] = await db.execute('SELECT * FROM accessoires WHERE id = ?', [productId]);
+        if (accessoire) {
+          productData = accessoire;
+          productType = 'accessoire';
+        }
+      } catch (error) {
+        console.log('Product not found in accessories table either');
+      }
+    }
+
+    // If product/accessoire not found, return error
+    if (!productData) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
     // Calculate discounts
     let promoDiscount = 0;
     let virementDiscount = 0;
@@ -703,7 +756,7 @@ app.post('/api/orders', async (req, res) => {
     }
 
     // Calculate Virement bancaire discount
-    if (paymentMethod === 'Virement bancaire') {
+    if (paymentMethod === 'Virement bancaire' || paymentMethod === 'تحويل بنكي') {
       virementDiscount = 100;
     }
 
@@ -720,12 +773,12 @@ app.post('/api/orders', async (req, res) => {
     // Insert order with all details
     const [orderResult] = await db.execute(
       `INSERT INTO orders (
-        client_id, product_id, product_name, status, payment_method, code_promo,
+        client_id, product_id, product_name, product_type, status, payment_method, code_promo,
         quantity, category_id, original_price, final_price, discount_amount,
         promo_discount, virement_discount, currency
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        clientId, productId, productName, 'en_attente', paymentMethod || null, codePromo || null,
+        clientId, productId, productName, productType, 'en_attente', paymentMethod || null, codePromo || null,
         quantity, categoryId || null, originalPrice || null, finalPrice || null, totalDiscount,
         promoDiscount, virementDiscount, currency || 'DH'
       ]
@@ -738,9 +791,20 @@ app.post('/api/orders', async (req, res) => {
     const [[client]] = await db.execute(
       `SELECT * from clients WHERE id = ${order.client_id}`,
     );
-    const [[product]] = await db.execute(
-      `SELECT * from products WHERE id = ${order.product_id}`,
-    );
+
+    // Fetch product from correct table based on product_type
+    let product;
+    if (order.product_type === 'accessoire') {
+      const [[accessoire]] = await db.execute(
+        `SELECT * from accessoires WHERE id = ${order.product_id}`,
+      );
+      product = accessoire;
+    } else {
+      const [[productData]] = await db.execute(
+        `SELECT * from products WHERE id = ${order.product_id}`,
+      );
+      product = productData;
+    }
 
     // Try to send email, but don't fail the order if email fails
     try {
