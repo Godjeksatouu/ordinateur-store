@@ -26,6 +26,7 @@ export default function ProductDetailsPage() {
   const params = useParams();
   const productId = params.id as string;
   const { t, locale } = useTranslations();
+  const { currency, format } = useCurrency();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +53,6 @@ export default function ProductDetailsPage() {
   const [finalPrice, setFinalPrice] = useState(0);
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
-  const { format } = useCurrency();
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
   useEffect(() => {

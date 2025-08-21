@@ -135,10 +135,10 @@ export default function Page() {
     <PublicLayout>
       <HydrationSafe>
         <div suppressHydrationWarning>
-        {/* Hero Section - Slider */}
-        <div className="relative h-[75vh] md:h-[85vh] overflow-hidden">
-          {/* Per-slide gradient backgrounds to match branding */}
-          <div className="absolute inset-0">
+          {/* Hero Section - Slider */}
+          <div className="relative h-[75vh] md:h-[85vh] overflow-hidden">
+            {/* Per-slide gradient backgrounds to match branding */}
+            <div className="absolute inset-0">
             {slides.map((_, idx) => (
               <div
                 key={`bg-${idx}`}
