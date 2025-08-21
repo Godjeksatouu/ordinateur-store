@@ -30,6 +30,9 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
     ? Math.round(((product.old_price - product.new_price) / product.old_price) * 100)
     : 0;
 
+  // Check if this is an accessory (accessories don't have RAM/storage/processor)
+  const isAccessory = !product.ram && !product.storage && !product.processor;
+
   return (
     <div
       className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-200 hover:border-[#6188a4]/40 h-full flex flex-col p-3"
@@ -87,23 +90,25 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
           {product.name}
         </h3>
 
-        {/* Specifications - Hidden on mobile, visible on larger screens */}
-        <div className="hidden sm:grid grid-cols-2 gap-2 mb-4 text-sm">
-          <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
-            <div className="text-[#adb8c1] text-xs font-medium">{t('ram')}</div>
-            <div className="font-bold text-[#262a2f] text-sm">{product.ram}</div>
-          </div>
-          <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
-            <div className="text-[#adb8c1] text-xs font-medium">{t('storage')}</div>
-            <div className="font-bold text-[#262a2f] text-sm">{product.storage}</div>
-          </div>
-          {product.processor && (
-            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2 col-span-2">
-              <div className="text-[#adb8c1] text-xs font-medium">{t('processor')}</div>
-              <div className="font-bold text-[#262a2f] text-xs leading-tight">{product.processor}</div>
+        {/* Specifications - Hidden on mobile, visible on larger screens, and hidden for accessories */}
+        {!isAccessory && (
+          <div className="hidden sm:grid grid-cols-2 gap-2 mb-4 text-sm">
+            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
+              <div className="text-[#adb8c1] text-xs font-medium">{t('ram')}</div>
+              <div className="font-bold text-[#262a2f] text-sm">{product.ram}</div>
             </div>
-          )}
-        </div>
+            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
+              <div className="text-[#adb8c1] text-xs font-medium">{t('storage')}</div>
+              <div className="font-bold text-[#262a2f] text-sm">{product.storage}</div>
+            </div>
+            {product.processor && (
+              <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2 col-span-2">
+                <div className="text-[#adb8c1] text-xs font-medium">{t('processor')}</div>
+                <div className="font-bold text-[#262a2f] text-xs leading-tight">{product.processor}</div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Price Section */}
         <div className="mt-auto">

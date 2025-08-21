@@ -26,6 +26,9 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
     ? Math.round(((product.old_price! - product.new_price) / product.old_price!) * 100)
     : 0;
 
+  // Check if this is an accessory (accessories don't have RAM/storage/processor)
+  const isAccessory = !product.ram && !product.storage && !product.processor;
+
   return (
     <article className="group relative rounded-2xl border border-muted/40 bg-light shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
       {/* Discount badge */}
@@ -61,26 +64,28 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
           {product.name}
         </h3>
 
-        <dl className="hidden sm:grid grid-cols-2 gap-2 text-xs md:text-sm mb-4">
-          {product.ram && (
-            <div className="rounded-lg bg-muted/20 p-2">
-              <dt className="text-dark/70">{t('ram')}</dt>
-              <dd className="font-semibold text-dark">{product.ram}</dd>
-            </div>
-          )}
-          {product.storage && (
-            <div className="rounded-lg bg-muted/20 p-2">
-              <dt className="text-dark/70">{t('storage')}</dt>
-              <dd className="font-semibold text-dark">{product.storage}</dd>
-            </div>
-          )}
-          {product.processor && (
-            <div className="rounded-lg bg-muted/20 p-2 col-span-2">
-              <dt className="text-dark/70">{t('processor')}</dt>
-              <dd className="font-semibold text-dark truncate">{product.processor}</dd>
-            </div>
-          )}
-        </dl>
+        {!isAccessory && (
+          <dl className="hidden sm:grid grid-cols-2 gap-2 text-xs md:text-sm mb-4">
+            {product.ram && (
+              <div className="rounded-lg bg-muted/20 p-2">
+                <dt className="text-dark/70">{t('ram')}</dt>
+                <dd className="font-semibold text-dark">{product.ram}</dd>
+              </div>
+            )}
+            {product.storage && (
+              <div className="rounded-lg bg-muted/20 p-2">
+                <dt className="text-dark/70">{t('storage')}</dt>
+                <dd className="font-semibold text-dark">{product.storage}</dd>
+              </div>
+            )}
+            {product.processor && (
+              <div className="rounded-lg bg-muted/20 p-2 col-span-2">
+                <dt className="text-dark/70">{t('processor')}</dt>
+                <dd className="font-semibold text-dark truncate">{product.processor}</dd>
+              </div>
+            )}
+          </dl>
+        )}
 
         {/* Pricing */}
         <div className="flex items-end justify-between gap-3">
