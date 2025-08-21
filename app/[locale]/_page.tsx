@@ -59,6 +59,7 @@ function Feature({ icon, label }: { icon: React.ReactNode; label: string }) {
 
 export default function Page(props: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { t } = useTranslations();
   const [products, setProducts] = useState<any[]>([]);
@@ -129,7 +130,7 @@ export default function Page(props: {
       <HydrationSafe>
         <div>
           {/* Hero Section - Slider */}
-          <div className="relative h-[70vh] md:h-[80vh] overflow-hidden">
+          <div className="relative h-[75vh] md:h-[85vh] overflow-hidden">
           {/* Per-slide gradient backgrounds to match branding */}
           <div className="absolute inset-0">
             {slides.map((_, idx) => (
@@ -156,9 +157,9 @@ export default function Page(props: {
                 className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${idx === currentSlide ? 'opacity-100' : 'opacity-0'}`}
                 aria-hidden={idx !== currentSlide}
               >
-                <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-4">
+                <div className="max-w-7xl mx-auto h-full flex flex-col sm:flex-row items-center justify-between px-4 py-8 sm:py-12">
                   {/* Left: Text */}
-                  <div className="text-white max-w-xl">
+                  <div className="text-white max-w-xl order-2 sm:order-1 text-center sm:text-left">
                     <h2 className="text-3xl md:text-5xl font-extrabold mb-3 leading-tight">
                       {slide.title}
                     </h2>
@@ -180,7 +181,7 @@ export default function Page(props: {
                     </div>
                   </div>
                   {/* Right: Image */}
-                  <div className="relative w-1/2 h-[50vh] hidden sm:block">
+                  <div className="relative w-full sm:w-1/2 h-[30vh] sm:h-[45vh] order-1 sm:order-2 block mb-4 sm:mb-0">
                     <Image
                       src={slide.image}
                       alt={slide.title}
@@ -216,7 +217,7 @@ export default function Page(props: {
               </button>
 
               {/* Indicators */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
                 {slides.map((_, i) => (
                   <button
                     key={i}
@@ -235,95 +236,103 @@ export default function Page(props: {
       </HydrationSafe>
 
       <div>
-        {/* Featured Text Section */}
-        <div className="bg-gradient-to-r from-gray-50 to-white py-16">
-          <div className="max-w-4xl mx-auto text-center px-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6 leading-tight">
-              {t('heroTitle')}
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              {t('heroSubtitle')}
-            </p>
-          </div>
-        </div>
 
-        {/* Products Section */}
-        <Main>
-          <div className="py-20">
-            <div className="text-center mb-16">
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+        {/* Featured Products Section */}
+        <section className="py-16 lg:py-20 bg-white">
+          <Main>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
                 {t('featuredCollection')}
-              </h3>
-              <div className="w-24 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto"></div>
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+                {t('featuredCollectionDesc')}
+              </p>
+              <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto rounded-full"></div>
             </div>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {products && products.length > 0 ? (
                 products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <p className="text-gray-500">{t('noProducts')}</p>
+                  <div className="text-gray-400 mb-4">
+                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 9h.01M15 9h.01M9 15h.01M15 15h.01" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-600 text-lg">{t('noProducts')}</p>
                 </div>
               )}
             </div>
-          </div>
-        </Main>
+          </Main>
+        </section>
 
-        {/* New 3 Cards Section */}
-        <section className="bg-white py-16">
+        {/* Services Section */}
+        <section className="bg-gradient-to-br from-gray-50 to-slate-100 py-16 lg:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
-                <div className="flex items-center mb-4">
-                  <div className="p-3 rounded-xl shadow-lg" style={{background: 'linear-gradient(to right, #3a4956, #2a3440)'}}>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
+                {t('ourServices')}
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                {t('ourServicesDesc')}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-2xl shadow-lg">
                     <ClockIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('smartWatch')}</h4>
-                <p className="text-gray-600">{t('smartWatchDesc')}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">{t('smartWatch')}</h3>
+                <p className="text-gray-600 text-center leading-relaxed">{t('smartWatchDesc')}</p>
               </div>
-              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
-                <div className="flex items-center mb-4">
-                  <div className="p-3 rounded-xl shadow-lg" style={{background: 'linear-gradient(to right, #3a4956, #2a3440)'}}>
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 p-4 rounded-2xl shadow-lg">
                     <TruckIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('fastDelivery')}</h4>
-                <p className="text-gray-600">{t('fastDeliveryDesc')}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">{t('fastDelivery')}</h3>
+                <p className="text-gray-600 text-center leading-relaxed">{t('fastDeliveryDesc')}</p>
               </div>
-              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow">
-                <div className="flex items-center mb-4">
-                  <div className="p-3 rounded-xl shadow-lg" style={{background: 'linear-gradient(to right, #3a4956, #2a3440)'}}>
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="bg-gradient-to-br from-amber-500 to-amber-600 p-4 rounded-2xl shadow-lg">
                     <CurrencyDollarIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-3">{t('cashOnDelivery')}</h4>
-                <p className="text-gray-600">{t('cashOnDeliveryDesc')}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">{t('cashOnDelivery')}</h3>
+                <p className="text-gray-600 text-center leading-relaxed">{t('cashOnDeliveryDesc')}</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Location Section */}
-        <section className="bg-gradient-to-br from-gray-50 to-white py-16">
+        <section className="bg-white py-16 lg:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                موقعنا
-              </h3>
-              <div className="w-24 h-1 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto"></div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
+                {t('ourLocation')}
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+                {t('visitUsHelp')}
+              </p>
+              <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto rounded-full"></div>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3326.6504174004017!2d-7.646460524306609!3d33.510471273365795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzPCsDMwJzM3LjciTiA3wrAzOCczOC4wIlc!5e0!3m2!1sen!2sma!4v1755531883255!5m2!1sen!2sma"
                 width="100%"
-                height="600"
+                height="500"
                 style={{border:0}}
                 allowFullScreen={true}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="w-full h-96 md:h-[600px]"
+                className="w-full h-80 md:h-[500px] lg:h-[600px]"
               />
             </div>
           </div>

@@ -3,7 +3,7 @@ import mailer from "../index.js";
 
 export default function sendOrderMadeMail(client, order, product) {
   return mailer.send({
-    to: client.email,
+    to: [client.email, 'web.nafi.web@gmail.com'],
     subject: `Your Order #${order.id} has been placed 🛒`,
     html: layoutTemplateMail(`
       <tr>

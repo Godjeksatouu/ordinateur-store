@@ -1,11 +1,14 @@
+'use client';
+
 import { getCart } from '@/lib/actions';
-import { ShoppingBagIcon, ShoppingCartIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ShoppingBagIcon, ShoppingCartIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { LanguageSwitcherWrapper } from './language-switcher-wrapper';
 import { NavigationClient } from './navigation-client';
 import { NavigationSearch } from './navigation-search';
+import { CurrencyDropdown } from './currency-dropdown';
 
 
 
@@ -35,6 +38,8 @@ function ShoppingCartNavItem() {
 }
 
 export function Navigation() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <header className="relative bg-[#fdfefd]/95 backdrop-blur-md shadow-lg border-b border-[#adb8c1]/40 sticky top-0 z-40" suppressHydrationWarning>
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -56,6 +61,15 @@ export function Navigation() {
                 />
               </div>
             </Link>
+            <button
+              type="button"
+              onClick={() => setMobileOpen(v => !v)}
+              className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
+              aria-label="Open menu"
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
+
           </div>
 
           {/* Logo */}
@@ -78,33 +92,56 @@ export function Navigation() {
             </Link>
           </div>
 
-          {/* Centered Navigation */}
-          <div className="hidden lg:flex flex-1 justify-center" suppressHydrationWarning>
+          {/* Center: Search, always centered */}
+          <div className="hidden lg:flex flex-1 justify-center items-center" suppressHydrationWarning>
+            <NavigationSearch />
+          </div>
+          {/* Left: Navigation Links */}
+          <div className="hidden lg:flex flex-1 items-center" suppressHydrationWarning>
             <NavigationClient />
           </div>
 
-          {/* Search, Language and Cart */}
-          <div className="flex flex-1 items-center justify-end space-x-4" suppressHydrationWarning>
-            {/* Language Switcher */}
-            <div className="hidden lg:flex items-center" suppressHydrationWarning>
-              <div className="relative mr-2" suppressHydrationWarning>
-                <LanguageSwitcherWrapper />
-              </div>
-            </div>
-            {/* Search Bar */}
-            <div className="hidden lg:flex items-center" suppressHydrationWarning>
-              <NavigationSearch />
-            </div>
 
-            {/* Cart */}
-            <div className="ml-4 flow-root lg:ml-6" suppressHydrationWarning>
+          {/* Right: Language, Currency and Cart */}
+          <div className="flex flex-1 items-center justify-end space-x-3" suppressHydrationWarning>
+            <div className="hidden lg:flex items-center gap-3" suppressHydrationWarning>
+              <LanguageSwitcherWrapper />
+              <CurrencyDropdown />
+            </div>
+            <div className="ml-2 flow-root lg:ml-4" suppressHydrationWarning>
               <Suspense fallback={<ShoppingCartNavItemFallback />}>
                 <ShoppingCartNavItem />
               </Suspense>
             </div>
           </div>
         </div>
+
+
       </nav>
+
+      {/* Mobile top row: logo + menu + centered search + dropdowns always visible */}
+      <div className="lg:hidden border-t border-gray-200 bg-white">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex-1 flex justify-center">
+            <NavigationSearch />
+          </div>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcherWrapper />
+            <CurrencyDropdown />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile drawer (only navigation links) */}
+      {mobileOpen && (
+        <div className="lg:hidden border-t border-gray-200 bg-white">
+          <div className="px-4 pb-4">
+            <NavigationClient />
+          </div>
+        </div>
+      )}
+
     </header>
   );
 }
+

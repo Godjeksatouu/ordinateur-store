@@ -47,9 +47,12 @@ export const translations = {
     heroSubtitle: 'نقدم لك أفضل أجهزة الكمبيوتر المحمولة بأحدث التقنيات وأعلى معايير الجودة',
     featuredCollection: 'مجموعتنا المميزة',
 
+    featuredCollectionDesc: 'اكتشف مجموعتنا المختارة من أفضل أجهزة الكمبيوتر المحمولة',
+    ourServices: 'خدماتنا المميزة',
+    ourServicesDesc: 'نقدم لك أفضل الخدمات لضمان تجربة تسوق مميزة',
     // Services Section
-    smartWatch: 'اكتشف عالم جديد من الذكاء',
-    smartWatchDesc: 'اجعل كل يوم أفضل مع ساعة ذكية مبتكرة!',
+    smartWatch: 'اكتشف قوة الأداء مع HP',
+    smartWatchDesc: 'اجعل عملك ودراستك أفضل مع حواسيب محمولة متطورة وإكسسوارات أصلية تزيد من إنتاجيتك!',
     fastDelivery: 'التوصيل السريع',
     fastDeliveryDesc: 'خدمة التوصيل السريع في جميع انحاء المدن',
     cashOnDelivery: 'خدمة الدفع عند الاستلام',
@@ -117,7 +120,7 @@ export const translations = {
     continueShopping: 'متابعة التسوق',
     or: 'أو',
     proceedToCheckout: 'إتمام الطلب',
-    
+
     // Admin
     dashboard: 'لوحة التحكم',
     addProduct: 'إضافة منتج جديد',
@@ -147,7 +150,54 @@ export const translations = {
     saturdayToThursday: 'السبت - الخميس',
     friday: 'الجمعة',
     closed: 'مغلق',
+    weAreHereToHelp: 'نحن هنا لمساعدتك في العثور على الجهاز المثالي لاحتياجاتك',
+    visitUsHelp: 'زورونا في موقعنا أو تواصلوا معنا لأي استفسار',
     storeLocation: 'الدار البيضاء، المغرب',
+    ourLocation: 'موقعنا',
+    phone: 'الهاتف',
+    email: 'البريد الإلكتروني',
+    address: 'العنوان',
+
+    // Contact Page
+    contactInfo: 'معلومات الاتصال',
+    workingHours: 'ساعات العمل',
+    sendMessage: 'أرسل لنا رسالة',
+    subject: 'الموضوع',
+    message: 'الرسالة',
+    sendMessageBtn: 'إرسال الرسالة',
+    saturdayToThursday: 'السبت - الخميس 9:00 ص - 6:00 م',
+    friday: 'الجمعة مغلق',
+    closed: 'مغلق',
+    available: 'متوفر',
+
+    // Product Detail Page
+    technicalSpecs: 'المواصفات التقنية',
+    orderNowBtn: 'اطلب الآن',
+    oneYearWarranty: 'ضمان سنة',
+    freeDelivery: 'توصيل مجاني',
+    cashOnDeliveryShort: 'الدفع عند الاستلام',
+    customerInfo: 'معلومات الزبون',
+    fillDetails: 'املأ البيانات التالية لإتمام طلبك',
+    phoneNumber: 'رقم الهاتف',
+    phoneExample: 'مثال: 0612345678',
+    city: 'المدينة',
+    cityPlaceholder: 'أدخل اسم المدينة',
+    detailedAddress: 'العنوان التفصيلي',
+    addressPlaceholder: 'أدخل عنوانك التفصيلي...',
+    promoCodeOptional: 'كود التخفيض (اختياري)',
+    promoCodePlaceholder: 'مثال: SAVE10',
+    paymentMethods: 'طرق الدفع',
+    automaticDiscount: 'خصم تلقائي',
+    storePickup: 'استلام من المتجر',
+    cashOnDeliveryFull: 'الدفع عند الاستلام',
+    cashPaymentOnDelivery: 'الدفع نقداً عند التوصيل',
+    securePayment: 'دفع آمن',
+    marketingConsent: 'أوافق على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني',
+    priceDetails: 'تفاصيل السعر:',
+    originalPrice: 'السعر الأصلي',
+    finalTotal: 'المجموع النهائي',
+    orderButton: 'اضغط هنا للطلب',
+    cancel: 'إلغاء',
 
     // Category Page
     category: 'الفئة',
@@ -188,8 +238,11 @@ export const translations = {
 
     // Top Banner
     topBannerWelcome: 'مرحبًا بك في متجرنا! احصل على خصومات مذهلة وعروض رائعة.',
+
+    // Developer Credit
+    developed: 'تم التطوير بواسطة',
   },
-  
+
   en: {
     // Navigation
     home: 'Home',
@@ -233,6 +286,9 @@ export const translations = {
     no: 'No',
     imageNotAvailable: 'Image not available',
 
+    featuredCollectionDesc: 'Discover our handpicked selection of top laptops',
+    ourServices: 'Our Premium Services',
+    ourServicesDesc: 'We provide you with the best services to ensure a great shopping experience',
     // Homepage
     heroTitle: 'Experience the Best Computer Awaits You',
     heroSubtitle: 'We offer you the best laptops with the latest technology and highest quality standards',
@@ -264,7 +320,7 @@ export const translations = {
     afterDiscount: 'After Discount',
     finalPrice: 'Final Price',
     youSaved: 'You Saved',
-    
+
     // Services
     fastDelivery: 'Fast Delivery',
     fastDeliveryDesc: 'Fast delivery service in all cities',
@@ -308,7 +364,7 @@ export const translations = {
     continueShopping: 'Continue Shopping',
     or: 'or',
     proceedToCheckout: 'Proceed to Checkout',
-    
+
     // Admin
     dashboard: 'Dashboard',
     addProduct: 'Add New Product',
@@ -331,6 +387,8 @@ export const translations = {
     // Contact Page
     contactInfo: 'Contact Information',
     workingHours: 'Working Hours',
+    weAreHereToHelp: 'We are here to help you find the perfect device for your needs',
+    visitUsHelp: 'Visit us at our location or contact us for any inquiries',
     sendMessage: 'Send us a message',
     subject: 'Subject',
     message: 'Message',
@@ -339,6 +397,51 @@ export const translations = {
     friday: 'Friday',
     closed: 'Closed',
     storeLocation: 'Casablanca, Morocco',
+    ourLocation: 'Our Location',
+    phone: 'Phone',
+    email: 'Email',
+    address: 'Address',
+
+    // Contact Page
+    contactInfo: 'Contact Information',
+    workingHours: 'Working Hours',
+    sendMessage: 'Send us a message',
+    subject: 'Subject',
+    message: 'Message',
+    sendMessageBtn: 'Send Message',
+    saturdayToThursday: 'Saturday - Thursday 9:00 AM - 6:00 PM',
+    friday: 'Friday Closed',
+    closed: 'Closed',
+    available: 'Available',
+
+    // Product Detail Page
+    technicalSpecs: 'Technical Specifications',
+    orderNowBtn: 'Order Now',
+    oneYearWarranty: 'One Year Warranty',
+    freeDelivery: 'Free Delivery',
+    cashOnDeliveryShort: 'Cash on Delivery',
+    customerInfo: 'Customer Information',
+    fillDetails: 'Fill in the following details to complete your order',
+    phoneNumber: 'Phone Number',
+    phoneExample: 'Example: 0612345678',
+    city: 'City',
+    cityPlaceholder: 'Enter city name',
+    detailedAddress: 'Detailed Address',
+    addressPlaceholder: 'Enter your detailed address...',
+    promoCodeOptional: 'Promo Code (Optional)',
+    promoCodePlaceholder: 'Example: SAVE10',
+    paymentMethods: 'Payment Methods',
+    automaticDiscount: 'Automatic Discount',
+    storePickup: 'Store Pickup',
+    cashOnDeliveryFull: 'Cash on Delivery',
+    cashPaymentOnDelivery: 'Cash payment on delivery',
+    securePayment: 'Secure Payment',
+    marketingConsent: 'I agree to receive the latest offers and products via email',
+    priceDetails: 'Price Details:',
+    originalPrice: 'Original Price',
+    finalTotal: 'Final Total',
+    orderButton: 'Click here to order',
+    cancel: 'Cancel',
 
     // Category Page
     category: 'Category',
@@ -379,8 +482,11 @@ export const translations = {
 
     // Top Banner
     topBannerWelcome: 'Welcome to our store! Get amazing discounts and great offers.',
+
+    // Developer Credit
+    developed: 'Developed by',
   },
-  
+
   fr: {
     // Navigation
     home: 'Accueil',
@@ -420,6 +526,9 @@ export const translations = {
     edit: 'Modifier',
     delete: 'Supprimer',
     confirm: 'Confirmer',
+    featuredCollectionDesc: 'Découvrez notre sélection d’ordinateurs portables',
+    ourServices: 'Nos Services Premium',
+    ourServicesDesc: 'Nous vous proposons les meilleurs services pour une expérience d’achat exceptionnelle',
     yes: 'Oui',
     no: 'Non',
     imageNotAvailable: 'Image non disponible',
@@ -455,7 +564,7 @@ export const translations = {
     afterDiscount: 'Après Remise',
     finalPrice: 'Prix Final',
     youSaved: 'Vous avez économisé',
-    
+
     // Services
     fastDelivery: 'Livraison Rapide',
     fastDeliveryDesc: 'Service de livraison rapide dans toutes les villes',
@@ -463,6 +572,8 @@ export const translations = {
     cashOnDeliveryDesc: 'Achetez en ligne dans le magasin et payez en espèces à la livraison.',
     smartWatch: 'Découvrez un Nouveau Monde d\'Intelligence',
     smartWatchDesc: 'Rendez chaque jour meilleur avec une montre intelligente innovante!',
+    weAreHereToHelp: 'Nous sommes là pour vous aider à trouver l’appareil idéal pour vos besoins',
+    visitUsHelp: 'Visitez-nous sur place ou contactez-nous pour toute question',
 
     // Footer
     storeName: 'Magasin d\'Ordinateurs',
@@ -476,8 +587,23 @@ export const translations = {
     returnPolicy: 'Politique de Retour',
     contactUs: 'Contactez-nous',
     phone: 'Téléphone',
+    email: 'Email',
+    address: 'Adresse',
     storeAddress: 'Casablanca, Maroc',
+    ourLocation: 'Notre Emplacement',
     allRightsReserved: 'Tous droits réservés',
+
+    // Contact Page
+    contactInfo: 'Informations de Contact',
+    workingHours: 'Heures de Travail',
+    sendMessage: 'Envoyez-nous un message',
+    subject: 'Sujet',
+    message: 'Message',
+    sendMessageBtn: 'Envoyer le Message',
+    saturdayToThursday: 'Samedi - Jeudi 9h00 - 18h00',
+    friday: 'Vendredi Fermé',
+    closed: 'Fermé',
+    available: 'Disponible',
 
     // WhatsApp & Contact
     whatsappMessage: 'Bonjour, je voudrais me renseigner sur les ordinateurs portables disponibles',
@@ -493,7 +619,7 @@ export const translations = {
     continueShopping: 'Continuer les Achats',
     or: 'ou',
     proceedToCheckout: 'Finaliser la Commande',
-    
+
     // Admin
     dashboard: 'Tableau de Bord',
     addProduct: 'Ajouter un Nouveau Produit',
@@ -515,8 +641,40 @@ export const translations = {
 
     // Top Banner
     topBannerWelcome: 'Bienvenue dans notre magasin! Obtenez des remises incroyables et de superbes offres.',
+
+    // Developer Credit
+    developed: 'Développé par',
+
+    // Product Detail Page
+    technicalSpecs: 'Spécifications Techniques',
+    orderNowBtn: 'Commander Maintenant',
+    oneYearWarranty: 'Garantie Un An',
+    freeDelivery: 'Livraison Gratuite',
+    cashOnDeliveryShort: 'Paiement à la Livraison',
+    customerInfo: 'Informations Client',
+    fillDetails: 'Remplissez les détails suivants pour compléter votre commande',
+    phoneNumber: 'Numéro de Téléphone',
+    phoneExample: 'Exemple: 0612345678',
+    city: 'Ville',
+    cityPlaceholder: 'Entrez le nom de la ville',
+    detailedAddress: 'Adresse Détaillée',
+    addressPlaceholder: 'Entrez votre adresse détaillée...',
+    promoCodeOptional: 'Code Promo (Optionnel)',
+    promoCodePlaceholder: 'Exemple: SAVE10',
+    paymentMethods: 'Méthodes de Paiement',
+    automaticDiscount: 'Remise Automatique',
+    storePickup: 'Retrait en Magasin',
+    cashOnDeliveryFull: 'Paiement à la Livraison',
+    cashPaymentOnDelivery: 'Paiement en espèces à la livraison',
+    securePayment: 'Paiement Sécurisé',
+    marketingConsent: 'J\'accepte de recevoir les dernières offres et produits par email',
+    priceDetails: 'Détails du Prix:',
+    originalPrice: 'Prix Original',
+    finalTotal: 'Total Final',
+    orderButton: 'Cliquez ici pour commander',
+    cancel: 'Annuler',
   },
-  
+
   es: {
     // Navigation
     home: 'Inicio',
@@ -524,12 +682,12 @@ export const translations = {
     contact: 'Contacto',
     cart: 'Carrito',
     search: 'Buscar...',
-    
+
     // Product actions
     buyNow: 'Comprar Ahora',
     orderNow: 'Pedir Ahora',
     viewDetails: 'Ver Detalles',
-    
+
     // Product specs
     ram: 'RAM',
     storage: 'Almacenamiento',
@@ -544,13 +702,16 @@ export const translations = {
     'slider.screenFHD': '14″ Full HD',
     'slider.screenTouch': '14″ FHD TÁCTIL',
     'slider.battery': 'Batería hasta 4 horas',
-    
+
     // Common
     loading: 'Cargando...',
     noProducts: 'No hay productos disponibles',
     currency: 'DH',
     imageNotAvailable: 'Imagen no disponible',
 
+    featuredCollectionDesc: 'Descubre nuestra selección de las mejores laptops',
+    ourServices: 'Nuestros Servicios Premium',
+    ourServicesDesc: 'Te ofrecemos los mejores servicios para asegurar una excelente experiencia de compra',
     // Price display
     productPrice: 'Precio del Producto',
     originalPrice: 'Precio Original',
@@ -562,8 +723,10 @@ export const translations = {
     heroTitle: 'La Mejor Experiencia de Computadora Te Espera',
     heroSubtitle: 'Te ofrecemos las mejores laptops con la última tecnología y los más altos estándares de calidad',
     featuredCollection: 'Nuestra Colección Destacada',
-    
+
     // Services
+    weAreHereToHelp: 'Estamos aquí para ayudarte a encontrar el dispositivo perfecto para tus necesidades',
+    visitUsHelp: 'Visítanos en nuestra ubicación o contáctanos para cualquier consulta',
     fastDelivery: 'Entrega Rápida',
     fastDeliveryDesc: 'Servicio de entrega rápida en todas las ciudades',
     cashOnDelivery: 'Servicio de Pago Contra Entrega',
@@ -585,8 +748,26 @@ export const translations = {
     phone: 'Teléfono',
     email: 'Correo Electrónico',
     address: 'Dirección',
+    phone: 'Teléfono',
+    email: 'Correo Electrónico',
+    address: 'Dirección',
     storeAddress: 'Casablanca, Marruecos',
+    ourLocation: 'Nuestra Ubicación',
     allRightsReserved: 'Todos los derechos reservados',
+
+    // Contact Page
+    contactInfo: 'Información de Contacto',
+    workingHours: 'Horarios de Trabajo',
+    sendMessage: 'Envíanos un mensaje',
+    subject: 'Asunto',
+    message: 'Mensaje',
+    sendMessageBtn: 'Enviar Mensaje',
+    saturdayToThursday: 'Sábado - Jueves',
+    friday: 'Viernes',
+    closed: 'Cerrado',
+    weAreHereToHelp: 'Estamos aquí para ayudarte a encontrar el dispositivo perfecto para tus necesidades',
+    visitUsHelp: 'Visítanos en nuestra ubicación o contáctanos para cualquier consulta',
+    storeLocation: 'Casablanca, Marruecos',
 
     // WhatsApp & Contact
     whatsappMessage: 'Hola, me gustaría consultar sobre las laptops disponibles',
@@ -602,7 +783,37 @@ export const translations = {
     continueShopping: 'Continuar Comprando',
     or: 'o',
     proceedToCheckout: 'Proceder al Pago',
-    
+
+    // Product Detail Page
+    technicalSpecs: 'Especificaciones Técnicas',
+    orderNowBtn: 'Pedir Ahora',
+    oneYearWarranty: 'Garantía de Un Año',
+    freeDelivery: 'Entrega Gratuita',
+    cashOnDeliveryShort: 'Pago Contra Entrega',
+    customerInfo: 'Información del Cliente',
+    fillDetails: 'Complete los siguientes detalles para completar su pedido',
+    phoneNumber: 'Número de Teléfono',
+    phoneExample: 'Ejemplo: 0612345678',
+    city: 'Ciudad',
+    cityPlaceholder: 'Ingrese el nombre de la ciudad',
+    detailedAddress: 'Dirección Detallada',
+    addressPlaceholder: 'Ingrese su dirección detallada...',
+    promoCodeOptional: 'Código Promocional (Opcional)',
+    promoCodePlaceholder: 'Ejemplo: SAVE10',
+    paymentMethods: 'Métodos de Pago',
+    automaticDiscount: 'Descuento Automático',
+    storePickup: 'Recogida en Tienda',
+    cashOnDeliveryFull: 'Pago Contra Entrega',
+    cashPaymentOnDelivery: 'Pago en efectivo contra entrega',
+    securePayment: 'Pago Seguro',
+    marketingConsent: 'Acepto recibir las últimas ofertas y productos por correo electrónico',
+    priceDetails: 'Detalles del Precio:',
+    originalPrice: 'Precio Original',
+    finalTotal: 'Total Final',
+    orderButton: 'Haga clic aquí para ordenar',
+    cancel: 'Cancelar',
+    available: 'Disponible',
+
     // Admin
     dashboard: 'Panel de Control',
     addProduct: 'Agregar Nuevo Producto',
@@ -624,6 +835,9 @@ export const translations = {
 
     // Top Banner
     topBannerWelcome: '¡Bienvenido a nuestra tienda! Obtén descuentos increíbles y ofertas geniales.',
+
+    // Developer Credit
+    developed: 'Desarrollado por',
   }
 };
 
@@ -631,13 +845,13 @@ export function getTranslation(locale: string, key: string, params?: Record<stri
   const lang = locale in translations ? locale as keyof typeof translations : 'ar';
   const t = translations[lang];
   let text = (t as any)[key] || translations.ar[key as keyof typeof translations.ar] || key;
-  
+
   // Simple parameter replacement
   if (params) {
     Object.entries(params).forEach(([param, value]) => {
       text = text.replace(`{${param}}`, String(value));
     });
   }
-  
+
   return text;
 }

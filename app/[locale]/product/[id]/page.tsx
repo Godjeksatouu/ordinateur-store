@@ -9,6 +9,8 @@ import { getProductById, Product } from '@/lib/products';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '@/hooks/use-translations';
 import { API_BASE_URL } from '@/lib/config';
+import { FacebookPixel } from '@/lib/facebook-pixel';
+import { useCurrency } from '@/components/currency-context';
 
 interface OrderForm {
   fullName: string;
@@ -263,13 +265,23 @@ export default function LocalizedProductDetailsPage() {
               (product.new_price * promoValidation.discount / 100) :
               promoValidation.discount) : 0,
           quantity: 1,
-          categoryId: null // Will be implemented when categories are linked to products
+          categoryId: null, // Will be implemented when categories are linked to products
+          currency: currency
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        // Track Facebook Pixel purchase event
+        const { currency } = useCurrency();
+        FacebookPixel.purchase(finalPrice, currency, {
+          content_ids: [product.id.toString()],
+          content_name: product.name,
+          content_type: 'product',
+          num_items: 1
+        });
+
         setOrderSuccess(true);
         setShowOrderForm(false);
         setOrderForm({
@@ -740,8 +752,121 @@ export default function LocalizedProductDetailsPage() {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <ProductReviews productId={productId} />
       </Main>
       </div>
     </PublicLayout>
+  );
+}
+
+// Reviews Component
+function ProductReviews({ productId }: { productId: string }) {
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { t } = useTranslations();
+
+  useEffect(() => {
+    fetchReviews();
+  }, [productId]);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reviews?product_id=${productId}`);
+      const data = await response.json();
+      setReviews(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      setReviews([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span key={i} className={i < rating ? 'text-yellow-400' : 'text-gray-300'}>
+        ⭐
+      </span>
+    ));
+  };
+
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+    : 0;
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <p className="mt-2 text-gray-600">جاري تحميل المراجعات...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">⭐ آراء العملاء</h2>
+          <p className="text-gray-600">لا توجد مراجعات لهذا المنتج بعد</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-12 bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">⭐ آراء العملاء</h2>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex">{renderStars(Math.round(averageRating))}</div>
+            <span className="text-lg font-semibold text-gray-700">
+              {averageRating.toFixed(1)} من 5
+            </span>
+            <span className="text-gray-500">({reviews.length} مراجعة)</span>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {reviews.map((review) => (
+            <div key={review.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-gray-900">{review.name || 'عميل'}</span>
+                    <div className="flex">{renderStars(review.rating)}</div>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {new Date(review.created_at).toLocaleDateString('ar-SA')}
+                  </p>
+                </div>
+              </div>
+
+              {review.comment && (
+                <p className="text-gray-700 mb-4 leading-relaxed">{review.comment}</p>
+              )}
+
+              {review.photos && review.photos.length > 0 && (
+                <div className="flex gap-3 flex-wrap">
+                  {review.photos.map((photo: string, index: number) => (
+                    <img
+                      key={index}
+                      src={`${API_BASE_URL}${photo}`}
+                      alt={`Review photo ${index + 1}`}
+                      className="h-20 w-20 rounded-lg object-cover border border-gray-200"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from '@/hooks/use-translations';
+import { useCurrency } from '@/components/currency-context';
 import { CartItem } from '@/components/utils/cart-types';
 
 function OrderSummaryFallback() {
@@ -35,14 +36,20 @@ function OrderSummaryContentClient({
   total: number;
   qualifyingForFreeDelivery: boolean;
 }) {
+  const [mounted, setMounted] = useState(false);
+  const { format } = useCurrency();
   const { t } = useTranslations();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="mt-6 space-y-4">
       <div className="flex items-center justify-between group hover:bg-gray-50 p-2 rounded-lg transition-all duration-300">
         <p className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors duration-300">{t('subtotal')}</p>
         <p className="text-sm font-medium text-gray-900 group-hover:text-gray-800 transition-colors duration-300">
-          {subtotal.toLocaleString()} {t('currency')}
+          {mounted ? format(subtotal) : `${subtotal.toLocaleString()} DH`}
         </p>
       </div>
       <div className="flex items-center justify-between border-t border-gray-200 pt-4 group hover:bg-gray-50 p-2 rounded-lg transition-all duration-300">
@@ -50,20 +57,20 @@ function OrderSummaryContentClient({
         {qualifyingForFreeDelivery ? (
           <p className="text-sm font-medium text-gray-900 group-hover:text-gray-800 transition-colors duration-300">
             <span className="line-through font-normal">
-              {shipping.toLocaleString()} {t('currency')}
+              {mounted ? format(shipping) : `${shipping.toLocaleString()} DH`}
             </span>{' '}
             <span className="text-green-600 font-semibold">{t('free')}</span>
           </p>
         ) : (
           <p className="text-sm font-medium text-gray-900 group-hover:text-gray-800 transition-colors duration-300">
-            {shipping.toLocaleString()} {t('currency')}
+            {mounted ? format(shipping) : `${shipping.toLocaleString()} DH`}
           </p>
         )}
       </div>
       <div className="flex items-center justify-between border-t border-gray-200 pt-4 group hover:bg-gray-50 p-2 rounded-lg transition-all duration-300">
         <div className="text-base font-medium text-gray-900 group-hover:text-gray-800 transition-colors duration-300">{t('total')}</div>
         <div className="text-base font-medium text-gray-900 group-hover:text-gray-800 transition-colors duration-300">
-          {total.toLocaleString()} {t('currency')}
+          {mounted ? format(total) : `${total.toLocaleString()} DH`}
         </div>
       </div>
     </div>

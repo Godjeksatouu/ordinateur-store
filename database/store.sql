@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Aug 17, 2025 at 04:28 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Hôte : 127.0.0.1
+-- Généré le : mar. 19 août 2025 à 08:14
+-- Version du serveur : 10.4.32-MariaDB
+-- Version de PHP : 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `store`
+-- Base de données : `store`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `categorie`
+-- Structure de la table `categorie`
 --
 
 CREATE TABLE `categorie` (
@@ -39,7 +39,7 @@ CREATE TABLE `categorie` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `categories`
+-- Structure de la table `categories`
 --
 
 CREATE TABLE `categories` (
@@ -50,7 +50,7 @@ CREATE TABLE `categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `categories`
+-- Déchargement des données de la table `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`, `created_at`, `updated_at`) VALUES
@@ -59,7 +59,7 @@ INSERT INTO `categories` (`id`, `name`, `created_at`, `updated_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `clients`
+-- Structure de la table `clients`
 --
 
 CREATE TABLE `clients` (
@@ -72,18 +72,10 @@ CREATE TABLE `clients` (
   `email` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `clients`
---
-
-INSERT INTO `clients` (`id`, `full_name`, `phone`, `city`, `address`, `created_at`, `email`) VALUES
-(5, 'Mohamedamine Satou', '0766376427', 'CASABLANCA', '78 lotissement lina etg 2 appt 15 fb 3 n', '2025-08-17 13:35:14', 'aminemohamedsatou@gmail.com'),
-(6, 'Hanane elyazidi', '0637195317', 'Ben ahmed', '70 rue belaassilia db el koura', '2025-08-17 13:36:47', 'godjekbusiness@gmail.com');
-
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orders`
+-- Structure de la table `orders`
 --
 
 CREATE TABLE `orders` (
@@ -105,18 +97,44 @@ CREATE TABLE `orders` (
   `virement_discount` decimal(10,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `orders`
+-- Structure de la table `payment_methods`
 --
 
-INSERT INTO `orders` (`id`, `client_id`, `product_id`, `product_name`, `status`, `created_at`, `updated_at`, `code_promo`, `payment_method`, `quantity`, `category_id`, `original_price`, `final_price`, `discount_amount`, `promo_discount`, `virement_discount`) VALUES
-(6, 5, 6, 'HP Elitebook 840 G7', 'confirme', '2025-08-17 13:35:14', '2025-08-17 13:37:04', NULL, 'Cashplus', 1, NULL, 3299.00, 3299.00, 0.00, 0.00, 0.00),
-(7, 6, 6, 'HP Elitebook 840 G7', 'confirme', '2025-08-17 13:36:47', '2025-08-17 13:37:03', '123', 'Virement bancaire', 1, NULL, 3299.00, 3099.00, 100.00, 100.00, 100.00);
+CREATE TABLE `payment_methods` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `name_ar` varchar(100) NOT NULL,
+  `name_en` varchar(100) NOT NULL,
+  `name_fr` varchar(100) NOT NULL,
+  `name_es` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `description_ar` varchar(255) DEFAULT NULL,
+  `description_en` varchar(255) DEFAULT NULL,
+  `description_fr` varchar(255) DEFAULT NULL,
+  `description_es` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
+  `discount_type` enum('fixed','percentage') DEFAULT 'fixed',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `payment_methods`
+--
+
+INSERT INTO `payment_methods` (`id`, `name`, `name_ar`, `name_en`, `name_fr`, `name_es`, `description`, `description_ar`, `description_en`, `description_fr`, `description_es`, `is_active`, `discount_amount`, `discount_type`, `created_at`) VALUES
+(1, 'Cashplus', 'كاش بلوس', 'Cashplus', 'Cashplus', 'Cashplus', 'RIB: 123 456 789 000 000 000 12', 'RIB: 123 456 789 000 000 000 12', 'RIB: 123 456 789 000 000 000 12', 'RIB: 123 456 789 000 000 000 12', 'RIB: 123 456 789 000 000 000 12', 1, 0.00, 'fixed', '2025-08-18 17:47:37'),
+(2, 'Virement bancaire', 'تحويل بنكي', 'Bank Transfer', 'Virement bancaire', 'Transferencia bancaria', 'RIB: 987 654 321 000 000 000 34', 'RIB: 987 654 321 000 000 000 34', 'RIB: 987 654 321 000 000 000 34', 'RIB: 987 654 321 000 000 000 34', 'RIB: 987 654 321 000 000 000 34', 1, 100.00, 'fixed', '2025-08-18 17:47:37'),
+(3, 'Retrait au Magasin', 'استلام من المتجر', 'Store Pickup', 'Retrait au Magasin', 'Recogida en tienda', 'استلام من المتجر', 'استلام من المتجر', 'Store pickup', 'Retrait au magasin', 'Recogida en tienda', 1, 0.00, 'fixed', '2025-08-18 17:47:37'),
+(4, 'Cash on Delivery', 'الدفع عند الاستلام', 'Cash on Delivery', 'Paiement à la livraison', 'Pago contra entrega', 'الدفع نقداً عند التوصيل', 'الدفع نقداً عند التوصيل', 'Pay cash upon delivery', 'Payer en espèces à la livraison', 'Pagar en efectivo al entregar', 1, 0.00, 'fixed', '2025-08-18 17:47:37');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `products`
+-- Structure de la table `products`
 --
 
 CREATE TABLE `products` (
@@ -142,7 +160,7 @@ CREATE TABLE `products` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `products`
+-- Déchargement des données de la table `products`
 --
 
 INSERT INTO `products` (`id`, `name`, `ram`, `storage`, `screen`, `graphics`, `os`, `old_price`, `new_price`, `images`, `description`, `created_at`, `updated_at`, `processor`, `main_images`, `optional_images`, `category_id`, `promo_code`, `promo_type`) VALUES
@@ -154,7 +172,7 @@ INSERT INTO `products` (`id`, `name`, `ram`, `storage`, `screen`, `graphics`, `o
 -- --------------------------------------------------------
 
 --
--- Table structure for table `promo_codes`
+-- Structure de la table `promo_codes`
 --
 
 CREATE TABLE `promo_codes` (
@@ -172,16 +190,16 @@ CREATE TABLE `promo_codes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `promo_codes`
+-- Déchargement des données de la table `promo_codes`
 --
 
 INSERT INTO `promo_codes` (`id`, `name`, `code`, `type`, `value`, `applies_to`, `product_ids`, `commercial_name`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'AZ', '123', 'fixed', 100.00, 'all', '[]', 'SATOU', 1, '2025-08-17 13:36:19', '2025-08-17 13:36:19');
+(1, 'az', '789', 'percentage', 5.00, 'all', '[]', 'sat', 1, '2025-08-19 06:07:21', '2025-08-19 06:07:21');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Structure de la table `users`
 --
 
 CREATE TABLE `users` (
@@ -193,7 +211,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Déchargement des données de la table `users`
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`) VALUES
@@ -205,30 +223,30 @@ INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`) VALUES
 (6, 'admin@example.com', '$2a$10$iK8T16AB8RIEjFg0hKnLmOg3XTefl9U63K3uQBQMdpbItQr3atKrK', 'super_admin', '2025-08-16 09:42:13');
 
 --
--- Indexes for dumped tables
+-- Index pour les tables déchargées
 --
 
 --
--- Indexes for table `categorie`
+-- Index pour la table `categorie`
 --
 ALTER TABLE `categorie`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `categories`
+-- Index pour la table `categories`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Indexes for table `clients`
+-- Index pour la table `clients`
 --
 ALTER TABLE `clients`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `orders`
+-- Index pour la table `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
@@ -236,77 +254,89 @@ ALTER TABLE `orders`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `products`
+-- Index pour la table `payment_methods`
+--
+ALTER TABLE `payment_methods`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `promo_codes`
+-- Index pour la table `promo_codes`
 --
 ALTER TABLE `promo_codes`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
 --
--- Indexes for table `users`
+-- Index pour la table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT pour les tables déchargées
 --
 
 --
--- AUTO_INCREMENT for table `categorie`
+-- AUTO_INCREMENT pour la table `categorie`
 --
 ALTER TABLE `categorie`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `categories`
+-- AUTO_INCREMENT pour la table `categories`
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `clients`
+-- AUTO_INCREMENT pour la table `clients`
 --
 ALTER TABLE `clients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT for table `orders`
+-- AUTO_INCREMENT pour la table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
--- AUTO_INCREMENT for table `products`
+-- AUTO_INCREMENT pour la table `payment_methods`
+--
+ALTER TABLE `payment_methods`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT pour la table `products`
 --
 ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `promo_codes`
+-- AUTO_INCREMENT pour la table `promo_codes`
 --
 ALTER TABLE `promo_codes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT pour la table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- Constraints for dumped tables
+-- Contraintes pour les tables déchargées
 --
 
 --
--- Constraints for table `orders`
+-- Contraintes pour la table `orders`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`),

@@ -13,6 +13,7 @@ export async function generateStaticParams() {
 
 export default function Page(props: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   return <ClientPage {...props} />;
 }

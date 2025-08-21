@@ -31,12 +31,12 @@ export function NavigationClient() {
   ];
 
   return (
-    <div className="flex space-x-2">
+    <div className="flex space-x-1 lg:space-x-2">
       {navigation.map((item) => (
         <Link
           key={item.name}
           href={item.href}
-          className="relative px-6 py-3 text-lg font-semibold text-[#262a2f] hover:text-[#6188a4] transition-all duration-300 rounded-xl hover:bg-[#adb8c1]/30 group"
+          className="relative px-3 lg:px-4 xl:px-6 py-3 text-sm lg:text-base xl:text-lg font-semibold text-[#262a2f] hover:text-[#6188a4] transition-all duration-300 rounded-xl hover:bg-[#adb8c1]/30 group whitespace-nowrap"
         >
           {item.name}
           <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-[#6188a4] to-[#262a2f] group-hover:w-full group-hover:left-0 transition-all duration-300"></span>

@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    ppr: 'incremental',
-  },
   images: {
     remotePatterns: [
       {
@@ -13,6 +10,7 @@ const nextConfig = {
       },
     ],
   },
+  // Note: Removed experimental.ppr to fix searchParams._debugInfo hydration error
 };
 
 export default nextConfig;

@@ -1,10 +1,12 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from '@/hooks/use-translations';
 import { Product } from '@/lib/products';
 import { API_BASE_URL } from '@/lib/config';
+import { useCurrency } from './currency-context';
 
 interface Props {
   product: Product;
@@ -12,7 +14,13 @@ interface Props {
 }
 
 export default function ProductCardModern({ product, showCTA = true }: Props) {
+  const [mounted, setMounted] = useState(false);
   const { t, locale } = useTranslations();
+  const { format } = useCurrency();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const hasDiscount = !!product.old_price && product.old_price > product.new_price;
   const discountPct = hasDiscount
     ? Math.round(((product.old_price! - product.new_price) / product.old_price!) * 100)
@@ -53,7 +61,7 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
           {product.name}
         </h3>
 
-        <dl className="grid grid-cols-2 gap-2 text-xs md:text-sm mb-4">
+        <dl className="hidden sm:grid grid-cols-2 gap-2 text-xs md:text-sm mb-4">
           {product.ram && (
             <div className="rounded-lg bg-muted/20 p-2">
               <dt className="text-dark/70">{t('ram')}</dt>
@@ -80,7 +88,7 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
             {product.old_price && product.old_price > 0 && (
               <div className="flex items-center justify-between mb-1">
                 <div className="text-xs text-dark/60 line-through">
-                  {product.old_price.toLocaleString()} {t('currency')}
+                  {mounted ? format(product.old_price) : `${product.old_price.toLocaleString()} DH`}
                 </div>
                 <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
                   -{Math.round(((product.old_price - product.new_price) / product.old_price) * 100)}%
@@ -88,11 +96,11 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
               </div>
             )}
             <div className="text-lg md:text-xl font-extrabold text-primary">
-              {product.new_price.toLocaleString()} <span className="text-xs text-dark/70">{t('currency')}</span>
+              {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
             </div>
             {product.old_price && product.old_price > 0 && (
               <div className="text-xs text-green-600 font-medium mt-1">
-                {t('youSaved')}: {(product.old_price - product.new_price).toLocaleString()} {t('currency')}
+                {t('youSaved')}: {mounted ? format(product.old_price - product.new_price) : `${(product.old_price - product.new_price).toLocaleString()} DH`}
               </div>
             )}
           </div>
