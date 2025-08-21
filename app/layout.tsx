@@ -6,8 +6,8 @@ import Script from 'next/script';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'متجر الحاسوب - أفضل أجهزة الكمبيوتر المحمولة',
-  description: 'متجر متخصص في بيع أجهزة الكمبيوتر المحمولة HP EliteBook بأفضل الأسعار',
+  title: 'Magasin d\'Ordinateurs - Les Meilleurs Ordinateurs Portables',
+  description: 'Magasin spécialisé dans la vente d\'ordinateurs portables HP EliteBook aux meilleurs prix',
 };
 
 export default function RootLayout({

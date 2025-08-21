@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const locales = ['ar', 'en', 'fr', 'es'];
-const defaultLocale = 'ar';
+const defaultLocale = 'fr';
 
 function getLocale(request: NextRequest): string {
   // Check if there is any supported locale in the pathname
@@ -37,7 +37,7 @@ export function middleware(request: NextRequest) {
   if (pathnameIsMissingLocale) {
     const locale = getLocale(request);
 
-    // For default locale (Arabic), don't add prefix to URL
+    // For default locale (French), don't add prefix to URL
     if (locale === defaultLocale) {
       return NextResponse.next();
     }

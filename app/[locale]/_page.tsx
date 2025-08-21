@@ -5,7 +5,9 @@ import { PublicLayout } from '@/components/public-layout';
 import { HydrationSafe } from '@/components/hydration-safe';
 import Image from 'next/image';
 import { fetchProducts } from '@/lib/products';
+import { fetchAccessoires, Accessoire } from '@/lib/accessoires';
 import { ProductCard } from '@/components/product-card';
+import Link from 'next/link';
 import { useTranslations } from '@/hooks/use-translations';
 import {
   ClockIcon,
@@ -63,7 +65,10 @@ export default function Page(props: {
 }) {
   const { t } = useTranslations();
   const [products, setProducts] = useState<any[]>([]);
+  const [accessoires, setAccessoires] = useState<Accessoire[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(20);
 
   // Hero slider data
   const slides = [
@@ -113,8 +118,12 @@ export default function Page(props: {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const fetchedProducts = await fetchProducts();
+        const [fetchedProducts, fetchedAccessoires] = await Promise.all([
+          fetchProducts(),
+          fetchAccessoires()
+        ]);
         setProducts(fetchedProducts);
+        setAccessoires(fetchedAccessoires);
       } catch (error) {
         console.error('Error loading products:', error);
       } finally {
@@ -124,6 +133,24 @@ export default function Page(props: {
 
     loadProducts();
   }, []);
+
+  // Combine products and accessories for display
+  const allItems = [...products, ...accessoires];
+
+  // Pagination logic
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentItems = allItems.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(allItems.length / productsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // Scroll to products section
+    const productsSection = document.getElementById('products-section');
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <PublicLayout>
@@ -235,10 +262,53 @@ export default function Page(props: {
         </div>
       </HydrationSafe>
 
+      {/* Categories Section */}
+      <section className="py-6 bg-gray-50">
+        <div className="px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4" suppressHydrationWarning>
+            {/* Laptops Card */}
+            <Link href="/categories/laptops" className="group block">
+              <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" suppressHydrationWarning>
+                <div className="aspect-[3/2] relative" suppressHydrationWarning>
+                  <img
+                    src="/images/c1.png"
+                    alt="Laptops"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      // Fallback to a gradient background if image doesn't exist
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+                    }}
+                  />
+                </div>
+              </div>
+            </Link>
+
+            {/* Accessoires Card */}
+            <Link href="/categories/accessoires" className="group block">
+              <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" suppressHydrationWarning>
+                <div className="aspect-[3/2] relative" suppressHydrationWarning>
+                  <img
+                    src="/images/c2.png"
+                    alt="Accessoires"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      // Fallback to a gradient background if image doesn't exist
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    }}
+                  />
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <div>
 
         {/* Featured Products Section */}
-        <section className="py-16 lg:py-20 bg-white">
+        <section id="products-section" className="py-16 lg:py-20 bg-white">
           <Main>
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
@@ -249,22 +319,96 @@ export default function Page(props: {
               </p>
               <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto rounded-full"></div>
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {products && products.length > 0 ? (
-                products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <div className="text-gray-400 mb-4">
-                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 9h.01M15 9h.01M9 15h.01M15 15h.01" />
-                    </svg>
-                  </div>
-                  <p className="text-gray-600 text-lg">{t('noProducts')}</p>
+            {loading ? (
+              <div className="text-center py-12" suppressHydrationWarning>
+                <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" suppressHydrationWarning></div>
+                <p className="mt-4 text-gray-600 text-lg">{t('loading')}</p>
+              </div>
+            ) : allItems.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {currentItems.map((item) => (
+                    <ProductCard key={item.id} product={item as any} />
+                  ))}
                 </div>
-              )}
-            </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-12 flex justify-center items-center space-x-2" suppressHydrationWarning>
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        currentPage === 1
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {t('previous')}
+                    </button>
+
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                      let pageNumber;
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i;
+                      } else {
+                        pageNumber = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                            currentPage === pageNumber
+                              ? 'bg-blue-600 text-white shadow-md'
+                              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        currentPage === totalPages
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {t('next')}
+                    </button>
+                  </div>
+                )}
+
+                {/* Products Count Info */}
+                <div className="mt-6 text-center text-gray-600" suppressHydrationWarning>
+                  <p>
+                    {t('showingProducts', {
+                      start: indexOfFirstProduct + 1,
+                      end: Math.min(indexOfLastProduct, allItems.length),
+                      total: allItems.length
+                    })}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 9h.01M15 9h.01M9 15h.01M15 15h.01" />
+                  </svg>
+                </div>
+                <p className="text-gray-600 text-lg">{t('noProducts')}</p>
+              </div>
+            )}
           </Main>
         </section>
 

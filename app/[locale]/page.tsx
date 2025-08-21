@@ -3,9 +3,9 @@ import ClientPage from './_page';
 // Generate static params for static export
 export async function generateStaticParams() {
   return [
+    { locale: 'fr' },
     { locale: 'ar' },
     { locale: 'en' },
-    { locale: 'fr' },
     { locale: 'es' }
   ];
 }

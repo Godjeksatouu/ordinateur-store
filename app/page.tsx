@@ -8,6 +8,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import Image from 'next/image';
 import Link from 'next/link';
 import { fetchProducts, Product } from '@/lib/products';
+import { fetchAccessoires, Accessoire } from '@/lib/accessoires';
 import { ProductCard } from '@/components/product-card';
 import {
   ClockIcon,
@@ -68,6 +69,7 @@ import { useEffect, useState } from 'react';
 export default function Page() {
   const { t } = useTranslations();
   const [products, setProducts] = useState<Product[]>([]);
+  const [accessoires, setAccessoires] = useState<Accessoire[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(20);
@@ -121,8 +123,12 @@ export default function Page() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const fetchedProducts = await fetchProducts();
+        const [fetchedProducts, fetchedAccessoires] = await Promise.all([
+          fetchProducts(),
+          fetchAccessoires()
+        ]);
         setProducts(fetchedProducts);
+        setAccessoires(fetchedAccessoires);
       } catch (error) {
         console.error('Error loading products:', error);
       } finally {
@@ -133,11 +139,14 @@ export default function Page() {
     loadProducts();
   }, []);
 
+  // Combine products and accessories for display
+  const allItems = [...products, ...accessoires];
+
   // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
-  const totalPages = Math.ceil(products.length / productsPerPage);
+  const currentItems = allItems.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(allItems.length / productsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -320,11 +329,11 @@ export default function Page() {
                 <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" suppressHydrationWarning></div>
                 <p className="mt-4 text-gray-600 text-lg">{t('loading')}</p>
               </div>
-            ) : products.length > 0 ? (
+            ) : allItems.length > 0 ? (
               <>
                 <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {currentProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                  {currentItems.map((item) => (
+                    <ProductCard key={item.id} product={item as any} />
                   ))}
                 </div>
 
@@ -340,7 +349,7 @@ export default function Page() {
                           : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                       }`}
                     >
-                      السابق
+                      {t('previous')}
                     </button>
 
                     {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -379,7 +388,7 @@ export default function Page() {
                           : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                       }`}
                     >
-                      التالي
+                      {t('next')}
                     </button>
                   </div>
                 )}
@@ -387,7 +396,11 @@ export default function Page() {
                 {/* Products Count Info */}
                 <div className="mt-6 text-center text-gray-600" suppressHydrationWarning>
                   <p>
-                    عرض {indexOfFirstProduct + 1} - {Math.min(indexOfLastProduct, products.length)} من أصل {products.length} منتج
+                    {t('showingProducts', {
+                      start: indexOfFirstProduct + 1,
+                      end: Math.min(indexOfLastProduct, allItems.length),
+                      total: allItems.length
+                    })}
                   </p>
                 </div>
               </>
