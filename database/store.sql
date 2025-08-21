@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mar. 19 août 2025 à 08:14
+-- Généré le : jeu. 21 août 2025 à 03:05
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.0.30
 
@@ -20,6 +20,33 @@ SET time_zone = "+00:00";
 --
 -- Base de données : `store`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `accessoires`
+--
+
+CREATE TABLE `accessoires` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `old_price` decimal(10,2) DEFAULT NULL,
+  `new_price` decimal(10,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`images`)),
+  `main_images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`main_images`)),
+  `optional_images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`optional_images`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `accessoires`
+--
+
+INSERT INTO `accessoires` (`id`, `name`, `old_price`, `new_price`, `description`, `category_id`, `images`, `main_images`, `optional_images`, `created_at`, `updated_at`) VALUES
+(1, 'Logitech G102 LightSync RGB (Noir)', 249.00, 199.00, 'Souris filaire pour gamer - droitier - capteur optique 8000 dpi - 6 boutons programmables - rétro-éclairage LightSync RGB', 3, '[\"/uploads/1755736346014-728577046.jpg\"]', '[\"/uploads/1755736346014-728577046.jpg\"]', '[]', '2025-08-20 21:21:07', '2025-08-21 00:32:26');
 
 -- --------------------------------------------------------
 
@@ -46,15 +73,17 @@ CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `slug` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `categories`
 --
 
-INSERT INTO `categories` (`id`, `name`, `created_at`, `updated_at`) VALUES
-(2, 'Laptops', '2025-08-17 13:04:07', '2025-08-17 13:04:07');
+INSERT INTO `categories` (`id`, `name`, `created_at`, `updated_at`, `slug`) VALUES
+(2, 'Laptops', '2025-08-17 13:04:07', '2025-08-20 22:08:31', 'laptops'),
+(3, 'Accesoires', '2025-08-20 21:14:10', '2025-08-20 22:08:31', 'accessoires');
 
 -- --------------------------------------------------------
 
@@ -71,6 +100,18 @@ CREATE TABLE `clients` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `email` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `clients`
+--
+
+INSERT INTO `clients` (`id`, `full_name`, `phone`, `city`, `address`, `created_at`, `email`) VALUES
+(13, 'Khattabi Abdelkrim', '0523408787', 'Ben AHmed', '74 derb lkora', '2025-08-20 16:26:58', 'godjeksatou@gmail.com'),
+(14, 'Khattabi Abdelkrim', '0523408787', 'Ben AHmed', '74 derb lkora', '2025-08-20 19:19:18', 'godjekdoon@gmail.com'),
+(15, 'Ibouha amine', '06587598', 'Agadir', '48498efdsg', '2025-08-20 19:52:00', 'ibouhaamin@gmail.com'),
+(16, 'Khattabi Abdelkrim', '0523408787', 'Ben AHmed', '74 derb lkora', '2025-08-20 21:52:26', 'godjekdoon@gmail.com'),
+(17, 'Nabil nabil', '06578459', 'Casablanca', '21 rue el houda lot elmouahidine', '2025-08-20 23:07:53', 'nabilelasri11@gmail.com'),
+(18, 'Test', '0656569595', 'Ben Ahmed', 'Derb si hamou Lot Almouahidin\nrue Alhouda n 21', '2025-08-20 23:12:20', 'godjekdoon@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -94,8 +135,23 @@ CREATE TABLE `orders` (
   `final_price` decimal(10,2) DEFAULT NULL,
   `discount_amount` decimal(10,2) DEFAULT 0.00,
   `promo_discount` decimal(10,2) DEFAULT 0.00,
-  `virement_discount` decimal(10,2) DEFAULT 0.00
+  `virement_discount` decimal(10,2) DEFAULT 0.00,
+  `review_token` varchar(64) DEFAULT NULL,
+  `review_used` tinyint(1) DEFAULT 0,
+  `currency` varchar(10) DEFAULT 'DH'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `orders`
+--
+
+INSERT INTO `orders` (`id`, `client_id`, `product_id`, `product_name`, `status`, `created_at`, `updated_at`, `code_promo`, `payment_method`, `quantity`, `category_id`, `original_price`, `final_price`, `discount_amount`, `promo_discount`, `virement_discount`, `review_token`, `review_used`, `currency`) VALUES
+(14, 13, 5, 'HP Elitebook 840 G6', 'livre', '2025-08-20 16:26:58', '2025-08-20 16:35:01', NULL, 'Retrait au Magasin', 1, NULL, 2899.00, 2899.00, 0.00, 0.00, 0.00, NULL, 0, 'DH'),
+(15, 14, 5, 'HP Elitebook 840 G6', 'en_attente', '2025-08-20 19:19:18', '2025-08-20 19:19:18', NULL, 'Cashplus', 1, NULL, 2899.00, 2899.00, 0.00, 0.00, 0.00, NULL, 0, 'DH'),
+(16, 15, 5, 'HP Elitebook 840 G6', 'livre', '2025-08-20 19:52:00', '2025-08-20 19:52:53', NULL, 'Cashplus', 1, NULL, 2899.00, 2899.00, 0.00, 0.00, 0.00, NULL, 0, 'DH'),
+(17, 16, 5, 'HP Elitebook 840 G6', 'livre', '2025-08-20 21:52:26', '2025-08-20 22:12:24', NULL, 'Cash on Delivery', 1, NULL, 2899.00, 2899.00, 0.00, 0.00, 0.00, 'e9ee1c2161fd7bbd11901f2557a48214ab48b6d46f6a9252024dd40699457f30', 1, 'DH'),
+(18, 17, 5, 'HP Elitebook 840 G6', 'livre', '2025-08-20 23:07:53', '2025-08-20 23:10:48', NULL, 'Retrait au Magasin', 1, NULL, 2899.00, 2899.00, 0.00, 0.00, 0.00, '91119d631c7a0c7f5e75814b0de22e27dc0f68e8e5efc6b9e8f757a42a67dd39', 0, 'DH'),
+(19, 18, 5, 'HP Elitebook 840 G6', 'livre', '2025-08-20 23:12:20', '2025-08-20 23:13:40', NULL, 'Cash on Delivery', 1, NULL, 2899.00, 2899.00, 0.00, 0.00, 0.00, '2e4319c7d1195692868a526534a397f1e0ea514d67c8b50a8ef79600acea7688', 1, 'DH');
 
 -- --------------------------------------------------------
 
@@ -164,10 +220,10 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `ram`, `storage`, `screen`, `graphics`, `os`, `old_price`, `new_price`, `images`, `description`, `created_at`, `updated_at`, `processor`, `main_images`, `optional_images`, `category_id`, `promo_code`, `promo_type`) VALUES
-(4, 'HP Elitebook 840 G5', '16GB', '256GB SSD', NULL, 'Intel UHD Graphics 620', 'Windows 11', 2599.00, 2399.00, '[\"/uploads/1755437991103-196569311.png\",\"/uploads/1755437991129-129012258.jpg\",\"/uploads/1755437991129-422970831.jpg\",\"/uploads/1755437991129-703878638.jpg\",\"/uploads/1755437991130-684606846.jpg\",\"/uploads/1755437991132-666907870.jpg\"]', 'If you’re looking for a laptop that can keep up with your demanding work schedule, then look no further than the HP Elitebook 840 g5. This laptop is a game-changer, with its impressive i5 processor, 8GB of RAM, and 256GB of storage.\r\n\r\nThe Elitebook 840 g5 is the perfect tool for professionals who need a reliable device to get the job done. Whether you’re running multiple programs at once, creating complex spreadsheets, or designing graphics, this laptop can handle it all with ease.', '2025-08-17 11:49:11', '2025-08-17 13:39:51', 'i5 8250u ', '[\"/uploads/1755437991103-196569311.png\"]', '[\"/uploads/1755437991129-129012258.jpg\",\"/uploads/1755437991129-422970831.jpg\",\"/uploads/1755437991129-703878638.jpg\",\"/uploads/1755437991130-684606846.jpg\",\"/uploads/1755437991132-666907870.jpg\"]', NULL, NULL, NULL),
-(5, 'HP Elitebook 840 G6', '16GB', '256GB SSD', NULL, 'Intel UHD Graphics 620', 'Windows 11', 3299.00, 2899.00, '[\"/uploads/1755437967225-151293338.png\",\"/uploads/1755437967251-817500473.jpg\",\"/uploads/1755437967251-380149911.jpg\",\"/uploads/1755437967252-121564827.jpg\",\"/uploads/1755437967252-528342959.jpg\",\"/uploads/1755437967254-317703579.jpg\"]', 'Le HP EliteBook 840 G6 est un ordinateur portable haut de gamme conçu pour les professionnels. Il arbore un design élégant et professionnel avec un châssis léger et fin. L\'écran de 14 pouces offre une résolution Full HD ou supérieure, et peut être doté d\'une fonctionnalité tactile. Avec des performances puissantes grâce à son processeur Intel Core i5 ou i7 et jusqu\'à 32 Go de RAM, cet ordinateur portable offre une expérience fluide et efficace.', '2025-08-17 11:51:00', '2025-08-17 13:39:27', 'i5-8365U', '[\"/uploads/1755437967225-151293338.png\"]', '[\"/uploads/1755437967251-817500473.jpg\",\"/uploads/1755437967251-380149911.jpg\",\"/uploads/1755437967252-121564827.jpg\",\"/uploads/1755437967252-528342959.jpg\",\"/uploads/1755437967254-317703579.jpg\"]', NULL, NULL, NULL),
-(6, 'HP Elitebook 840 G7', '16GB', '256GB SSD', NULL, 'Intel UHD Graphics 620', 'Windows 11', 3699.00, 3299.00, '[\"/uploads/1755438018355-351456566.png\",\"/uploads/1755438018382-643720072.jpg\",\"/uploads/1755438018383-664632599.jpg\",\"/uploads/1755438018383-505154796.jpg\",\"/uploads/1755438018383-262848783.jpg\"]', '1J5Y0EA PC Portable - HP Elitebook 840 G7 Processeur Intel Core i5-10310U Disque dur 1To SSD, RAM 16 Go DDR4 ,Reseau WIFI et bluetooth, Lecteur d\'empreintes digitales, Windows 10 Pro, Ecran 14 pouces LED FHD, GARANTIE 3 Mois à 4080,00 MAD Disponible et pas cher - Livraison gratuite – Access computer est le spécialiste de la marque HP au Maroc', '2025-08-17 11:52:35', '2025-08-17 13:40:18', 'i5-10310U', '[\"/uploads/1755438018355-351456566.png\"]', '[\"/uploads/1755438018382-643720072.jpg\",\"/uploads/1755438018383-664632599.jpg\",\"/uploads/1755438018383-505154796.jpg\",\"/uploads/1755438018383-262848783.jpg\"]', NULL, NULL, NULL),
-(7, 'HP Elitebook 840 G8', '16GB', '256GB SSD', NULL, 'Intel UHD Graphics 620', 'Windows 11', 4899.00, 4499.00, '[\"/uploads/1755437860168-639136134.png\",\"/uploads/1755437860210-966312933.jpg\",\"/uploads/1755437860211-220676830.jpg\",\"/uploads/1755437860212-840072405.jpg\",\"/uploads/1755437860213-544957566.jpg\",\"/uploads/1755437860218-838953440.jpg\"]', 'HP EliteBook 840 G8 (336M4EA) (336M4EA#ABF) sur Access computer, n°1 du high-tech. Intel Core i5-1135G7 16 Go SSD 512 Go 14\" LED Full HD Wi-Fi AX/Bluetooth Webcam Windows 10 Professionnel 64 bits.', '2025-08-17 11:53:50', '2025-08-17 13:37:40', 'i5-1145G7', '[\"/uploads/1755437860168-639136134.png\"]', '[\"/uploads/1755437860210-966312933.jpg\",\"/uploads/1755437860211-220676830.jpg\",\"/uploads/1755437860212-840072405.jpg\",\"/uploads/1755437860213-544957566.jpg\",\"/uploads/1755437860218-838953440.jpg\"]', NULL, NULL, NULL);
+(4, 'HP Elitebook 840 G5', '16GB', '256GB SSD', NULL, 'Intel UHD Graphics 620', 'Windows 11', 2599.00, 2399.00, '[]', 'If you’re looking for a laptop that can keep up with your demanding work schedule, then look no further than the HP Elitebook 840 g5. This laptop is a game-changer, with its impressive i5 processor, 8GB of RAM, and 256GB of storage.\r\n\r\nThe Elitebook 840 g5 is the perfect tool for professionals who need a reliable device to get the job done. Whether you’re running multiple programs at once, creating complex spreadsheets, or designing graphics, this laptop can handle it all with ease.', '2025-08-17 11:49:11', '2025-08-21 00:27:48', 'i5 8250u ', '[]', '[]', 2, NULL, NULL),
+(5, 'HP Elitebook 840 G6', '16GB', '256GB SSD', NULL, 'Intel UHD Graphics 620', 'Windows 11', 3299.00, 2899.00, '[]', 'Le HP EliteBook 840 G6 est un ordinateur portable haut de gamme conçu pour les professionnels. Il arbore un design élégant et professionnel avec un châssis léger et fin. L\'écran de 14 pouces offre une résolution Full HD ou supérieure, et peut être doté d\'une fonctionnalité tactile. Avec des performances puissantes grâce à son processeur Intel Core i5 ou i7 et jusqu\'à 32 Go de RAM, cet ordinateur portable offre une expérience fluide et efficace.', '2025-08-17 11:51:00', '2025-08-21 00:12:42', 'i5-8365U', '[]', '[]', NULL, NULL, NULL),
+(6, 'HP Elitebook 840 G7', '16GB', '256GB SSD', NULL, 'Intel UHD Graphics 620', 'Windows 11', 3699.00, 3299.00, '[]', '1J5Y0EA PC Portable - HP Elitebook 840 G7 Processeur Intel Core i5-10310U Disque dur 1To SSD, RAM 16 Go DDR4 ,Reseau WIFI et bluetooth, Lecteur d\'empreintes digitales, Windows 10 Pro, Ecran 14 pouces LED FHD, GARANTIE 3 Mois à 4080,00 MAD Disponible et pas cher - Livraison gratuite – Access computer est le spécialiste de la marque HP au Maroc', '2025-08-17 11:52:35', '2025-08-21 00:12:33', 'i5-10310U', '[]', '[]', NULL, NULL, NULL),
+(7, 'HP Elitebook 840 G8', '16GB', '256GB SSD', NULL, 'Intel UHD Graphics 620', 'Windows 11', 4899.00, 4499.00, '[]', 'HP EliteBook 840 G8 (336M4EA) (336M4EA#ABF) sur Access computer, n°1 du high-tech. Intel Core i5-1135G7 16 Go SSD 512 Go 14\" LED Full HD Wi-Fi AX/Bluetooth Webcam Windows 10 Professionnel 64 bits.', '2025-08-17 11:53:50', '2025-08-21 00:12:22', 'i5-1145G7', '[]', '[]', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -189,12 +245,24 @@ CREATE TABLE `promo_codes` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Déchargement des données de la table `promo_codes`
+-- Structure de la table `reviews`
 --
 
-INSERT INTO `promo_codes` (`id`, `name`, `code`, `type`, `value`, `applies_to`, `product_ids`, `commercial_name`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'az', '789', 'percentage', 5.00, 'all', '[]', 'sat', 1, '2025-08-19 06:07:21', '2025-08-19 06:07:21');
+CREATE TABLE `reviews` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `client_id` int(11) DEFAULT NULL,
+  `rating` int(11) NOT NULL,
+  `photos` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`photos`)),
+  `name` varchar(255) DEFAULT NULL,
+  `comment` text DEFAULT NULL,
+  `approved` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -225,6 +293,12 @@ INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`) VALUES
 --
 -- Index pour les tables déchargées
 --
+
+--
+-- Index pour la table `accessoires`
+--
+ALTER TABLE `accessoires`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `categorie`
@@ -273,6 +347,12 @@ ALTER TABLE `promo_codes`
   ADD UNIQUE KEY `code` (`code`);
 
 --
+-- Index pour la table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Index pour la table `users`
 --
 ALTER TABLE `users`
@@ -284,6 +364,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT pour la table `accessoires`
+--
+ALTER TABLE `accessoires`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT pour la table `categorie`
 --
 ALTER TABLE `categorie`
@@ -293,19 +379,19 @@ ALTER TABLE `categorie`
 -- AUTO_INCREMENT pour la table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT pour la table `clients`
 --
 ALTER TABLE `clients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT pour la table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT pour la table `payment_methods`
@@ -323,7 +409,13 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT pour la table `promo_codes`
 --
 ALTER TABLE `promo_codes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT pour la table `users`
