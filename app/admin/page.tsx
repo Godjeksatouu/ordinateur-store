@@ -173,6 +173,8 @@ function ProductsManager() {
   const [mainImages, setMainImages] = useState<FileList | null>(null);
   const [optionalImages, setOptionalImages] = useState<FileList | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [existingMainImages, setExistingMainImages] = useState<string[]>([]);
+  const [existingOptionalImages, setExistingOptionalImages] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProducts();
@@ -227,6 +229,9 @@ function ProductsManager() {
       Array.from(mainImages).forEach(file => {
         formDataToSend.append('mainImages', file);
       });
+    } else if (editingId && existingMainImages.length > 0) {
+      // Keep existing main images if no new ones are uploaded
+      formDataToSend.append('existing_main_images', JSON.stringify(existingMainImages));
     }
 
     // Append optional images
@@ -234,6 +239,9 @@ function ProductsManager() {
       Array.from(optionalImages).forEach(file => {
         formDataToSend.append('optionalImages', file);
       });
+    } else if (editingId && existingOptionalImages.length > 0) {
+      // Keep existing optional images if no new ones are uploaded
+      formDataToSend.append('existing_optional_images', JSON.stringify(existingOptionalImages));
     }
 
     try {
@@ -256,6 +264,8 @@ function ProductsManager() {
         setMainImages(null);
         setOptionalImages(null);
         setEditingId(null);
+        setExistingMainImages([]);
+        setExistingOptionalImages([]);
         alert(editingId ? 'تم تحديث المنتج بنجاح' : 'تم إنشاء المنتج بنجاح');
       } else {
         let errorMessage = 'خطأ غير معروف';
@@ -287,6 +297,22 @@ function ProductsManager() {
       category_id: product.category_id || ''
     });
     setEditingId(product.id);
+
+    // Load existing images
+    if (product.images && Array.isArray(product.images)) {
+      // Separate main and optional images based on naming convention or first 3 as main
+      const mainImgs = product.images.slice(0, 3);
+      const optionalImgs = product.images.slice(3);
+      setExistingMainImages(mainImgs);
+      setExistingOptionalImages(optionalImgs);
+    } else {
+      setExistingMainImages([]);
+      setExistingOptionalImages([]);
+    }
+
+    // Clear new image selections
+    setMainImages(null);
+    setOptionalImages(null);
   };
 
   const handleDelete = async (id: number) => {
@@ -425,6 +451,36 @@ function ProductsManager() {
           {/* Main Images Section */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">الصور الرئيسية</label>
+
+            {/* Existing Main Images */}
+            {editingId && existingMainImages.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">الصور الحالية:</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {existingMainImages.map((image, idx) => (
+                    <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-blue-200">
+                      <img
+                        src={`${API_BASE_URL}${image}`}
+                        alt={`existing-main-${idx}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
+                        رئيسية {idx + 1}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setExistingMainImages(prev => prev.filter((_, i) => i !== idx))}
+                        className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">يمكنك حذف الصور الحالية أو رفع صور جديدة لاستبدالها</p>
+              </div>
+            )}
+
             <div className="border-2 border-dashed border-blue-300 rounded-xl p-4 hover:border-blue-400 transition-colors bg-blue-50">
               <input
                 className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
@@ -462,6 +518,36 @@ function ProductsManager() {
           {/* Optional Images Section */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">الصور الاختيارية</label>
+
+            {/* Existing Optional Images */}
+            {editingId && existingOptionalImages.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">الصور الاختيارية الحالية:</p>
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                  {existingOptionalImages.map((image, idx) => (
+                    <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border border-green-200">
+                      <img
+                        src={`${API_BASE_URL}${image}`}
+                        alt={`existing-optional-${idx}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-0 left-0 bg-green-500 text-white text-xs px-1 py-0.5 rounded-br">
+                        {idx + 1}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setExistingOptionalImages(prev => prev.filter((_, i) => i !== idx))}
+                        className="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-bl hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">يمكنك حذف الصور الحالية أو رفع صور جديدة لاستبدالها</p>
+              </div>
+            )}
+
             <div className="border-2 border-dashed border-green-300 rounded-xl p-4 hover:border-green-400 transition-colors bg-green-50">
               <input
                 className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
@@ -521,6 +607,10 @@ function ProductsManager() {
                   setFormData({
                     name: '', ram: '', storage: '', graphics: '', os: '', processor: '', old_price: '', new_price: '', description: '', category_id: ''
                   });
+                  setMainImages(null);
+                  setOptionalImages(null);
+                  setExistingMainImages([]);
+                  setExistingOptionalImages([]);
                 }}
                 className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold"
               >
@@ -2301,6 +2391,8 @@ function AccessoiresManager() {
   const [mainImages, setMainImages] = useState<FileList | null>(null);
   const [optionalImages, setOptionalImages] = useState<FileList | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [existingMainImages, setExistingMainImages] = useState<string[]>([]);
+  const [existingOptionalImages, setExistingOptionalImages] = useState<string[]>([]);
 
   useEffect(() => {
     fetchAccessoires();

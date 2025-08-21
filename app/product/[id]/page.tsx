@@ -236,7 +236,7 @@ export default function ProductDetailsPage() {
 
         setPromoValidation({
           isValid: true,
-          message: t('promoCodeValid', { amount: discountAmount.toLocaleString() }),
+          message: t('promoCodeValid', { amount: format(discountAmount) }),
           discount: discount,
           discountType: discountType
         });
@@ -405,21 +405,21 @@ export default function ProductDetailsPage() {
                 <div className="flex items-center space-x-4">
                   {product.old_price && product.old_price > 0 && (
                     <div className="text-xl text-gray-500 line-through">
-                      {mounted ? format(product.old_price) : `${product.old_price.toLocaleString()} DH`}
+                      {format(product.old_price)}
                     </div>
                   )}
                   {promoValidation?.isValid && finalPrice !== product.new_price ? (
                     <div className="flex flex-col">
                       <div className="text-lg text-gray-500 line-through">
-                        {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
+                        {format(product.new_price)}
                       </div>
                       <div className="text-3xl font-bold text-green-600">
-                        {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
+                        {format(finalPrice)}
                       </div>
                     </div>
                   ) : (
                     <div className="text-3xl font-bold text-[#6188a4]">
-                      {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
+                      {format(finalPrice)}
                     </div>
                   )}
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -676,7 +676,7 @@ export default function ProductDetailsPage() {
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">{t('originalPrice')}:</span>
                               <span className="text-sm font-medium">
-                                {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
+                                {format(product.new_price)}
                               </span>
                             </div>
 
@@ -685,11 +685,9 @@ export default function ProductDetailsPage() {
                               <div className="flex justify-between items-center text-green-600">
                                 <span className="text-sm">خصم كود التخفيض:</span>
                                 <span className="text-sm font-medium">
-                                  -{mounted ? format(promoValidation.discountType === 'percentage' ?
+                                  -{format(promoValidation.discountType === 'percentage' ?
                                     (product.new_price * promoValidation.discount / 100) :
-                                    promoValidation.discount) : `${(promoValidation.discountType === 'percentage' ?
-                                    (product.new_price * promoValidation.discount / 100) :
-                                    promoValidation.discount).toLocaleString()} DH`}
+                                    promoValidation.discount)}
                                 </span>
                               </div>
                             )}
@@ -702,7 +700,7 @@ export default function ProductDetailsPage() {
                                   <div className="flex justify-between items-center text-green-600">
                                     <span className="text-sm">خصم {selectedPaymentMethod.name_ar || selectedPaymentMethod.name}:</span>
                                     <span className="text-sm font-medium">
-                                      -{selectedPaymentMethod.discount_type === 'percentage' ? `${selectedPaymentMethod.discount_amount}%` : (mounted ? format(selectedPaymentMethod.discount_amount) : `${selectedPaymentMethod.discount_amount.toLocaleString()} DH`)}
+                                      -{selectedPaymentMethod.discount_type === 'percentage' ? `${selectedPaymentMethod.discount_amount}%` : format(selectedPaymentMethod.discount_amount)}
                                     </span>
                                   </div>
                                 );
@@ -719,14 +717,14 @@ export default function ProductDetailsPage() {
                             <div className="flex justify-between items-center">
                               <span className="text-lg font-semibold text-gray-900">{t('finalTotal')}:</span>
                               <span className="text-xl font-bold text-[#6188a4]">
-                                {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
+                                {format(finalPrice)}
                               </span>
                             </div>
 
                             {/* Savings Summary */}
                             {finalPrice !== product.new_price && (
                               <div className="text-sm text-green-700 font-medium bg-green-50 p-2 rounded">
-                                وفرت: {(product.new_price - finalPrice).toLocaleString()} {t('currency')}
+                                وفرت: {format(product.new_price - finalPrice)}
                               </div>
                             )}
                           </div>

@@ -50,6 +50,29 @@ export default function ReviewPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation
+    if (!formData.name.trim()) {
+      setError('يرجى إدخال اسمك');
+      return;
+    }
+
+    if (!formData.comment.trim()) {
+      setError('يرجى إدخال تعليقك');
+      return;
+    }
+
+    if (formData.comment.trim().length < 10) {
+      setError('يرجى كتابة تعليق أطول (10 أحرف على الأقل)');
+      return;
+    }
+
+    if (formData.rating < 1 || formData.rating > 5) {
+      setError('يرجى اختيار تقييم صحيح');
+      return;
+    }
+
+    setError(null);
     setSubmitting(true);
 
     const formDataToSend = new FormData();
@@ -83,17 +106,42 @@ export default function ReviewPage() {
     }
   };
 
+  const [hoveredRating, setHoveredRating] = useState(0);
+
   const renderStars = () => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <button
-        key={i}
-        type="button"
-        onClick={() => setFormData({ ...formData, rating: i + 1 })}
-        className={`text-3xl ${i < formData.rating ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400 transition-colors`}
-      >
-        ⭐
-      </button>
-    ));
+    return Array.from({ length: 5 }, (_, i) => {
+      const starNumber = i + 1;
+      const isActive = starNumber <= (hoveredRating || formData.rating);
+
+      return (
+        <button
+          key={i}
+          type="button"
+          onClick={() => setFormData({ ...formData, rating: starNumber })}
+          onMouseEnter={() => setHoveredRating(starNumber)}
+          onMouseLeave={() => setHoveredRating(0)}
+          className={`text-4xl transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-50 rounded ${
+            isActive
+              ? 'text-yellow-400 drop-shadow-sm'
+              : 'text-gray-300 hover:text-yellow-300'
+          }`}
+          aria-label={`تقييم ${starNumber} نجوم`}
+        >
+          {isActive ? '★' : '☆'}
+        </button>
+      );
+    });
+  };
+
+  const getRatingText = (rating: number) => {
+    const ratingTexts = {
+      1: 'سيء جداً',
+      2: 'سيء',
+      3: 'متوسط',
+      4: 'جيد',
+      5: 'ممتاز'
+    };
+    return ratingTexts[rating as keyof typeof ratingTexts] || '';
   };
 
   if (loading) {
@@ -167,37 +215,72 @@ export default function ReviewPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Rating */}
                 <div className="text-center">
-                  <label className="block text-lg font-medium text-gray-700 mb-4">التقييم</label>
-                  <div className="flex justify-center gap-1">
+                  <label className="block text-lg font-medium text-gray-700 mb-4">
+                    التقييم <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex justify-center gap-2 mb-3">
                     {renderStars()}
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {formData.rating} من 5 نجوم
-                  </p>
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-gray-700">
+                      {formData.rating} من 5 نجوم
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {getRatingText(formData.rating)}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">الاسم</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الاسم <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
+                    required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="اسمك (اختياري)"
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                      formData.name.trim()
+                        ? 'border-gray-300 focus:ring-blue-500'
+                        : 'border-red-300 focus:ring-red-500'
+                    }`}
+                    placeholder="أدخل اسمك"
                   />
+                  {!formData.name.trim() && (
+                    <p className="text-red-500 text-xs mt-1">هذا الحقل مطلوب</p>
+                  )}
                 </div>
 
                 {/* Comment */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">التعليق</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    التعليق <span className="text-red-500">*</span>
+                  </label>
                   <textarea
                     rows={4}
+                    required
                     value={formData.comment}
                     onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="شاركنا تجربتك مع المنتج (اختياري)"
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors resize-none ${
+                      formData.comment.trim()
+                        ? 'border-gray-300 focus:ring-blue-500'
+                        : 'border-red-300 focus:ring-red-500'
+                    }`}
+                    placeholder="شاركنا تجربتك مع المنتج بالتفصيل..."
+                    minLength={10}
                   />
+                  <div className="flex justify-between items-center mt-1">
+                    {!formData.comment.trim() ? (
+                      <p className="text-red-500 text-xs">هذا الحقل مطلوب (10 أحرف على الأقل)</p>
+                    ) : formData.comment.length < 10 ? (
+                      <p className="text-orange-500 text-xs">يرجى كتابة تعليق أطول (10 أحرف على الأقل)</p>
+                    ) : (
+                      <p className="text-green-500 text-xs">ممتاز!</p>
+                    )}
+                    <p className="text-gray-400 text-xs">{formData.comment.length} حرف</p>
+                  </div>
                 </div>
 
                 {/* Photos */}
@@ -213,14 +296,40 @@ export default function ReviewPage() {
                   <p className="text-xs text-gray-500 mt-1">يمكنك رفع حتى 5 صور</p>
                 </div>
 
+                {/* Error Display */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center">
+                      <div className="text-red-500 text-xl mr-3">⚠️</div>
+                      <p className="text-red-700 font-medium">{error}</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+                  disabled={submitting || !formData.name.trim() || !formData.comment.trim() || formData.comment.length < 10}
+                  className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 ${
+                    submitting || !formData.name.trim() || !formData.comment.trim() || formData.comment.length < 10
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                  }`}
                 >
-                  {submitting ? 'جاري الإرسال...' : 'إرسال المراجعة'}
+                  {submitting ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      جاري الإرسال...
+                    </div>
+                  ) : (
+                    'إرسال المراجعة ⭐'
+                  )}
                 </button>
+
+                {/* Form Requirements */}
+                <div className="text-center text-sm text-gray-500">
+                  <p>جميع الحقول المطلوبة مُعلمة بـ <span className="text-red-500">*</span></p>
+                </div>
               </form>
             </div>
           </div>
