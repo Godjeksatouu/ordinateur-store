@@ -12,6 +12,7 @@ import { API_BASE_URL } from '@/lib/config';
 import { FacebookPixel } from '@/lib/facebook-pixel';
 
 import { useCurrency } from '@/components/currency-context';
+import { HydrationSafe } from '@/components/hydration-safe';
 interface OrderForm {
   fullName: string;
   phoneNumber: string;
@@ -20,6 +21,7 @@ interface OrderForm {
   email?: string;
   paymentMethod?: string;
   codePromo?: string;
+  marketingConsent?: boolean;
 }
 
 export default function ProductDetailsPage() {
@@ -29,6 +31,7 @@ export default function ProductDetailsPage() {
   const { currency, format } = useCurrency();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -40,9 +43,9 @@ export default function ProductDetailsPage() {
     address: '',
     email: '',
     paymentMethod: '',
-    codePromo: ''
+    codePromo: '',
+    marketingConsent: false
   });
-  const [marketingConsent, setMarketingConsent] = useState(false);
   const [promoValidation, setPromoValidation] = useState<{
     isValid: boolean;
     message: string;
@@ -62,20 +65,28 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     const loadProduct = async () => {
       try {
+        setError(null);
         const fetchedProduct = await getProductById(productId);
-        setProduct(fetchedProduct || null);
-        setFinalPrice(fetchedProduct?.new_price || 0);
+
+        if (!fetchedProduct) {
+          setError('المنتج غير موجود');
+          setProduct(null);
+          return;
+        }
+
+        setProduct(fetchedProduct);
+        setFinalPrice(fetchedProduct.new_price || 0);
 
         // Track Facebook Pixel view content event
-        if (fetchedProduct) {
-          FacebookPixel.viewContent(fetchedProduct.new_price, currency, {
-            content_ids: [fetchedProduct.id.toString()],
-            content_name: fetchedProduct.name,
-            content_type: 'product'
-          });
-        }
+        FacebookPixel.viewContent(fetchedProduct.new_price, currency, {
+          content_ids: [fetchedProduct.id.toString()],
+          content_name: fetchedProduct.name,
+          content_type: 'product'
+        });
       } catch (error) {
         console.error('Error loading product:', error);
+        setError('حدث خطأ في تحميل المنتج');
+        setProduct(null);
       } finally {
         setLoading(false);
       }
@@ -114,10 +125,42 @@ export default function ProductDetailsPage() {
     return (
       <PublicLayout>
         <Main>
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-            <p className="mt-2 text-gray-600">{t('loadingProduct')}</p>
-          </div>
+          <HydrationSafe>
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+              <p className="mt-2 text-gray-600">{t('loadingProduct')}</p>
+            </div>
+          </HydrationSafe>
+        </Main>
+      </PublicLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PublicLayout>
+        <Main>
+          <HydrationSafe>
+            <div className="text-center py-12">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">خطأ في تحميل المنتج</h1>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <div className="space-x-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
+                >
+                  إعادة المحاولة
+                </button>
+                <a
+                  href="/"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg transition-colors inline-block"
+                >
+                  العودة للصفحة الرئيسية
+                </a>
+              </div>
+            </div>
+          </HydrationSafe>
         </Main>
       </PublicLayout>
     );
@@ -151,14 +194,14 @@ export default function ProductDetailsPage() {
     );
   }
 
-  const handleInputChange = (field: keyof OrderForm, value: string) => {
+  const handleInputChange = (field: keyof OrderForm, value: string | boolean) => {
     setOrderForm(prev => ({
       ...prev,
       [field]: value
     }));
 
     // If promo code field is changed, validate it with debouncing
-    if (field === 'codePromo') {
+    if (field === 'codePromo' && typeof value === 'string') {
       // Clear existing timer
       if (promoDebounceTimer) {
         clearTimeout(promoDebounceTimer);
@@ -178,7 +221,7 @@ export default function ProductDetailsPage() {
     }
 
     // If payment method is changed, recalculate price
-    if (field === 'paymentMethod') {
+    if (field === 'paymentMethod' && typeof value === 'string') {
       const promoDiscount = promoValidation?.isValid ?
         (promoValidation.discountType === 'percentage' ?
           (product?.new_price || 0) * (promoValidation.discount / 100) :
@@ -190,16 +233,9 @@ export default function ProductDetailsPage() {
   const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
     let finalPrice = basePrice - promoDiscount;
 
-    // Apply payment method discount
-    if (paymentMethod) {
-      const selectedPaymentMethod = paymentMethods.find(pm => pm.name === paymentMethod);
-      if (selectedPaymentMethod && selectedPaymentMethod.discount_amount > 0) {
-        if (selectedPaymentMethod.discount_type === 'percentage') {
-          finalPrice = Math.max(0, finalPrice - (finalPrice * selectedPaymentMethod.discount_amount / 100));
-        } else {
-          finalPrice = Math.max(0, finalPrice - selectedPaymentMethod.discount_amount);
-        }
-      }
+    // Apply payment method discount - fixed 100 DH for "تحويل بنكي"
+    if (paymentMethod === 'تحويل بنكي') {
+      finalPrice = Math.max(0, finalPrice - 100);
     }
 
     setFinalPrice(finalPrice);
@@ -273,7 +309,7 @@ export default function ProductDetailsPage() {
       alert('يرجى تعبئة جميع الحقول المطلوبة');
       return;
     }
-    if (!marketingConsent) {
+    if (!orderForm.marketingConsent) {
       alert('يرجى الموافقة على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني');
       return;
     }
@@ -324,7 +360,11 @@ export default function ProductDetailsPage() {
           fullName: '',
           phoneNumber: '',
           city: '',
-          address: ''
+          address: '',
+          email: '',
+          paymentMethod: '',
+          codePromo: '',
+          marketingConsent: false
         });
       } else {
         // show inline error later if needed
@@ -339,7 +379,8 @@ export default function ProductDetailsPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <Main>
-        <div className="py-12">
+        <HydrationSafe>
+          <div className="py-12">
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
             {/* Product Image */}
             <div className="mb-12 lg:mb-0">
@@ -402,24 +443,24 @@ export default function ProductDetailsPage() {
                   {product.name}
                 </h1>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4" suppressHydrationWarning>
                   {product.old_price && product.old_price > 0 && (
                     <div className="text-xl text-gray-500 line-through">
-                      {format(product.old_price)}
+                      {mounted ? format(product.old_price) : `${product.old_price.toLocaleString()} DH`}
                     </div>
                   )}
                   {promoValidation?.isValid && finalPrice !== product.new_price ? (
                     <div className="flex flex-col">
                       <div className="text-lg text-gray-500 line-through">
-                        {format(product.new_price)}
+                        {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
                       </div>
                       <div className="text-3xl font-bold text-green-600">
-                        {format(finalPrice)}
+                        {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
                       </div>
                     </div>
                   ) : (
                     <div className="text-3xl font-bold text-[#6188a4]">
-                      {format(finalPrice)}
+                      {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
                     </div>
                   )}
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -505,15 +546,15 @@ export default function ProductDetailsPage() {
                 ) : (
                   <div className="space-y-6">
                     <div className="text-center">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('customerInfo')}</h3>
-                      <p className="text-gray-600">{t('fillDetails')}</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">معلومات الزبون</h3>
+                      <p className="text-gray-600">املأ البيانات التالية لإتمام طلبك</p>
                     </div>
 
                     <form onSubmit={handleSubmitOrder} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
-                            {t('fullName')}
+                            اسمك بالكامل
                           </label>
                           <input
                             type="text"
@@ -522,13 +563,13 @@ export default function ProductDetailsPage() {
                             value={orderForm.fullName}
                             onChange={(e) => handleInputChange('fullName', e.target.value)}
                             className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder={t('fullName')}
+                            placeholder="اسمك بالكامل"
                           />
                         </div>
 
                         <div>
                           <label htmlFor="phoneNumber" className="block text-sm font-semibold text-gray-700 mb-2">
-                            {t('phoneNumber')}
+                            رقم الهاتف
                           </label>
                           <input
                             type="tel"
@@ -539,14 +580,14 @@ export default function ProductDetailsPage() {
                             value={orderForm.phoneNumber}
                             onChange={(e) => handleInputChange('phoneNumber', e.target.value.replace(/[^0-9]/g, ''))}
                             className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder={t('phoneExample')}
+                            placeholder="مثال: 0612345678"
                           />
                         </div>
                       </div>
 
                       <div>
                         <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-2">
-                          {t('city')}
+                          المدينة
                         </label>
                         <input
                           type="text"
@@ -555,7 +596,7 @@ export default function ProductDetailsPage() {
                           value={orderForm.city}
                           onChange={(e) => handleInputChange('city', e.target.value)}
                           className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                          placeholder={t('cityPlaceholder')}
+                          placeholder="أدخل اسم المدينة"
                         />
                       </div>
 
@@ -563,7 +604,7 @@ export default function ProductDetailsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
                             <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
-                              {t('detailedAddress')}
+                              العنوان التفصيلي
                             </label>
                             <textarea
                               id="address"
@@ -572,12 +613,12 @@ export default function ProductDetailsPage() {
                               value={orderForm.address}
                               onChange={(e) => handleInputChange('address', e.target.value)}
                               className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white resize-none"
-                              placeholder={t('addressPlaceholder')}
+                              placeholder="أدخل عنوانك التفصيلي..."
                             />
                           </div>
                           <div>
                             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                              {t('email')}
+                              البريد الإلكتروني
                             </label>
                             <input
                               type="email"
@@ -592,7 +633,7 @@ export default function ProductDetailsPage() {
 
                         <div className="mt-6">
                           <label htmlFor="codePromo" className="block text-sm font-semibold text-gray-700 mb-2">
-                            {t('promoCodeOptional')}
+                            كود التخفيض (اختياري)
                           </label>
                           <div className="relative">
                             <input
@@ -607,7 +648,7 @@ export default function ProductDetailsPage() {
                                   ? 'border-red-500 bg-red-50 focus:ring-red-500 focus:border-red-500'
                                   : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white focus:ring-[#6188a4] focus:border-[#6188a4]'
                               }`}
-                              placeholder={t('promoCodePlaceholder')}
+                              placeholder="مثال: SAVE10"
                               disabled={isValidatingPromo}
                             />
                             {isValidatingPromo && (
@@ -625,30 +666,69 @@ export default function ProductDetailsPage() {
 
                         <div className="mt-6">
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            {t('paymentMethods')}
+                            طرق الدفع
                           </label>
-                          <div className={`grid grid-cols-1 md:grid-cols-2 ${paymentMethods.length > 3 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
-                            {paymentMethods.map((pm) => (
-                              <label key={pm.id} className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === pm.name ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                                <input
-                                  type="radio"
-                                  name="paymentMethod"
-                                  value={pm.name}
-                                  checked={orderForm.paymentMethod === pm.name}
-                                  onChange={() => handleInputChange('paymentMethod', pm.name)}
-                                  className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                                />
-                                <div>
-                                  <div className="font-semibold text-gray-900">{pm.name_ar || pm.name}</div>
-                                  <div className="text-sm text-gray-600">{pm.description_ar || pm.description}</div>
-                                  {pm.discount_amount > 0 && (
-                                    <div className="text-xs text-green-700 mt-1">
-                                      {t('automaticDiscount')}: -{pm.discount_amount}{pm.discount_type === 'percentage' ? '%' : ' درهم'}
-                                    </div>
-                                  )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'كاش بلوس' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="كاش بلوس"
+                                checked={orderForm.paymentMethod === 'كاش بلوس'}
+                                onChange={() => handleInputChange('paymentMethod', 'كاش بلوس')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">كاش بلوس</div>
+                                <div className="text-sm text-gray-600">RIB: 123 456 789 000 000 000 12</div>
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'تحويل بنكي' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="تحويل بنكي"
+                                checked={orderForm.paymentMethod === 'تحويل بنكي'}
+                                onChange={() => handleInputChange('paymentMethod', 'تحويل بنكي')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">تحويل بنكي</div>
+                                <div className="text-sm text-gray-600">RIB: 987 654 321 000 000 000 34</div>
+                                <div className="text-xs text-green-700 mt-1">
+                                  خصم تلقائي: -100 درهم
                                 </div>
-                              </label>
-                            ))}
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'استلام من المتجر' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="استلام من المتجر"
+                                checked={orderForm.paymentMethod === 'استلام من المتجر'}
+                                onChange={() => handleInputChange('paymentMethod', 'استلام من المتجر')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">استلام من المتجر</div>
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'الدفع عند الاستلام' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="الدفع عند الاستلام"
+                                checked={orderForm.paymentMethod === 'الدفع عند الاستلام'}
+                                onChange={() => handleInputChange('paymentMethod', 'الدفع عند الاستلام')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">الدفع عند الاستلام</div>
+                              </div>
+                            </label>
                           </div>
                         </div>
                       </div>
@@ -658,25 +738,25 @@ export default function ProductDetailsPage() {
                           <input
                             id="marketingConsent"
                             type="checkbox"
-                            checked={marketingConsent}
-                            onChange={(e) => setMarketingConsent(e.target.checked)}
+                            checked={orderForm.marketingConsent || false}
+                            onChange={(e) => handleInputChange('marketingConsent', e.target.checked)}
                             className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] rounded focus:ring-[#6188a4]"
                             required
                           />
                           <label htmlFor="marketingConsent" className="text-gray-700">
-                            {t('marketingConsent')}
+                            أوافق على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني
                           </label>
                         </div>
 
                         {/* Dynamic Price Display */}
-                        <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <div className="text-sm text-gray-600 mb-2">{t('priceDetails')}</div>
+                        <div className="bg-white p-3 rounded-lg border border-gray-200" suppressHydrationWarning>
+                          <div className="text-sm text-gray-600 mb-2">تفاصيل السعر</div>
                           <div className="space-y-2">
                             {/* Original Price */}
                             <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">{t('originalPrice')}:</span>
+                              <span className="text-sm text-gray-600">السعر الأصلي:</span>
                               <span className="text-sm font-medium">
-                                {format(product.new_price)}
+                                {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
                               </span>
                             </div>
 
@@ -685,46 +765,42 @@ export default function ProductDetailsPage() {
                               <div className="flex justify-between items-center text-green-600">
                                 <span className="text-sm">خصم كود التخفيض:</span>
                                 <span className="text-sm font-medium">
-                                  -{format(promoValidation.discountType === 'percentage' ?
+                                  -{mounted ? format(promoValidation.discountType === 'percentage' ?
                                     (product.new_price * promoValidation.discount / 100) :
-                                    promoValidation.discount)}
+                                    promoValidation.discount) : `${(promoValidation.discountType === 'percentage' ?
+                                    (product.new_price * promoValidation.discount / 100) :
+                                    promoValidation.discount).toLocaleString()} DH`}
                                 </span>
                               </div>
                             )}
 
                             {/* Payment Method Discount */}
-                            {orderForm.paymentMethod && (() => {
-                              const selectedPaymentMethod = paymentMethods.find(pm => pm.name === orderForm.paymentMethod);
-                              if (selectedPaymentMethod && selectedPaymentMethod.discount_amount > 0) {
-                                return (
-                                  <div className="flex justify-between items-center text-green-600">
-                                    <span className="text-sm">خصم {selectedPaymentMethod.name_ar || selectedPaymentMethod.name}:</span>
-                                    <span className="text-sm font-medium">
-                                      -{selectedPaymentMethod.discount_type === 'percentage' ? `${selectedPaymentMethod.discount_amount}%` : format(selectedPaymentMethod.discount_amount)}
-                                    </span>
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })()}
+                            {orderForm.paymentMethod === 'تحويل بنكي' && (
+                              <div className="flex justify-between items-center text-green-600">
+                                <span className="text-sm">خصم تحويل بنكي:</span>
+                                <span className="text-sm font-medium">
+                                  -100 DH
+                                </span>
+                              </div>
+                            )}
 
                             {/* Divider */}
-                            {(promoValidation?.isValid || (orderForm.paymentMethod && paymentMethods.find(pm => pm.name === orderForm.paymentMethod)?.discount_amount > 0)) && (
+                            {(promoValidation?.isValid || orderForm.paymentMethod === 'تحويل بنكي') && (
                               <hr className="border-gray-200" />
                             )}
 
                             {/* Final Price */}
                             <div className="flex justify-between items-center">
-                              <span className="text-lg font-semibold text-gray-900">{t('finalTotal')}:</span>
+                              <span className="text-lg font-semibold text-gray-900">المجموع النهائي:</span>
                               <span className="text-xl font-bold text-[#6188a4]">
-                                {format(finalPrice)}
+                                {mounted ? format(finalPrice) : `${finalPrice.toLocaleString()} DH`}
                               </span>
                             </div>
 
                             {/* Savings Summary */}
                             {finalPrice !== product.new_price && (
                               <div className="text-sm text-green-700 font-medium bg-green-50 p-2 rounded">
-                                وفرت: {format(product.new_price - finalPrice)}
+                                وفرت: {mounted ? format(product.new_price - finalPrice) : `${(product.new_price - finalPrice).toLocaleString()} DH`}
                               </div>
                             )}
                           </div>
@@ -736,14 +812,14 @@ export default function ProductDetailsPage() {
                           type="submit"
                           className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                         >
-                          {t('orderButton')}
+                          اضغط هنا للطلب
                         </button>
                         <button
                           type="button"
                           onClick={() => setShowOrderForm(false)}
                           className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-4 rounded-xl font-semibold text-lg transition-all duration-300"
                         >
-                          {t('cancel')}
+                          إلغاء
                         </button>
                       </div>
                     </form>
@@ -756,6 +832,7 @@ export default function ProductDetailsPage() {
 
         {/* Reviews Section */}
         <ProductReviews productId={productId} />
+        </HydrationSafe>
       </Main>
       </div>
     </PublicLayout>
