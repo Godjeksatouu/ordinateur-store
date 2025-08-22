@@ -1,5 +1,6 @@
 import layoutTemplateMail from "./_layout.js";
 import mailer from "../index.js";
+import { formatCurrency } from "../../../currency-utils.js";
 
 export default function sendOrderMadeMail(client, order, product) {
   return mailer.send({
@@ -67,7 +68,7 @@ export default function sendOrderMadeMail(client, order, product) {
             </tr>
             <tr>
               <td style="padding:10px; border:1px solid #ddd; background-color:#f9f9f9; font-weight:bold;">Total</td>
-              <td style="padding:10px; border:1px solid #ddd; color:#4b2e2e; font-weight:bold;">${order.final_price}</td>
+              <td style="padding:10px; border:1px solid #ddd; color:#4b2e2e; font-weight:bold;">${formatCurrency(order.final_price, order.currency || 'DH', 'en')}</td>
             </tr>
           </table>
 

@@ -33,6 +33,22 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
   // Check if this is an accessory (accessories don't have RAM/storage/processor)
   const isAccessory = !product.ram && !product.storage && !product.processor;
 
+  // Get the first available image from main_images, images, or optional_images
+  const getFirstImage = () => {
+    if (product.main_images && product.main_images.length > 0) {
+      return product.main_images[0];
+    }
+    if (product.images && product.images.length > 0) {
+      return product.images[0];
+    }
+    if (product.optional_images && product.optional_images.length > 0) {
+      return product.optional_images[0];
+    }
+    return null;
+  };
+
+  const firstImage = getFirstImage();
+
   return (
     <div
       className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-200 hover:border-[#6188a4]/40 h-full flex flex-col p-3"
@@ -50,18 +66,27 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
 
       {/* Product Image */}
       <div className="relative h-48 bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 overflow-hidden">
-        {product.images && product.images.length > 0 ? (
+        {firstImage ? (
           <>
+            {/* Image skeleton while loading */}
+            <div className="absolute inset-0 skeleton" aria-hidden />
             <Image
-              src={`${API_BASE_URL}${product.images[0]}`}
+              src={`${API_BASE_URL}${firstImage}`}
               alt={product.name}
               fill
               className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               unoptimized
+              onLoad={(e) => {
+                // Hide skeleton when image loads
+                const skeleton = (e.currentTarget.parentElement as HTMLElement)?.querySelector('.skeleton') as HTMLElement | null;
+                if (skeleton) skeleton.style.display = 'none';
+              }}
               onError={(e) => {
                 // Hide the broken image and show fallback
                 e.currentTarget.style.display = 'none';
+                const skeleton = (e.currentTarget.parentElement as HTMLElement)?.querySelector('.skeleton') as HTMLElement | null;
+                if (skeleton) skeleton.style.display = 'none';
                 const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback');
                 if (fallback) {
                   (fallback as HTMLElement).style.display = 'flex';

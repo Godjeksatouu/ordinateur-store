@@ -38,6 +38,18 @@ jobs:
           target: ${{ vars.SERVER_TARGET_PATH }}
           rm: true
 
+<<<<<<< HEAD
+      - name: Ensure target folder exists
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          username: ${{ vars.SERVER_USER }}
+          key: ${{ vars.SERVER_SSH_KEY }}
+          script: |
+            mkdir -p ${{ vars.SERVER_TARGET_PATH }}
+
+=======
+>>>>>>> 410f7cb10f8913bf767a2b6692bf485b50a26d92
       - name: Setup Project
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -46,6 +58,11 @@ jobs:
           key: ${{ vars.SERVER_SSH_KEY }}
           script: |
             cd ${{ vars.SERVER_TARGET_PATH }}
+<<<<<<< HEAD
+            npm install --omit=dev
+            npm run build
+=======
+>>>>>>> 410f7cb10f8913bf767a2b6692bf485b50a26d92
 
             # Load env vars
             echo "${{ vars.ENV_FILE }}" > .env

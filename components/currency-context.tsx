@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type CurrencyCode = "DH" | "EUR" | "USD" | "XOF";
 
@@ -31,6 +31,30 @@ const CurrencyContext = createContext<CurrencyContextValue | undefined>(undefine
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [currency, setCurrency] = useState<CurrencyCode>("DH");
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load currency from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedCurrency = localStorage.getItem('selectedCurrency') as CurrencyCode;
+      if (savedCurrency && ['DH', 'EUR', 'USD', 'XOF'].includes(savedCurrency)) {
+        setCurrency(savedCurrency);
+      }
+    } catch (error) {
+      console.error('Error loading currency from localStorage:', error);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save currency to localStorage when it changes
+  const handleSetCurrency = (newCurrency: CurrencyCode) => {
+    setCurrency(newCurrency);
+    try {
+      localStorage.setItem('selectedCurrency', newCurrency);
+    } catch (error) {
+      console.error('Error saving currency to localStorage:', error);
+    }
+  };
 
   const convert = (amountInDH: number) => {
     const rate = RATE_PER_DH[currency] ?? 1;
@@ -41,14 +65,20 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
   const format = (amountInDH: number) => {
     const converted = convert(amountInDH);
-    // Keep grouping similar to toLocaleString default
     const rounded = Math.round((converted + Number.EPSILON) * 100) / 100;
-    return `${rounded.toLocaleString()} ${symbol}`;
+
+    // Format with proper number formatting
+    const formatted = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(rounded);
+
+    return `${formatted} ${symbol}`;
   };
 
   const value: CurrencyContextValue = {
     currency,
-    setCurrency,
+    setCurrency: handleSetCurrency,
     convert,
     symbol,
     format

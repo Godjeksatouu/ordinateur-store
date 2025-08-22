@@ -999,6 +999,7 @@ app.get('/api/products', async (req, res) => {
 
     // Parse JSON images for each product
     const productsWithParsedImages = products.map(product => {
+      // Parse legacy images field
       if (product.images) {
         try {
           product.images = JSON.parse(product.images);
@@ -1009,6 +1010,35 @@ app.get('/api/products', async (req, res) => {
       } else {
         product.images = [];
       }
+
+      // Parse main_images field
+      if (product.main_images) {
+        try {
+          if (typeof product.main_images === 'string') {
+            product.main_images = JSON.parse(product.main_images);
+          }
+        } catch (e) {
+          console.error('Error parsing main_images for product', product.id, e);
+          product.main_images = [];
+        }
+      } else {
+        product.main_images = [];
+      }
+
+      // Parse optional_images field
+      if (product.optional_images) {
+        try {
+          if (typeof product.optional_images === 'string') {
+            product.optional_images = JSON.parse(product.optional_images);
+          }
+        } catch (e) {
+          console.error('Error parsing optional_images for product', product.id, e);
+          product.optional_images = [];
+        }
+      } else {
+        product.optional_images = [];
+      }
+
       return product;
     });
 
@@ -1154,8 +1184,45 @@ app.get('/api/products/:id', async (req, res) => {
     }
 
     const product = products[0];
+
+    // Parse legacy images field
     if (product.images) {
-      product.images = JSON.parse(product.images);
+      try {
+        product.images = JSON.parse(product.images);
+      } catch (e) {
+        console.error('Error parsing images for product', product.id, e);
+        product.images = [];
+      }
+    } else {
+      product.images = [];
+    }
+
+    // Parse main_images field
+    if (product.main_images) {
+      try {
+        if (typeof product.main_images === 'string') {
+          product.main_images = JSON.parse(product.main_images);
+        }
+      } catch (e) {
+        console.error('Error parsing main_images for product', product.id, e);
+        product.main_images = [];
+      }
+    } else {
+      product.main_images = [];
+    }
+
+    // Parse optional_images field
+    if (product.optional_images) {
+      try {
+        if (typeof product.optional_images === 'string') {
+          product.optional_images = JSON.parse(product.optional_images);
+        }
+      } catch (e) {
+        console.error('Error parsing optional_images for product', product.id, e);
+        product.optional_images = [];
+      }
+    } else {
+      product.optional_images = [];
     }
 
     res.json(product);
@@ -1183,6 +1250,7 @@ app.get('/api/accessoires', async (req, res) => {
 
     // Parse JSON images for each accessoire
     const accessoiresWithParsedImages = accessoires.map(accessoire => {
+      // Parse legacy images field
       if (accessoire.images) {
         try {
           accessoire.images = JSON.parse(accessoire.images);
@@ -1193,6 +1261,35 @@ app.get('/api/accessoires', async (req, res) => {
       } else {
         accessoire.images = [];
       }
+
+      // Parse main_images field
+      if (accessoire.main_images) {
+        try {
+          if (typeof accessoire.main_images === 'string') {
+            accessoire.main_images = JSON.parse(accessoire.main_images);
+          }
+        } catch (e) {
+          console.error('Error parsing main_images for accessoire', accessoire.id, e);
+          accessoire.main_images = [];
+        }
+      } else {
+        accessoire.main_images = [];
+      }
+
+      // Parse optional_images field
+      if (accessoire.optional_images) {
+        try {
+          if (typeof accessoire.optional_images === 'string') {
+            accessoire.optional_images = JSON.parse(accessoire.optional_images);
+          }
+        } catch (e) {
+          console.error('Error parsing optional_images for accessoire', accessoire.id, e);
+          accessoire.optional_images = [];
+        }
+      } else {
+        accessoire.optional_images = [];
+      }
+
       return accessoire;
     });
 
@@ -1327,6 +1424,8 @@ app.get('/api/accessoires/:id', async (req, res) => {
     }
 
     const accessoire = accessoires[0];
+
+    // Parse legacy images field
     if (accessoire.images) {
       try {
         accessoire.images = JSON.parse(accessoire.images);
@@ -1336,6 +1435,34 @@ app.get('/api/accessoires/:id', async (req, res) => {
       }
     } else {
       accessoire.images = [];
+    }
+
+    // Parse main_images field
+    if (accessoire.main_images) {
+      try {
+        if (typeof accessoire.main_images === 'string') {
+          accessoire.main_images = JSON.parse(accessoire.main_images);
+        }
+      } catch (e) {
+        console.error('Error parsing main_images for accessoire', accessoire.id, e);
+        accessoire.main_images = [];
+      }
+    } else {
+      accessoire.main_images = [];
+    }
+
+    // Parse optional_images field
+    if (accessoire.optional_images) {
+      try {
+        if (typeof accessoire.optional_images === 'string') {
+          accessoire.optional_images = JSON.parse(accessoire.optional_images);
+        }
+      } catch (e) {
+        console.error('Error parsing optional_images for accessoire', accessoire.id, e);
+        accessoire.optional_images = [];
+      }
+    } else {
+      accessoire.optional_images = [];
     }
 
     res.json(accessoire);

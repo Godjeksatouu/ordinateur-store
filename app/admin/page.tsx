@@ -301,17 +301,27 @@ function ProductsManager() {
     });
     setEditingId(product.id);
 
-    // Load existing images
-    if (product.images && Array.isArray(product.images)) {
-      // Separate main and optional images based on naming convention or first 3 as main
-      const mainImgs = product.images.slice(0, 3);
-      const optionalImgs = product.images.slice(3);
-      setExistingMainImages(mainImgs);
-      setExistingOptionalImages(optionalImgs);
-    } else {
-      setExistingMainImages([]);
-      setExistingOptionalImages([]);
+    // Load existing images from the new structure (main_images and optional_images)
+    // If those don't exist, fall back to the legacy images field
+    let mainImgs = [];
+    let optionalImgs = [];
+
+    if (product.main_images && Array.isArray(product.main_images)) {
+      mainImgs = product.main_images;
+    } else if (product.images && Array.isArray(product.images)) {
+      // Fallback: use first 3 images as main
+      mainImgs = product.images.slice(0, 3);
     }
+
+    if (product.optional_images && Array.isArray(product.optional_images)) {
+      optionalImgs = product.optional_images;
+    } else if (product.images && Array.isArray(product.images) && product.images.length > 3) {
+      // Fallback: use remaining images as optional
+      optionalImgs = product.images.slice(3);
+    }
+
+    setExistingMainImages(mainImgs);
+    setExistingOptionalImages(optionalImgs);
 
     // Clear new image selections
     setMainImages(null);
@@ -2453,6 +2463,9 @@ function AccessoiresManager() {
       Array.from(mainImages).forEach(file => {
         formDataToSend.append('mainImages', file);
       });
+    } else if (editingId && existingMainImages.length > 0) {
+      // Keep existing main images if no new ones are uploaded
+      formDataToSend.append('existing_main_images', JSON.stringify(existingMainImages));
     }
 
     // Append optional images
@@ -2460,6 +2473,9 @@ function AccessoiresManager() {
       Array.from(optionalImages).forEach(file => {
         formDataToSend.append('optionalImages', file);
       });
+    } else if (editingId && existingOptionalImages.length > 0) {
+      // Keep existing optional images if no new ones are uploaded
+      formDataToSend.append('existing_optional_images', JSON.stringify(existingOptionalImages));
     }
 
     try {
@@ -2482,6 +2498,8 @@ function AccessoiresManager() {
         setMainImages(null);
         setOptionalImages(null);
         setEditingId(null);
+        setExistingMainImages([]);
+        setExistingOptionalImages([]);
         alert(editingId ? 'تم تحديث الإكسسوار بنجاح' : 'تم إنشاء الإكسسوار بنجاح');
       } else {
         let errorMessage = 'خطأ غير معروف';
@@ -2508,6 +2526,32 @@ function AccessoiresManager() {
       category_id: accessoire.category_id || ''
     });
     setEditingId(accessoire.id);
+
+    // Load existing images from the new structure (main_images and optional_images)
+    // If those don't exist, fall back to the legacy images field
+    let mainImgs = [];
+    let optionalImgs = [];
+
+    if (accessoire.main_images && Array.isArray(accessoire.main_images)) {
+      mainImgs = accessoire.main_images;
+    } else if (accessoire.images && Array.isArray(accessoire.images)) {
+      // Fallback: use first 3 images as main
+      mainImgs = accessoire.images.slice(0, 3);
+    }
+
+    if (accessoire.optional_images && Array.isArray(accessoire.optional_images)) {
+      optionalImgs = accessoire.optional_images;
+    } else if (accessoire.images && Array.isArray(accessoire.images) && accessoire.images.length > 3) {
+      // Fallback: use remaining images as optional
+      optionalImgs = accessoire.images.slice(3);
+    }
+
+    setExistingMainImages(mainImgs);
+    setExistingOptionalImages(optionalImgs);
+
+    // Clear new image selections
+    setMainImages(null);
+    setOptionalImages(null);
   };
 
   const handleDelete = async (id: number) => {
@@ -2619,6 +2663,36 @@ function AccessoiresManager() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">الصور الرئيسية</label>
+
+              {/* Existing Main Images */}
+              {editingId && existingMainImages.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-2">الصور الحالية:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {existingMainImages.map((image, idx) => (
+                      <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-blue-200">
+                        <img
+                          src={`${API_BASE_URL}${image}`}
+                          alt={`existing-main-${idx}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
+                          رئيسية {idx + 1}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setExistingMainImages(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">يمكنك حذف الصور الحالية أو رفع صور جديدة لاستبدالها</p>
+                </div>
+              )}
+
               <input
                 type="file"
                 multiple
@@ -2626,10 +2700,61 @@ function AccessoiresManager() {
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
                 onChange={(e) => setMainImages(e.target.files)}
               />
+
+              {/* Main Images Previews */}
+              {mainImages && mainImages.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 mb-2">معاينة الصور الرئيسية:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {Array.from(mainImages).map((file, idx) => (
+                      <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-blue-200">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`main-preview-${idx}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">
+                          رئيسية {idx + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">صور إضافية</label>
+
+              {/* Existing Optional Images */}
+              {editingId && existingOptionalImages.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-2">الصور الاختيارية الحالية:</p>
+                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                    {existingOptionalImages.map((image, idx) => (
+                      <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border border-green-200">
+                        <img
+                          src={`${API_BASE_URL}${image}`}
+                          alt={`existing-optional-${idx}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-0 left-0 bg-green-500 text-white text-xs px-1 py-0.5 rounded-br">
+                          {idx + 1}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setExistingOptionalImages(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-bl hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">يمكنك حذف الصور الحالية أو رفع صور جديدة لاستبدالها</p>
+                </div>
+              )}
+
               <input
                 type="file"
                 multiple
@@ -2637,6 +2762,27 @@ function AccessoiresManager() {
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300"
                 onChange={(e) => setOptionalImages(e.target.files)}
               />
+
+              {/* Optional Images Previews */}
+              {optionalImages && optionalImages.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 mb-2">معاينة الصور الإضافية:</p>
+                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                    {Array.from(optionalImages).map((file, idx) => (
+                      <div key={idx} className="relative w-full aspect-square rounded-lg overflow-hidden border border-green-200">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`optional-preview-${idx}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-0 left-0 bg-green-500 text-white text-xs px-1 py-0.5 rounded-br">
+                          {idx + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="md:col-span-2 flex gap-4">

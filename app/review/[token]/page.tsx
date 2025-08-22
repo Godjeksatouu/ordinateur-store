@@ -24,6 +24,7 @@ export default function ReviewPage() {
     comment: ''
   });
   const [photos, setPhotos] = useState<FileList | null>(null);
+  const [photosPreviews, setPhotosPreviews] = useState<string[]>([]);
 
   useEffect(() => {
     if (token) {
@@ -107,6 +108,47 @@ export default function ReviewPage() {
   };
 
   const [hoveredRating, setHoveredRating] = useState(0);
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    setPhotos(files);
+
+    if (files && files.length > 0) {
+      // Generate previews
+      const previews: string[] = [];
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            previews.push(event.target.result as string);
+            if (previews.length === files.length) {
+              setPhotosPreviews(previews);
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    } else {
+      setPhotosPreviews([]);
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    if (photos) {
+      const newFiles = Array.from(photos);
+      newFiles.splice(index, 1);
+
+      // Create new FileList
+      const dt = new DataTransfer();
+      newFiles.forEach(file => dt.items.add(file));
+      setPhotos(dt.files);
+
+      // Update previews
+      const newPreviews = [...photosPreviews];
+      newPreviews.splice(index, 1);
+      setPhotosPreviews(newPreviews);
+    }
+  };
 
   const renderStars = () => {
     return Array.from({ length: 5 }, (_, i) => {
@@ -201,31 +243,34 @@ export default function ReviewPage() {
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white py-12">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/20 py-12">
         <Main>
           <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="bg-white rounded-2xl shadow-xl border border-[#adb8c1]/20 p-8">
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">⭐ قيم تجربتك</h1>
-                <p className="text-gray-600">
-                  شاركنا رأيك في المنتج: <span className="font-semibold">{validationData?.product_name}</span>
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#6188a4] to-[#262a2f] rounded-full mb-4">
+                  <span className="text-2xl text-white">⭐</span>
+                </div>
+                <h1 className="text-3xl font-bold text-[#262a2f] mb-4">قيم تجربتك</h1>
+                <p className="text-[#adb8c1]">
+                  شاركنا رأيك في المنتج: <span className="font-semibold text-[#6188a4]">{validationData?.product_name}</span>
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Rating */}
-                <div className="text-center">
-                  <label className="block text-lg font-medium text-gray-700 mb-4">
+                <div className="text-center bg-gradient-to-r from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-6 border border-[#adb8c1]/20">
+                  <label className="block text-lg font-medium text-[#262a2f] mb-4">
                     التقييم <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex justify-center gap-2 mb-3">
+                  <div className="flex justify-center gap-2 mb-4">
                     {renderStars()}
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-semibold text-gray-700">
+                    <p className="text-lg font-semibold text-[#6188a4]">
                       {formData.rating} من 5 نجوم
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-[#adb8c1]">
                       {getRatingText(formData.rating)}
                     </p>
                   </div>
@@ -233,7 +278,7 @@ export default function ReviewPage() {
 
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#262a2f] mb-2">
                     الاسم <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -241,9 +286,9 @@ export default function ReviewPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-colors ${
                       formData.name.trim()
-                        ? 'border-gray-300 focus:ring-blue-500'
+                        ? 'border-[#adb8c1]/40 focus:ring-[#6188a4] focus:border-[#6188a4]'
                         : 'border-red-300 focus:ring-red-500'
                     }`}
                     placeholder="أدخل اسمك"
@@ -255,7 +300,7 @@ export default function ReviewPage() {
 
                 {/* Comment */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#262a2f] mb-2">
                     التعليق <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -263,9 +308,9 @@ export default function ReviewPage() {
                     required
                     value={formData.comment}
                     onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors resize-none ${
+                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-colors resize-none ${
                       formData.comment.trim()
-                        ? 'border-gray-300 focus:ring-blue-500'
+                        ? 'border-[#adb8c1]/40 focus:ring-[#6188a4] focus:border-[#6188a4]'
                         : 'border-red-300 focus:ring-red-500'
                     }`}
                     placeholder="شاركنا تجربتك مع المنتج بالتفصيل..."
@@ -285,15 +330,54 @@ export default function ReviewPage() {
 
                 {/* Photos */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">صور (اختياري)</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => setPhotos(e.target.files)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">يمكنك رفع حتى 5 صور</p>
+                  <label className="block text-sm font-medium text-[#262a2f] mb-2">صور المنتج (اختياري)</label>
+                  <div className="border-2 border-dashed border-[#adb8c1]/40 rounded-xl p-6 text-center hover:border-[#6188a4] transition-colors">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      className="hidden"
+                      id="photo-upload"
+                    />
+                    <label htmlFor="photo-upload" className="cursor-pointer">
+                      <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-gradient-to-r from-[#6188a4] to-[#262a2f] rounded-full flex items-center justify-center mb-3">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        </div>
+                        <p className="text-[#6188a4] font-medium">اضغط لرفع الصور</p>
+                        <p className="text-[#adb8c1] text-sm mt-1">أو اسحب الصور هنا</p>
+                      </div>
+                    </label>
+                  </div>
+                  <p className="text-[#adb8c1] text-xs mt-2">يمكنك رفع عدة صور للمنتج (JPG, PNG, GIF)</p>
+
+                  {/* Photo Previews */}
+                  {photosPreviews.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-[#262a2f] mb-3">معاينة الصور:</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {photosPreviews.map((preview, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={preview}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border border-[#adb8c1]/20"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removePhoto(index)}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Error Display */}
@@ -310,10 +394,10 @@ export default function ReviewPage() {
                 <button
                   type="submit"
                   disabled={submitting || !formData.name.trim() || !formData.comment.trim() || formData.comment.length < 10}
-                  className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 ${
+                  className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 ${
                     submitting || !formData.name.trim() || !formData.comment.trim() || formData.comment.length < 10
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                      ? 'bg-[#adb8c1]/30 text-[#adb8c1] cursor-not-allowed'
+                      : 'bg-gradient-to-r from-[#6188a4] to-[#262a2f] hover:from-[#262a2f] hover:to-[#6188a4] text-white shadow-lg hover:shadow-xl transform hover:scale-105'
                   }`}
                 >
                   {submitting ? (
@@ -327,7 +411,7 @@ export default function ReviewPage() {
                 </button>
 
                 {/* Form Requirements */}
-                <div className="text-center text-sm text-gray-500">
+                <div className="text-center text-sm text-[#adb8c1]">
                   <p>جميع الحقول المطلوبة مُعلمة بـ <span className="text-red-500">*</span></p>
                 </div>
               </form>

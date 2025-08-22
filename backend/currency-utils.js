@@ -43,18 +43,23 @@ const CURRENCY_NAMES = {
 };
 
 // Format currency amount with proper symbol and locale
-function formatCurrency(amount, currency = 'DH', locale = 'ar') {
+// Amount should be in DH, will be converted to target currency
+function formatCurrency(amountInDH, currency = 'DH', locale = 'ar') {
   const symbol = CURRENCY_SYMBOLS[currency] || 'DH';
+
+  // Convert from DH to target currency
+  const convertedAmount = convertFromDH(amountInDH, currency);
+
   const formattedAmount = new Intl.NumberFormat(locale === 'ar' ? 'ar-MA' : locale, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(convertedAmount);
 
   // For Arabic locale, put symbol after number
   if (locale === 'ar') {
     return `${formattedAmount} ${symbol}`;
   }
-  
+
   // For other locales, put symbol before number (except DH)
   if (currency === 'DH') {
     return `${formattedAmount} ${symbol}`;

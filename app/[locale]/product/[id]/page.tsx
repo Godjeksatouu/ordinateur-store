@@ -27,6 +27,8 @@ export default function LocalizedProductDetailsPage() {
   const productId = params.id as string;
   const { t, locale } = useTranslations();
   const { currency, format } = useCurrency();
+
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -82,7 +84,18 @@ export default function LocalizedProductDetailsPage() {
     if (productId) {
       loadProduct();
     }
-  }, [productId, currency]);
+  }, [productId]); // Remove currency dependency to avoid reloading product
+
+  // Recalculate final price when currency changes
+  useEffect(() => {
+    if (product) {
+      const promoDiscount = promoValidation?.isValid ?
+        (promoValidation.discountType === 'percentage' ?
+          product.new_price * (promoValidation.discount / 100) :
+          promoValidation.discount) : 0;
+      calculateFinalPrice(product.new_price, promoDiscount, orderForm.paymentMethod);
+    }
+  }, [currency, product, promoValidation, orderForm.paymentMethod]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -173,9 +186,9 @@ export default function LocalizedProductDetailsPage() {
   const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
     let finalPrice = basePrice - promoDiscount;
 
-    // Apply Virement bancaire discount
+    // Apply Virement bancaire discount (always 100 DH, stored in DH)
     if (paymentMethod === 'Virement bancaire') {
-      finalPrice = Math.max(0, finalPrice - 100); // 100 DH discount
+      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
     }
 
     setFinalPrice(finalPrice);
@@ -313,7 +326,7 @@ export default function LocalizedProductDetailsPage() {
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/20">
       <Main>
         <div className="py-12">
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
@@ -378,6 +391,8 @@ export default function LocalizedProductDetailsPage() {
                   {product.name}
                 </h1>
 
+
+
                 <div className="flex items-center space-x-4">
                   {product.old_price && product.old_price > 0 && (
                     <div className="text-xl text-gray-500 line-through">
@@ -406,34 +421,34 @@ export default function LocalizedProductDetailsPage() {
 
               {/* Technical Specifications - Hidden for accessories */}
               {!isAccessory && (
-                <div className="bg-white rounded-2xl p-6 shadow-lg">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
+                <div className="bg-white rounded-2xl p-6 shadow-xl border border-[#adb8c1]/20">
+                  <h2 className="text-2xl font-bold text-[#262a2f] mb-6 flex items-center">
+                    <span className="w-1 h-6 rounded-full mr-3 bg-gradient-to-b from-[#6188a4] to-[#262a2f]"></span>
                     {t('technicalSpecs')}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {product.ram && (
-                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                        <span className="text-sm text-gray-600 block">{t('ram')}</span>
-                        <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
+                      <div className="bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-[#adb8c1]/20">
+                        <span className="text-sm text-[#adb8c1] block">{t('ram')}</span>
+                        <span className="text-lg font-semibold text-[#262a2f]">{product.ram}</span>
                       </div>
                     )}
                     {product.storage && (
-                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                        <span className="text-sm text-gray-600 block">{t('storage')}</span>
-                        <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
+                      <div className="bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-[#adb8c1]/20">
+                        <span className="text-sm text-[#adb8c1] block">{t('storage')}</span>
+                        <span className="text-lg font-semibold text-[#262a2f]">{product.storage}</span>
                       </div>
                     )}
                     {product.screen && (
-                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                        <span className="text-sm text-gray-600 block">{t('screen')}</span>
-                        <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
+                      <div className="bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-[#adb8c1]/20">
+                        <span className="text-sm text-[#adb8c1] block">{t('screen')}</span>
+                        <span className="text-lg font-semibold text-[#262a2f]">{product.screen}</span>
                       </div>
                     )}
                     {product.processor && (
-                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                        <span className="text-sm text-gray-600 block">{t('graphics')}</span>
-                        <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
+                      <div className="bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-[#adb8c1]/20">
+                        <span className="text-sm text-[#adb8c1] block">{t('graphics')}</span>
+                        <span className="text-lg font-semibold text-[#262a2f]">{product.processor}</span>
                       </div>
                     )}
                     {product.os && (
@@ -606,7 +621,7 @@ export default function LocalizedProductDetailsPage() {
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             {t('paymentMethods')}
                           </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cashplus' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
                               <input
                                 type="radio"
@@ -616,9 +631,9 @@ export default function LocalizedProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'Cashplus')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">Cashplus</div>
-                                <div className="text-sm text-gray-600">RIB: 123 456 789 000 000 000 12</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">Cashplus</div>
+                                <div className="text-sm text-gray-600 break-words">RIB: 123 456 789 000 000 000 12</div>
                               </div>
                             </label>
 
@@ -631,10 +646,10 @@ export default function LocalizedProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'Virement bancaire')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">Virement bancaire</div>
-                                <div className="text-sm text-gray-600">RIB: 987 654 321 000 000 000 34</div>
-                                <div className="text-xs text-green-700 mt-1">{t('automaticDiscount')}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">Virement bancaire</div>
+                                <div className="text-sm text-gray-600 break-words">RIB: 987 654 321 000 000 000 34</div>
+                                <div className="text-xs text-green-700 mt-1 break-words">{t('automaticDiscount')}</div>
                               </div>
                             </label>
 
@@ -647,10 +662,10 @@ export default function LocalizedProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'Retrait au Magasin')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">Retrait au Magasin</div>
-                                <div className="text-sm text-gray-600">{t('pickupFromStore')}</div>
-                                <div className="text-xs text-blue-700 mt-1">{t('payOnPickup')}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">Retrait au Magasin</div>
+                                <div className="text-sm text-gray-600 break-words">{t('pickupFromStore')}</div>
+                                <div className="text-xs text-blue-700 mt-1 break-words">{t('payOnPickup')}</div>
                               </div>
                             </label>
 
@@ -663,10 +678,10 @@ export default function LocalizedProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'Cash on Delivery')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">{t('cashOnDeliveryShort')}</div>
-                                <div className="text-sm text-gray-600">{t('cashOnDeliveryDesc2') || 'الدفع نقداً عند التوصيل'}</div>
-                                <div className="text-xs text-purple-700 mt-1">💵 {t('securePayment') || 'دفع آمن'}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">{t('cashOnDeliveryShort')}</div>
+                                <div className="text-sm text-gray-600 break-words">{t('cashOnDeliveryDesc2') || 'الدفع نقداً عند التوصيل'}</div>
+                                <div className="text-xs text-purple-700 mt-1 break-words">💵 {t('securePayment') || 'دفع آمن'}</div>
                               </div>
                             </label>
                           </div>

@@ -93,7 +93,7 @@ export function Navigation() {
           </div>
 
           {/* Center: Search, always centered */}
-          <div className="hidden lg:flex flex-1 justify-center items-center" suppressHydrationWarning>
+          <div className="hidden lg:flex flex-1 justify-center items-center ml-8" suppressHydrationWarning>
             <NavigationSearch />
           </div>
           {/* Left: Navigation Links */}
