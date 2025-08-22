@@ -688,9 +688,9 @@ export default function ProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'كاش بلوس')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">كاش بلوس</div>
-                                <div className="text-sm text-gray-600">RIB: 123 456 789 000 000 000 12</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">كاش بلوس</div>
+                                <div className="text-sm text-gray-600 break-words">RIB: 123 456 789 000 000 000 12</div>
                               </div>
                             </label>
 
@@ -703,10 +703,10 @@ export default function ProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'تحويل بنكي')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">تحويل بنكي</div>
-                                <div className="text-sm text-gray-600">RIB: 987 654 321 000 000 000 34</div>
-                                <div className="text-xs text-green-700 mt-1">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">تحويل بنكي</div>
+                                <div className="text-sm text-gray-600 break-words">RIB: 987 654 321 000 000 000 34</div>
+                                <div className="text-xs text-green-700 mt-1 break-words">
                                   خصم تلقائي: -100 درهم
                                 </div>
                               </div>
@@ -721,8 +721,8 @@ export default function ProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'استلام من المتجر')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">استلام من المتجر</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">استلام من المتجر</div>
                               </div>
                             </label>
 
@@ -735,8 +735,8 @@ export default function ProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'الدفع عند الاستلام')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">الدفع عند الاستلام</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">الدفع عند الاستلام</div>
                               </div>
                             </label>
                           </div>

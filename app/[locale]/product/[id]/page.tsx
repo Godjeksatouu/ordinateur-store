@@ -621,7 +621,7 @@ export default function LocalizedProductDetailsPage() {
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             {t('paymentMethods')}
                           </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cashplus' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
                               <input
                                 type="radio"
@@ -631,9 +631,9 @@ export default function LocalizedProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'Cashplus')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">Cashplus</div>
-                                <div className="text-sm text-gray-600">RIB: 123 456 789 000 000 000 12</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">Cashplus</div>
+                                <div className="text-sm text-gray-600 break-words">RIB: 123 456 789 000 000 000 12</div>
                               </div>
                             </label>
 
@@ -646,10 +646,10 @@ export default function LocalizedProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'Virement bancaire')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">Virement bancaire</div>
-                                <div className="text-sm text-gray-600">RIB: 987 654 321 000 000 000 34</div>
-                                <div className="text-xs text-green-700 mt-1">{t('automaticDiscount')}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">Virement bancaire</div>
+                                <div className="text-sm text-gray-600 break-words">RIB: 987 654 321 000 000 000 34</div>
+                                <div className="text-xs text-green-700 mt-1 break-words">{t('automaticDiscount')}</div>
                               </div>
                             </label>
 
@@ -662,10 +662,10 @@ export default function LocalizedProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'Retrait au Magasin')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">Retrait au Magasin</div>
-                                <div className="text-sm text-gray-600">{t('pickupFromStore')}</div>
-                                <div className="text-xs text-blue-700 mt-1">{t('payOnPickup')}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">Retrait au Magasin</div>
+                                <div className="text-sm text-gray-600 break-words">{t('pickupFromStore')}</div>
+                                <div className="text-xs text-blue-700 mt-1 break-words">{t('payOnPickup')}</div>
                               </div>
                             </label>
 
@@ -678,10 +678,10 @@ export default function LocalizedProductDetailsPage() {
                                 onChange={() => handleInputChange('paymentMethod', 'Cash on Delivery')}
                                 className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
                               />
-                              <div>
-                                <div className="font-semibold text-gray-900">{t('cashOnDeliveryShort')}</div>
-                                <div className="text-sm text-gray-600">{t('cashOnDeliveryDesc2') || 'الدفع نقداً عند التوصيل'}</div>
-                                <div className="text-xs text-purple-700 mt-1">💵 {t('securePayment') || 'دفع آمن'}</div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900 break-words">{t('cashOnDeliveryShort')}</div>
+                                <div className="text-sm text-gray-600 break-words">{t('cashOnDeliveryDesc2') || 'الدفع نقداً عند التوصيل'}</div>
+                                <div className="text-xs text-purple-700 mt-1 break-words">💵 {t('securePayment') || 'دفع آمن'}</div>
                               </div>
                             </label>
                           </div>
