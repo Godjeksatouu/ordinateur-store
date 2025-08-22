@@ -2,8 +2,8 @@ name: Deploy App
 
 on:
   push:
-    branches:
-      - deploy
+    tags:
+      - '*'
 
 jobs:
   deploy:
