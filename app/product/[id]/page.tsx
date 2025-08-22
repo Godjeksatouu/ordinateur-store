@@ -239,9 +239,9 @@ export default function ProductDetailsPage() {
   const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
     let finalPrice = basePrice - promoDiscount;
 
-    // Apply payment method discount - fixed 100 DH for "تحويل بنكي"
+    // Apply payment method discount - always 100 DH, stored in DH for "تحويل بنكي"
     if (paymentMethod === 'تحويل بنكي') {
-      finalPrice = Math.max(0, finalPrice - 100);
+      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
     }
 
     setFinalPrice(finalPrice);

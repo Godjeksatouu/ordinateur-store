@@ -213,6 +213,7 @@ export const translations = {
     cancel: 'إلغاء',
 
     // Category Page
+    browseCategories: 'تصفح الفئات',
     category: 'الفئة',
     noProductsInCategory: 'لا توجد منتجات في هذه الفئة حالياً',
 
@@ -470,6 +471,7 @@ export const translations = {
     cancel: 'Cancel',
 
     // Category Page
+    browseCategories: 'Browse Categories',
     category: 'Category',
     noProductsInCategory: 'No products available in this category',
 
@@ -712,6 +714,11 @@ export const translations = {
     finalTotal: 'Total Final',
     orderButton: 'Cliquez ici pour commander',
     cancel: 'Annuler',
+
+    // Category Page
+    browseCategories: 'Parcourir les Catégories',
+    category: 'Catégorie',
+    noProductsInCategory: 'Aucun produit disponible dans cette catégorie',
   },
 
   es: {

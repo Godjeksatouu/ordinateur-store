@@ -116,7 +116,7 @@ export default function AdminLoginPage() {
                   value={productsCreds.email}
                   onChange={(e) => setProductsCreds({ ...productsCreds, email: e.target.value })}
                   className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-base"
-                  placeholder="products@example.com"
+                  placeholder="products@ordinateurstore.ma"
                 />
               </div>
               <div suppressHydrationWarning={true}>
@@ -154,7 +154,7 @@ export default function AdminLoginPage() {
                   value={ordersCreds.email}
                   onChange={(e) => setOrdersCreds({ ...ordersCreds, email: e.target.value })}
                   className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 text-base"
-                  placeholder="orders@example.com"
+                  placeholder="orders@ordinateurstore.ma"
                 />
               </div>
               <div>
@@ -193,7 +193,7 @@ export default function AdminLoginPage() {
                   onChange={(e) => setSuperCreds({ ...superCreds, email: e.target.value })}
                   className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 text-base"
                   style={{'--tw-ring-color': '#3a4956'} as any}
-                  placeholder="admin@example.com"
+                  placeholder="admin@ordinateurstore.ma"
                 />
               </div>
               <div>
@@ -220,26 +220,7 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
-        <div className="text-center text-sm text-gray-500 mt-12 p-6 bg-gray-50 rounded-xl" suppressHydrationWarning={true}>
-          <p className="font-semibold text-gray-700 mb-3">بيانات الدخول الافتراضية:</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs" suppressHydrationWarning={true}>
-            <div className="bg-white p-3 rounded-lg border border-blue-100" suppressHydrationWarning={true}>
-              <p className="font-medium text-blue-600">Product Manager</p>
-              <p>products@example.com</p>
-              <p>products123</p>
-            </div>
-            <div className="bg-white p-3 rounded-lg border border-green-100" suppressHydrationWarning={true}>
-              <p className="font-medium text-green-600">Gestion Commandes</p>
-              <p>orders@example.com</p>
-              <p>orders123</p>
-            </div>
-            <div className="bg-white p-3 rounded-lg border border-amber-100" suppressHydrationWarning={true}>
-              <p className="font-medium text-amber-600">Super Admin</p>
-              <p>admin@example.com</p>
-              <p>admin123</p>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   );

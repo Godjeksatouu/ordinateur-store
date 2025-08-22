@@ -27,6 +27,8 @@ export default function LocalizedProductDetailsPage() {
   const productId = params.id as string;
   const { t, locale } = useTranslations();
   const { currency, format } = useCurrency();
+
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -184,9 +186,9 @@ export default function LocalizedProductDetailsPage() {
   const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
     let finalPrice = basePrice - promoDiscount;
 
-    // Apply Virement bancaire discount
+    // Apply Virement bancaire discount (always 100 DH, stored in DH)
     if (paymentMethod === 'Virement bancaire') {
-      finalPrice = Math.max(0, finalPrice - 100); // 100 DH discount
+      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
     }
 
     setFinalPrice(finalPrice);
@@ -388,6 +390,8 @@ export default function LocalizedProductDetailsPage() {
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
                   {product.name}
                 </h1>
+
+
 
                 <div className="flex items-center space-x-4">
                   {product.old_price && product.old_price > 0 && (
