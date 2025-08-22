@@ -4,6 +4,7 @@ import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { motion } from 'motion/react';
 import { ShoppingCartRemoveButton } from './shopping-cart-remove-button';
 import Link from 'next/link';
+import { useCurrency } from '@/components/currency-context';
 
 export function EmptyShoppingCartItem() {
   return (
@@ -24,6 +25,9 @@ export function EmptyShoppingCartItem() {
 }
 
 export function ShoppingCartItem({ item }: { item: CartItem }) {
+  const { format } = useCurrency();
+  const standardPrice = 45000; // Standard laptop price in DH
+
   return (
     <motion.li
       layout
@@ -43,7 +47,7 @@ export function ShoppingCartItem({ item }: { item: CartItem }) {
         <div>
           <div className="flex justify-between text-base font-medium text-gray-900">
             <h3>حاسوب محمول</h3>
-            <p className="ml-4">45,000 دج</p>
+            <p className="ml-4">{format(standardPrice)}</p>
           </div>
           <p className="mt-1 text-sm text-gray-500">
             {item.color}, {item.size}

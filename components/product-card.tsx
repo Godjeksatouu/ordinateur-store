@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Product } from '@/lib/products';
 import { ShoppingBagIcon, StarIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '@/hooks/use-translations';
+import { useCurrency } from './currency-context';
+import { API_BASE_URL } from '@/lib/config';
 
 interface ProductCardProps {
   product: Product;
@@ -14,7 +16,13 @@ interface ProductCardProps {
 
 export function ProductCard({ product, showPrice = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { t, locale } = useTranslations();
+  const { format } = useCurrency();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Calculate discount percentage
   const hasDiscount = product.old_price && product.old_price > product.new_price;
@@ -22,9 +30,12 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
     ? Math.round(((product.old_price - product.new_price) / product.old_price) * 100)
     : 0;
 
+  // Check if this is an accessory (accessories don't have RAM/storage/processor)
+  const isAccessory = !product.ram && !product.storage && !product.processor;
+
   return (
     <div
-      className="group relative bg-[#fdfefd] rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-[#adb8c1]/20 hover:border-[#6188a4]/30 h-full flex flex-col"
+      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-200 hover:border-[#6188a4]/40 h-full flex flex-col p-3"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -42,11 +53,12 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
         {product.images && product.images.length > 0 ? (
           <>
             <Image
-              src={`http://localhost:5000${product.images[0]}`}
+              src={`${API_BASE_URL}${product.images[0]}`}
               alt={product.name}
               fill
               className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              unoptimized
               onError={(e) => {
                 // Hide the broken image and show fallback
                 e.currentTarget.style.display = 'none';
@@ -78,23 +90,25 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
           {product.name}
         </h3>
 
-        {/* Specifications */}
-        <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
-          <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
-            <div className="text-[#adb8c1] text-xs font-medium">{t('ram')}</div>
-            <div className="font-bold text-[#262a2f] text-sm">{product.ram}</div>
-          </div>
-          <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
-            <div className="text-[#adb8c1] text-xs font-medium">{t('storage')}</div>
-            <div className="font-bold text-[#262a2f] text-sm">{product.storage}</div>
-          </div>
-          {product.processor && (
-            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2 col-span-2">
-              <div className="text-[#adb8c1] text-xs font-medium">{t('processor')}</div>
-              <div className="font-bold text-[#262a2f] text-xs leading-tight">{product.processor}</div>
+        {/* Specifications - Hidden on mobile, visible on larger screens, and hidden for accessories */}
+        {!isAccessory && (
+          <div className="hidden sm:grid grid-cols-2 gap-2 mb-4 text-sm">
+            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
+              <div className="text-[#adb8c1] text-xs font-medium">{t('ram')}</div>
+              <div className="font-bold text-[#262a2f] text-sm">{product.ram}</div>
             </div>
-          )}
-        </div>
+            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
+              <div className="text-[#adb8c1] text-xs font-medium">{t('storage')}</div>
+              <div className="font-bold text-[#262a2f] text-sm">{product.storage}</div>
+            </div>
+            {product.processor && (
+              <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2 col-span-2">
+                <div className="text-[#adb8c1] text-xs font-medium">{t('processor')}</div>
+                <div className="font-bold text-[#262a2f] text-xs leading-tight">{product.processor}</div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Price Section */}
         <div className="mt-auto">
@@ -102,7 +116,7 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
             {hasDiscount && (
               <div className="flex items-center justify-between mb-1">
                 <div className="text-sm text-[#adb8c1] line-through">
-                  {product.old_price.toLocaleString()} {t('currency')}
+                  {mounted ? format(product.old_price) : `${product.old_price.toLocaleString()} DH`}
                 </div>
                 <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
                   -{discountPercentage}%
@@ -110,11 +124,11 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
               </div>
             )}
             <div className="text-2xl font-bold text-[#6188a4]">
-              {product.new_price.toLocaleString()} <span className="text-sm text-[#adb8c1] mr-1">{t('currency')}</span>
+              {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
             </div>
             {hasDiscount && (
               <div className="text-xs text-green-600 font-medium mt-1">
-                {t('youSaved')}: {(product.old_price - product.new_price).toLocaleString()} {t('currency')}
+                {t('youSaved')}: {mounted ? format(product.old_price - product.new_price) : `${(product.old_price - product.new_price).toLocaleString()} DH`}
               </div>
             )}
           </div>

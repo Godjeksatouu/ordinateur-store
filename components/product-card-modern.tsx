@@ -1,9 +1,12 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from '@/hooks/use-translations';
 import { Product } from '@/lib/products';
+import { API_BASE_URL } from '@/lib/config';
+import { useCurrency } from './currency-context';
 
 interface Props {
   product: Product;
@@ -11,11 +14,20 @@ interface Props {
 }
 
 export default function ProductCardModern({ product, showCTA = true }: Props) {
+  const [mounted, setMounted] = useState(false);
   const { t, locale } = useTranslations();
+  const { format } = useCurrency();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const hasDiscount = !!product.old_price && product.old_price > product.new_price;
   const discountPct = hasDiscount
     ? Math.round(((product.old_price! - product.new_price) / product.old_price!) * 100)
     : 0;
+
+  // Check if this is an accessory (accessories don't have RAM/storage/processor)
+  const isAccessory = !product.ram && !product.storage && !product.processor;
 
   return (
     <article className="group relative rounded-2xl border border-muted/40 bg-light shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
@@ -32,11 +44,12 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
       <div className="relative aspect-[4/3] bg-muted/20">
         {product.images?.[0] ? (
           <Image
-            src={`http://localhost:5000${product.images[0]}`}
+            src={`${API_BASE_URL}${product.images[0]}`}
             alt={product.name}
             fill
             className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            unoptimized
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center text-dark/60">
@@ -51,26 +64,28 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
           {product.name}
         </h3>
 
-        <dl className="grid grid-cols-2 gap-2 text-xs md:text-sm mb-4">
-          {product.ram && (
-            <div className="rounded-lg bg-muted/20 p-2">
-              <dt className="text-dark/70">{t('ram')}</dt>
-              <dd className="font-semibold text-dark">{product.ram}</dd>
-            </div>
-          )}
-          {product.storage && (
-            <div className="rounded-lg bg-muted/20 p-2">
-              <dt className="text-dark/70">{t('storage')}</dt>
-              <dd className="font-semibold text-dark">{product.storage}</dd>
-            </div>
-          )}
-          {product.processor && (
-            <div className="rounded-lg bg-muted/20 p-2 col-span-2">
-              <dt className="text-dark/70">{t('processor')}</dt>
-              <dd className="font-semibold text-dark truncate">{product.processor}</dd>
-            </div>
-          )}
-        </dl>
+        {!isAccessory && (
+          <dl className="hidden sm:grid grid-cols-2 gap-2 text-xs md:text-sm mb-4">
+            {product.ram && (
+              <div className="rounded-lg bg-muted/20 p-2">
+                <dt className="text-dark/70">{t('ram')}</dt>
+                <dd className="font-semibold text-dark">{product.ram}</dd>
+              </div>
+            )}
+            {product.storage && (
+              <div className="rounded-lg bg-muted/20 p-2">
+                <dt className="text-dark/70">{t('storage')}</dt>
+                <dd className="font-semibold text-dark">{product.storage}</dd>
+              </div>
+            )}
+            {product.processor && (
+              <div className="rounded-lg bg-muted/20 p-2 col-span-2">
+                <dt className="text-dark/70">{t('processor')}</dt>
+                <dd className="font-semibold text-dark truncate">{product.processor}</dd>
+              </div>
+            )}
+          </dl>
+        )}
 
         {/* Pricing */}
         <div className="flex items-end justify-between gap-3">
@@ -78,7 +93,7 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
             {product.old_price && product.old_price > 0 && (
               <div className="flex items-center justify-between mb-1">
                 <div className="text-xs text-dark/60 line-through">
-                  {product.old_price.toLocaleString()} {t('currency')}
+                  {mounted ? format(product.old_price) : `${product.old_price.toLocaleString()} DH`}
                 </div>
                 <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
                   -{Math.round(((product.old_price - product.new_price) / product.old_price) * 100)}%
@@ -86,11 +101,11 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
               </div>
             )}
             <div className="text-lg md:text-xl font-extrabold text-primary">
-              {product.new_price.toLocaleString()} <span className="text-xs text-dark/70">{t('currency')}</span>
+              {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
             </div>
             {product.old_price && product.old_price > 0 && (
               <div className="text-xs text-green-600 font-medium mt-1">
-                {t('youSaved')}: {(product.old_price - product.new_price).toLocaleString()} {t('currency')}
+                {t('youSaved')}: {mounted ? format(product.old_price - product.new_price) : `${(product.old_price - product.new_price).toLocaleString()} DH`}
               </div>
             )}
           </div>

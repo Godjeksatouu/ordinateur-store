@@ -8,7 +8,11 @@ import { PublicLayout } from '@/components/public-layout';
 import { getProductById, Product } from '@/lib/products';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '@/hooks/use-translations';
+import { API_BASE_URL } from '@/lib/config';
+import { FacebookPixel } from '@/lib/facebook-pixel';
 
+import { useCurrency } from '@/components/currency-context';
+import { HydrationSafe } from '@/components/hydration-safe';
 interface OrderForm {
   fullName: string;
   phoneNumber: string;
@@ -17,14 +21,17 @@ interface OrderForm {
   email?: string;
   paymentMethod?: string;
   codePromo?: string;
+  marketingConsent?: boolean;
 }
 
 export default function ProductDetailsPage() {
   const params = useParams();
   const productId = params.id as string;
   const { t, locale } = useTranslations();
+  const { currency, format } = useCurrency();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -36,9 +43,9 @@ export default function ProductDetailsPage() {
     address: '',
     email: '',
     paymentMethod: '',
-    codePromo: ''
+    codePromo: '',
+    marketingConsent: false
   });
-  const [marketingConsent, setMarketingConsent] = useState(false);
   const [promoValidation, setPromoValidation] = useState<{
     isValid: boolean;
     message: string;
@@ -53,11 +60,28 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     const loadProduct = async () => {
       try {
+        setError(null);
         const fetchedProduct = await getProductById(productId);
-        setProduct(fetchedProduct || null);
-        setFinalPrice(fetchedProduct?.new_price || 0);
+
+        if (!fetchedProduct) {
+          setError('المنتج غير موجود');
+          setProduct(null);
+          return;
+        }
+
+        setProduct(fetchedProduct);
+        setFinalPrice(fetchedProduct.new_price || 0);
+
+        // Track Facebook Pixel view content event
+        FacebookPixel.viewContent(fetchedProduct.new_price, currency, {
+          content_ids: [fetchedProduct.id.toString()],
+          content_name: fetchedProduct.name,
+          content_type: 'product'
+        });
       } catch (error) {
         console.error('Error loading product:', error);
+        setError('حدث خطأ في تحميل المنتج');
+        setProduct(null);
       } finally {
         setLoading(false);
       }
@@ -66,12 +90,12 @@ export default function ProductDetailsPage() {
     if (productId) {
       loadProduct();
     }
-  }, [productId]);
+  }, [productId, currency]);
 
   useEffect(() => {
     const loadPaymentMethods = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/payment-methods');
+        const response = await fetch(`${API_BASE_URL}/api/payment-methods`);
         const data = await response.json();
         setPaymentMethods(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -96,10 +120,42 @@ export default function ProductDetailsPage() {
     return (
       <PublicLayout>
         <Main>
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-            <p className="mt-2 text-gray-600">{t('loadingProduct')}</p>
-          </div>
+          <HydrationSafe>
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+              <p className="mt-2 text-gray-600">{t('loadingProduct')}</p>
+            </div>
+          </HydrationSafe>
+        </Main>
+      </PublicLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PublicLayout>
+        <Main>
+          <HydrationSafe>
+            <div className="text-center py-12">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">خطأ في تحميل المنتج</h1>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <div className="space-x-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
+                >
+                  إعادة المحاولة
+                </button>
+                <a
+                  href="/"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg transition-colors inline-block"
+                >
+                  العودة للصفحة الرئيسية
+                </a>
+              </div>
+            </div>
+          </HydrationSafe>
         </Main>
       </PublicLayout>
     );
@@ -133,14 +189,14 @@ export default function ProductDetailsPage() {
     );
   }
 
-  const handleInputChange = (field: keyof OrderForm, value: string) => {
+  const handleInputChange = (field: keyof OrderForm, value: string | boolean) => {
     setOrderForm(prev => ({
       ...prev,
       [field]: value
     }));
 
     // If promo code field is changed, validate it with debouncing
-    if (field === 'codePromo') {
+    if (field === 'codePromo' && typeof value === 'string') {
       // Clear existing timer
       if (promoDebounceTimer) {
         clearTimeout(promoDebounceTimer);
@@ -160,7 +216,7 @@ export default function ProductDetailsPage() {
     }
 
     // If payment method is changed, recalculate price
-    if (field === 'paymentMethod') {
+    if (field === 'paymentMethod' && typeof value === 'string') {
       const promoDiscount = promoValidation?.isValid ?
         (promoValidation.discountType === 'percentage' ?
           (product?.new_price || 0) * (promoValidation.discount / 100) :
@@ -172,16 +228,9 @@ export default function ProductDetailsPage() {
   const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
     let finalPrice = basePrice - promoDiscount;
 
-    // Apply payment method discount
-    if (paymentMethod) {
-      const selectedPaymentMethod = paymentMethods.find(pm => pm.name === paymentMethod);
-      if (selectedPaymentMethod && selectedPaymentMethod.discount_amount > 0) {
-        if (selectedPaymentMethod.discount_type === 'percentage') {
-          finalPrice = Math.max(0, finalPrice - (finalPrice * selectedPaymentMethod.discount_amount / 100));
-        } else {
-          finalPrice = Math.max(0, finalPrice - selectedPaymentMethod.discount_amount);
-        }
-      }
+    // Apply payment method discount - fixed 100 DH for "تحويل بنكي"
+    if (paymentMethod === 'تحويل بنكي') {
+      finalPrice = Math.max(0, finalPrice - 100);
     }
 
     setFinalPrice(finalPrice);
@@ -192,7 +241,7 @@ export default function ProductDetailsPage() {
 
     setIsValidatingPromo(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/promos/validate`, {
+      const response = await fetch(`${API_BASE_URL}/api/promos/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,7 +267,7 @@ export default function ProductDetailsPage() {
 
         setPromoValidation({
           isValid: true,
-          message: t('promoCodeValid', { amount: discountAmount.toLocaleString() }),
+          message: t('promoCodeValid', { amount: format(discountAmount) }),
           discount: discount,
           discountType: discountType
         });
@@ -255,13 +304,13 @@ export default function ProductDetailsPage() {
       alert('يرجى تعبئة جميع الحقول المطلوبة');
       return;
     }
-    if (!marketingConsent) {
+    if (!orderForm.marketingConsent) {
       alert('يرجى الموافقة على استقبال أحدث العروض والمنتجات عبر البريد الإلكتروني');
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -284,27 +333,42 @@ export default function ProductDetailsPage() {
               (product.new_price * promoValidation.discount / 100) :
               promoValidation.discount) : 0,
           quantity: 1,
-          categoryId: null // Will be implemented when categories are linked to products
+          categoryId: null, // Will be implemented when categories are linked to products
+          currency: currency
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        // Track Facebook Pixel purchase event
+        FacebookPixel.purchase(finalPrice, currency, {
+          content_ids: [product.id.toString()],
+          content_name: product.name,
+          content_type: 'product',
+          num_items: 1
+        });
+
         setOrderSuccess(true);
         setShowOrderForm(false);
         setOrderForm({
           fullName: '',
           phoneNumber: '',
           city: '',
-          address: ''
+          address: '',
+          email: '',
+          paymentMethod: '',
+          codePromo: '',
+          marketingConsent: false
         });
       } else {
-        // show inline error later if needed
-        console.error('Order submit failed');
+        // Show specific error message
+        console.error('Order submit failed:', data);
+        alert(`فشل في إرسال الطلب: ${data.error || 'خطأ غير معروف'}`);
       }
     } catch (error) {
       console.error('Error submitting order:', error);
+      alert('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.');
     }
   };
 
@@ -312,7 +376,8 @@ export default function ProductDetailsPage() {
     <PublicLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <Main>
-        <div className="py-12">
+        <HydrationSafe>
+          <div className="py-12">
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
             {/* Product Image */}
             <div className="mb-12 lg:mb-0">
@@ -322,12 +387,13 @@ export default function ProductDetailsPage() {
                     {/* Main Image with Zoom on Hover */}
                     <div className="h-full w-full overflow-hidden">
                       <Image
-                        src={product.images && product.images.length > 0 ? `http://localhost:5000${product.images[activeIndex]}` : '/images/1.png'}
+                        src={product.images && product.images.length > 0 ? `${API_BASE_URL}${product.images[activeIndex]}` : '/images/1.png'}
                         alt={product.name}
                         fill
                         className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
                         sizes="(max-width: 768px) 100vw, 50vw"
                         priority
+                        unoptimized
                       />
                     </div>
 
@@ -352,11 +418,12 @@ export default function ProductDetailsPage() {
                           aria-label={`صورة ${i + 1}`}
                         >
                           <Image
-                            src={`http://localhost:5000${src}`}
+                            src={`${API_BASE_URL}${src}`}
                             alt={`صورة ${i + 1}`}
                             fill
                             className="object-cover object-center"
                             sizes="(max-width: 768px) 20vw, 10vw"
+                            unoptimized
                           />
                         </button>
                       ))}
@@ -373,26 +440,24 @@ export default function ProductDetailsPage() {
                   {product.name}
                 </h1>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4" suppressHydrationWarning>
                   {product.old_price && product.old_price > 0 && (
                     <div className="text-xl text-gray-500 line-through">
-                      {product.old_price.toLocaleString()} {t('currency')}
+                      {format(product.old_price)}
                     </div>
                   )}
                   {promoValidation?.isValid && finalPrice !== product.new_price ? (
                     <div className="flex flex-col">
                       <div className="text-lg text-gray-500 line-through">
-                        {product.new_price.toLocaleString()} {t('currency')}
+                        {format(product.new_price)}
                       </div>
                       <div className="text-3xl font-bold text-green-600">
-                        {finalPrice.toLocaleString()}
-                        <span className="text-lg text-gray-500 mr-2">{t('currency')}</span>
+                        {format(finalPrice)}
                       </div>
                     </div>
                   ) : (
                     <div className="text-3xl font-bold text-[#6188a4]">
-                      {finalPrice.toLocaleString()}
-                      <span className="text-lg text-gray-500 mr-2">{t('currency')}</span>
+                      {format(finalPrice)}
                     </div>
                   )}
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -401,45 +466,47 @@ export default function ProductDetailsPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
-                  {t('technicalSpecs')}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {product.ram && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('ram')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
-                    </div>
-                  )}
-                  {product.storage && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('storage')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
-                    </div>
-                  )}
-                  {product.screen && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('screen')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
-                    </div>
-                  )}
-                  {product.processor && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('graphics')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
-                    </div>
-                  )}
-                  {product.os && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('os')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.os}</span>
-                    </div>
-                  )}
-
+              {/* Technical Specifications - Only show for products with technical specs (not accessories) */}
+              {(product.ram || product.storage || product.screen || product.processor || product.os || product.graphics) && (
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
+                    {t('technicalSpecs')}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {product.ram && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('ram')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
+                      </div>
+                    )}
+                    {product.storage && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('storage')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
+                      </div>
+                    )}
+                    {product.screen && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('screen')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
+                      </div>
+                    )}
+                    {product.processor && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('graphics')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
+                      </div>
+                    )}
+                    {product.os && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('os')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.os}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
@@ -486,7 +553,7 @@ export default function ProductDetailsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label htmlFor="fullName" className="block text-sm font-semibold text-gray-700 mb-2">
-                            {t('fullName')}
+                            اسمك بالكامل
                           </label>
                           <input
                             type="text"
@@ -512,7 +579,7 @@ export default function ProductDetailsPage() {
                             value={orderForm.phoneNumber}
                             onChange={(e) => handleInputChange('phoneNumber', e.target.value.replace(/[^0-9]/g, ''))}
                             className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder="مثال: 0612345678"
+                            placeholder={t('phoneExample')}
                           />
                         </div>
                       </div>
@@ -528,7 +595,7 @@ export default function ProductDetailsPage() {
                           value={orderForm.city}
                           onChange={(e) => handleInputChange('city', e.target.value)}
                           className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                          placeholder="أدخل اسم المدينة"
+                          placeholder={t('cityPlaceholder')}
                         />
                       </div>
 
@@ -545,7 +612,7 @@ export default function ProductDetailsPage() {
                               value={orderForm.address}
                               onChange={(e) => handleInputChange('address', e.target.value)}
                               className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white resize-none"
-                              placeholder="أدخل عنوانك التفصيلي..."
+                              placeholder={t('addressPlaceholder')}
                             />
                           </div>
                           <div>
@@ -565,7 +632,7 @@ export default function ProductDetailsPage() {
 
                         <div className="mt-6">
                           <label htmlFor="codePromo" className="block text-sm font-semibold text-gray-700 mb-2">
-                            {t('promoCodeOptional')}
+                            كود التخفيض (اختياري)
                           </label>
                           <div className="relative">
                             <input
@@ -600,28 +667,67 @@ export default function ProductDetailsPage() {
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             طرق الدفع
                           </label>
-                          <div className={`grid grid-cols-1 md:grid-cols-2 ${paymentMethods.length > 3 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
-                            {paymentMethods.map((pm) => (
-                              <label key={pm.id} className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === pm.name ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                                <input
-                                  type="radio"
-                                  name="paymentMethod"
-                                  value={pm.name}
-                                  checked={orderForm.paymentMethod === pm.name}
-                                  onChange={() => handleInputChange('paymentMethod', pm.name)}
-                                  className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                                />
-                                <div>
-                                  <div className="font-semibold text-gray-900">{pm.name_ar || pm.name}</div>
-                                  <div className="text-sm text-gray-600">{pm.description_ar || pm.description}</div>
-                                  {pm.discount_amount > 0 && (
-                                    <div className="text-xs text-green-700 mt-1">
-                                      خصم تلقائي: -{pm.discount_amount}{pm.discount_type === 'percentage' ? '%' : ' درهم'}
-                                    </div>
-                                  )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'كاش بلوس' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="كاش بلوس"
+                                checked={orderForm.paymentMethod === 'كاش بلوس'}
+                                onChange={() => handleInputChange('paymentMethod', 'كاش بلوس')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">كاش بلوس</div>
+                                <div className="text-sm text-gray-600">RIB: 123 456 789 000 000 000 12</div>
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'تحويل بنكي' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="تحويل بنكي"
+                                checked={orderForm.paymentMethod === 'تحويل بنكي'}
+                                onChange={() => handleInputChange('paymentMethod', 'تحويل بنكي')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">تحويل بنكي</div>
+                                <div className="text-sm text-gray-600">RIB: 987 654 321 000 000 000 34</div>
+                                <div className="text-xs text-green-700 mt-1">
+                                  خصم تلقائي: -100 درهم
                                 </div>
-                              </label>
-                            ))}
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'استلام من المتجر' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="استلام من المتجر"
+                                checked={orderForm.paymentMethod === 'استلام من المتجر'}
+                                onChange={() => handleInputChange('paymentMethod', 'استلام من المتجر')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">استلام من المتجر</div>
+                              </div>
+                            </label>
+
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'الدفع عند الاستلام' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                              <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="الدفع عند الاستلام"
+                                checked={orderForm.paymentMethod === 'الدفع عند الاستلام'}
+                                onChange={() => handleInputChange('paymentMethod', 'الدفع عند الاستلام')}
+                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                              />
+                              <div>
+                                <div className="font-semibold text-gray-900">الدفع عند الاستلام</div>
+                              </div>
+                            </label>
                           </div>
                         </div>
                       </div>
@@ -631,8 +737,8 @@ export default function ProductDetailsPage() {
                           <input
                             id="marketingConsent"
                             type="checkbox"
-                            checked={marketingConsent}
-                            onChange={(e) => setMarketingConsent(e.target.checked)}
+                            checked={orderForm.marketingConsent || false}
+                            onChange={(e) => handleInputChange('marketingConsent', e.target.checked)}
                             className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] rounded focus:ring-[#6188a4]"
                             required
                           />
@@ -642,47 +748,44 @@ export default function ProductDetailsPage() {
                         </div>
 
                         {/* Dynamic Price Display */}
-                        <div className="bg-white p-3 rounded-lg border border-gray-200">
-                          <div className="text-sm text-gray-600 mb-2">تفاصيل السعر:</div>
+                        <div className="bg-white p-3 rounded-lg border border-gray-200" suppressHydrationWarning>
+                          <div className="text-sm text-gray-600 mb-2">تفاصيل السعر</div>
                           <div className="space-y-2">
                             {/* Original Price */}
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">السعر الأصلي:</span>
                               <span className="text-sm font-medium">
-                                {product.new_price.toLocaleString()} {t('currency')}
+                                {format(product.new_price)}
                               </span>
                             </div>
 
                             {/* Promo Code Discount */}
-                            {promoValidation?.isValid && (
+                            {promoValidation?.isValid && (() => {
+                              const discountAmount = promoValidation.discountType === 'percentage' ?
+                                (product.new_price * promoValidation.discount / 100) :
+                                promoValidation.discount;
+                              return (
+                                <div className="flex justify-between items-center text-green-600">
+                                  <span className="text-sm">خصم كود التخفيض:</span>
+                                  <span className="text-sm font-medium">
+                                    -{format(discountAmount)}
+                                  </span>
+                                </div>
+                              );
+                            })()}
+
+                            {/* Payment Method Discount */}
+                            {orderForm.paymentMethod === 'تحويل بنكي' && (
                               <div className="flex justify-between items-center text-green-600">
-                                <span className="text-sm">خصم كود التخفيض:</span>
+                                <span className="text-sm">خصم تحويل بنكي:</span>
                                 <span className="text-sm font-medium">
-                                  -{(promoValidation.discountType === 'percentage' ?
-                                    (product.new_price * promoValidation.discount / 100) :
-                                    promoValidation.discount).toLocaleString()} {t('currency')}
+                                  -{format(100)}
                                 </span>
                               </div>
                             )}
 
-                            {/* Payment Method Discount */}
-                            {orderForm.paymentMethod && (() => {
-                              const selectedPaymentMethod = paymentMethods.find(pm => pm.name === orderForm.paymentMethod);
-                              if (selectedPaymentMethod && selectedPaymentMethod.discount_amount > 0) {
-                                return (
-                                  <div className="flex justify-between items-center text-green-600">
-                                    <span className="text-sm">خصم {selectedPaymentMethod.name_ar || selectedPaymentMethod.name}:</span>
-                                    <span className="text-sm font-medium">
-                                      -{selectedPaymentMethod.discount_amount}{selectedPaymentMethod.discount_type === 'percentage' ? '%' : ` ${t('currency')}`}
-                                    </span>
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })()}
-
                             {/* Divider */}
-                            {(promoValidation?.isValid || (orderForm.paymentMethod && paymentMethods.find(pm => pm.name === orderForm.paymentMethod)?.discount_amount > 0)) && (
+                            {(promoValidation?.isValid || orderForm.paymentMethod === 'تحويل بنكي') && (
                               <hr className="border-gray-200" />
                             )}
 
@@ -690,14 +793,14 @@ export default function ProductDetailsPage() {
                             <div className="flex justify-between items-center">
                               <span className="text-lg font-semibold text-gray-900">المجموع النهائي:</span>
                               <span className="text-xl font-bold text-[#6188a4]">
-                                {finalPrice.toLocaleString()} {t('currency')}
+                                {format(finalPrice)}
                               </span>
                             </div>
 
                             {/* Savings Summary */}
                             {finalPrice !== product.new_price && (
                               <div className="text-sm text-green-700 font-medium bg-green-50 p-2 rounded">
-                                وفرت: {(product.new_price - finalPrice).toLocaleString()} {t('currency')}
+                                وفرت: {format(product.new_price - finalPrice)}
                               </div>
                             )}
                           </div>
@@ -726,8 +829,126 @@ export default function ProductDetailsPage() {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <ProductReviews productId={productId} locale={locale} />
+        </HydrationSafe>
       </Main>
       </div>
     </PublicLayout>
+  );
+}
+
+// Reviews Component
+function ProductReviews({ productId, locale }: { productId: string; locale: string }) {
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { t } = useTranslations();
+
+  useEffect(() => {
+    fetchReviews();
+  }, [productId]);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reviews?product_id=${productId}`);
+      const data = await response.json();
+      setReviews(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      setReviews([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span key={i} className={i < rating ? 'text-yellow-400' : 'text-gray-300'}>
+        ⭐
+      </span>
+    ));
+  };
+
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+    : 0;
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <p className="mt-2 text-gray-600">جاري تحميل المراجعات...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">⭐ {t('customerReviews')}</h2>
+          <p className="text-gray-600">{t('noReviews')}</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-12 bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">⭐ {t('customerReviews')}</h2>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex">{renderStars(Math.round(averageRating))}</div>
+            <span className="text-lg font-semibold text-gray-700">
+              {averageRating.toFixed(1)} {locale === 'ar' ? 'من 5' : locale === 'fr' ? 'sur 5' : locale === 'es' ? 'de 5' : 'out of 5'}
+            </span>
+            <span className="text-gray-500">({reviews.length} {locale === 'ar' ? 'مراجعة' : locale === 'fr' ? 'avis' : locale === 'es' ? 'reseñas' : 'reviews'})</span>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {reviews.map((review) => (
+            <div key={review.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-gray-900">{review.name || t('customer')}</span>
+                    <div className="flex">{renderStars(review.rating)}</div>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {new Date(review.created_at).toLocaleDateString(
+                      locale === 'ar' ? 'ar-SA' :
+                      locale === 'fr' ? 'fr-FR' :
+                      locale === 'es' ? 'es-ES' : 'en-US'
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {review.comment && (
+                <p className="text-gray-700 mb-4 leading-relaxed">{review.comment}</p>
+              )}
+
+              {review.photos && review.photos.length > 0 && (
+                <div className="flex gap-3 flex-wrap">
+                  {review.photos.map((photo: string, index: number) => (
+                    <img
+                      key={index}
+                      src={`${API_BASE_URL}${photo}`}
+                      alt={`Review photo ${index + 1}`}
+                      className="h-20 w-20 rounded-lg object-cover border border-gray-200"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

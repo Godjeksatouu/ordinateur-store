@@ -8,6 +8,9 @@ import { PublicLayout } from '@/components/public-layout';
 import { getProductById, Product } from '@/lib/products';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from '@/hooks/use-translations';
+import { API_BASE_URL } from '@/lib/config';
+import { FacebookPixel } from '@/lib/facebook-pixel';
+import { useCurrency } from '@/components/currency-context';
 
 interface OrderForm {
   fullName: string;
@@ -23,6 +26,7 @@ export default function LocalizedProductDetailsPage() {
   const params = useParams();
   const productId = params.id as string;
   const { t, locale } = useTranslations();
+  const { currency, format } = useCurrency();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,12 +54,24 @@ export default function LocalizedProductDetailsPage() {
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
+  // Check if this is an accessory (accessories don't have RAM/storage/processor)
+  const isAccessory = product && !product.ram && !product.storage && !product.processor;
+
   useEffect(() => {
     const loadProduct = async () => {
       try {
         const fetchedProduct = await getProductById(productId);
         setProduct(fetchedProduct || null);
         setFinalPrice(fetchedProduct?.new_price || 0);
+
+        // Track Facebook Pixel view content event
+        if (fetchedProduct) {
+          FacebookPixel.viewContent(fetchedProduct.new_price, currency, {
+            content_ids: [fetchedProduct.id.toString()],
+            content_name: fetchedProduct.name,
+            content_type: 'product'
+          });
+        }
       } catch (error) {
         console.error('Error loading product:', error);
       } finally {
@@ -66,7 +82,7 @@ export default function LocalizedProductDetailsPage() {
     if (productId) {
       loadProduct();
     }
-  }, [productId]);
+  }, [productId, currency]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -170,7 +186,7 @@ export default function LocalizedProductDetailsPage() {
 
     setIsValidatingPromo(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/promos/validate`, {
+      const response = await fetch(`${API_BASE_URL}/api/promos/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +212,7 @@ export default function LocalizedProductDetailsPage() {
 
         setPromoValidation({
           isValid: true,
-          message: t('promoCodeValid', { amount: discountAmount.toLocaleString() }),
+          message: t('promoCodeValid', { amount: format(discountAmount) }),
           discount: discount,
           discountType: discountType
         });
@@ -239,7 +255,7 @@ export default function LocalizedProductDetailsPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -262,13 +278,22 @@ export default function LocalizedProductDetailsPage() {
               (product.new_price * promoValidation.discount / 100) :
               promoValidation.discount) : 0,
           quantity: 1,
-          categoryId: null // Will be implemented when categories are linked to products
+          categoryId: null, // Will be implemented when categories are linked to products
+          currency: currency
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
+        // Track Facebook Pixel purchase event
+        FacebookPixel.purchase(finalPrice, currency, {
+          content_ids: [product.id.toString()],
+          content_name: product.name,
+          content_type: 'product',
+          num_items: 1
+        });
+
         setOrderSuccess(true);
         setShowOrderForm(false);
         setOrderForm({
@@ -300,12 +325,13 @@ export default function LocalizedProductDetailsPage() {
                     {/* Main Image with Zoom on Hover */}
                     <div className="h-full w-full overflow-hidden">
                       <Image
-                        src={product.images && product.images.length > 0 ? `http://localhost:5000${product.images[activeIndex]}` : '/images/1.png'}
+                        src={product.images && product.images.length > 0 ? `${API_BASE_URL}${product.images[activeIndex]}` : '/images/1.png'}
                         alt={product.name}
                         fill
                         className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
                         sizes="(max-width: 768px) 100vw, 50vw"
                         priority
+                        unoptimized
                       />
                     </div>
 
@@ -330,11 +356,12 @@ export default function LocalizedProductDetailsPage() {
                           aria-label={`صورة ${i + 1}`}
                         >
                           <Image
-                            src={`http://localhost:5000${src}`}
+                            src={`${API_BASE_URL}${src}`}
                             alt={`صورة ${i + 1}`}
                             fill
                             className="object-cover object-center"
                             sizes="(max-width: 768px) 20vw, 10vw"
+                            unoptimized
                           />
                         </button>
                       ))}
@@ -354,23 +381,21 @@ export default function LocalizedProductDetailsPage() {
                 <div className="flex items-center space-x-4">
                   {product.old_price && product.old_price > 0 && (
                     <div className="text-xl text-gray-500 line-through">
-                      {product.old_price.toLocaleString()} {t('currency')}
+                      {format(product.old_price)}
                     </div>
                   )}
                   {promoValidation?.isValid && finalPrice !== product.new_price ? (
                     <div className="flex flex-col">
                       <div className="text-lg text-gray-500 line-through">
-                        {product.new_price.toLocaleString()} {t('currency')}
+                        {format(product.new_price)}
                       </div>
                       <div className="text-3xl font-bold text-green-600">
-                        {finalPrice.toLocaleString()}
-                        <span className="text-lg text-gray-500 mr-2">{t('currency')}</span>
+                        {format(finalPrice)}
                       </div>
                     </div>
                   ) : (
                     <div className="text-3xl font-bold text-[#6188a4]">
-                      {finalPrice.toLocaleString()}
-                      <span className="text-lg text-gray-500 mr-2">{t('currency')}</span>
+                      {format(finalPrice)}
                     </div>
                   )}
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -379,45 +404,48 @@ export default function LocalizedProductDetailsPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
-                  {t('technicalSpecs')}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {product.ram && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('ram')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
-                    </div>
-                  )}
-                  {product.storage && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('storage')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
-                    </div>
-                  )}
-                  {product.screen && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('screen')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
-                    </div>
-                  )}
-                  {product.processor && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('graphics')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
-                    </div>
-                  )}
-                  {product.os && (
-                    <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                      <span className="text-sm text-gray-600 block">{t('os')}</span>
-                      <span className="text-lg font-semibold text-gray-900">{product.os}</span>
-                    </div>
-                  )}
+              {/* Technical Specifications - Hidden for accessories */}
+              {!isAccessory && (
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
+                    {t('technicalSpecs')}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {product.ram && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('ram')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
+                      </div>
+                    )}
+                    {product.storage && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('storage')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
+                      </div>
+                    )}
+                    {product.screen && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('screen')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
+                      </div>
+                    )}
+                    {product.processor && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('graphics')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
+                      </div>
+                    )}
+                    {product.os && (
+                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
+                        <span className="text-sm text-gray-600 block">{t('os')}</span>
+                        <span className="text-lg font-semibold text-gray-900">{product.os}</span>
+                      </div>
+                    )}
 
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
@@ -490,7 +518,7 @@ export default function LocalizedProductDetailsPage() {
                             value={orderForm.phoneNumber}
                             onChange={(e) => handleInputChange('phoneNumber', e.target.value.replace(/[^0-9]/g, ''))}
                             className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                            placeholder="مثال: 0612345678"
+                            placeholder={t('phoneExample')}
                           />
                         </div>
                       </div>
@@ -506,7 +534,7 @@ export default function LocalizedProductDetailsPage() {
                           value={orderForm.city}
                           onChange={(e) => handleInputChange('city', e.target.value)}
                           className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white"
-                          placeholder="أدخل اسم المدينة"
+                          placeholder={t('cityPlaceholder')}
                         />
                       </div>
 
@@ -523,7 +551,7 @@ export default function LocalizedProductDetailsPage() {
                               value={orderForm.address}
                               onChange={(e) => handleInputChange('address', e.target.value)}
                               className="w-full px-4 py-3 border-2 border-[#adb8c1] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6188a4] focus:border-[#6188a4] transition-all duration-300 bg-[#fdfefd] hover:bg-white resize-none"
-                              placeholder="أدخل عنوانك التفصيلي..."
+                              placeholder={t('addressPlaceholder')}
                             />
                           </div>
                           <div>
@@ -668,7 +696,7 @@ export default function LocalizedProductDetailsPage() {
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">{t('originalPrice')}</span>
                               <span className="text-sm font-medium">
-                                {product.new_price.toLocaleString()} {t('currency')}
+                                {format(product.new_price)}
                               </span>
                             </div>
 
@@ -677,9 +705,9 @@ export default function LocalizedProductDetailsPage() {
                               <div className="flex justify-between items-center text-green-600">
                                 <span className="text-sm">{t('promoDiscount')}</span>
                                 <span className="text-sm font-medium">
-                                  -{(promoValidation.discountType === 'percentage' ?
+                                  -{format(promoValidation.discountType === 'percentage' ?
                                     (product.new_price * promoValidation.discount / 100) :
-                                    promoValidation.discount).toLocaleString()} {t('currency')}
+                                    promoValidation.discount)}
                                 </span>
                               </div>
                             )}
@@ -688,7 +716,7 @@ export default function LocalizedProductDetailsPage() {
                             {orderForm.paymentMethod === 'Virement bancaire' && (
                               <div className="flex justify-between items-center text-green-600">
                                 <span className="text-sm">{t('bankTransferDiscount')}</span>
-                                <span className="text-sm font-medium">-100 {t('currency')}</span>
+                                <span className="text-sm font-medium">-{format(100)}</span>
                               </div>
                             )}
 
@@ -701,14 +729,14 @@ export default function LocalizedProductDetailsPage() {
                             <div className="flex justify-between items-center">
                               <span className="text-lg font-semibold text-gray-900">{t('finalTotal')}</span>
                               <span className="text-xl font-bold text-[#6188a4]">
-                                {finalPrice.toLocaleString()} {t('currency')}
+                                {format(finalPrice)}
                               </span>
                             </div>
 
                             {/* Savings Summary */}
                             {finalPrice !== product.new_price && (
                               <div className="text-sm text-green-700 font-medium bg-green-50 p-2 rounded">
-                                {t('youSaved')} {(product.new_price - finalPrice).toLocaleString()} {t('currency')}
+                                {t('youSaved')} {format(product.new_price - finalPrice)}
                               </div>
                             )}
                           </div>
@@ -737,8 +765,125 @@ export default function LocalizedProductDetailsPage() {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <ProductReviews productId={productId} />
       </Main>
       </div>
     </PublicLayout>
+  );
+}
+
+// Reviews Component
+function ProductReviews({ productId }: { productId: string }) {
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { t } = useTranslations();
+
+  useEffect(() => {
+    fetchReviews();
+  }, [productId]);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/reviews?product_id=${productId}`);
+      const data = await response.json();
+      setReviews(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      setReviews([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span key={i} className={i < rating ? 'text-yellow-400' : 'text-gray-300'}>
+        ⭐
+      </span>
+    ));
+  };
+
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+    : 0;
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <p className="mt-2 text-gray-600">جاري تحميل المراجعات...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <section className="py-12 bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">⭐ {t('customerReviews')}</h2>
+          <p className="text-gray-600">{t('noReviews')}</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-12 bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">⭐ {t('customerReviews')}</h2>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex">{renderStars(Math.round(averageRating))}</div>
+            <span className="text-lg font-semibold text-gray-700">
+              {averageRating.toFixed(1)} {locale === 'ar' ? 'من 5' : locale === 'fr' ? 'sur 5' : locale === 'es' ? 'de 5' : 'out of 5'}
+            </span>
+            <span className="text-gray-500">({reviews.length} {locale === 'ar' ? 'مراجعة' : locale === 'fr' ? 'avis' : locale === 'es' ? 'reseñas' : 'reviews'})</span>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {reviews.map((review) => (
+            <div key={review.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-gray-900">{review.name || t('customer')}</span>
+                    <div className="flex">{renderStars(review.rating)}</div>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {new Date(review.created_at).toLocaleDateString(
+                      locale === 'ar' ? 'ar-SA' :
+                      locale === 'fr' ? 'fr-FR' :
+                      locale === 'es' ? 'es-ES' : 'en-US'
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {review.comment && (
+                <p className="text-gray-700 mb-4 leading-relaxed">{review.comment}</p>
+              )}
+
+              {review.photos && review.photos.length > 0 && (
+                <div className="flex gap-3 flex-wrap">
+                  {review.photos.map((photo: string, index: number) => (
+                    <img
+                      key={index}
+                      src={`${API_BASE_URL}${photo}`}
+                      alt={`Review photo ${index + 1}`}
+                      className="h-20 w-20 rounded-lg object-cover border border-gray-200"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

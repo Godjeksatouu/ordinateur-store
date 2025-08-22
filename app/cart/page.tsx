@@ -1,3 +1,4 @@
+'use client';
 import { OrderSummary } from '@/app/cart/order-summary';
 import { Main } from '@/components/main';
 import { PublicLayout } from '@/components/public-layout';

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/config';
 
 // Mobile-optimized admin dashboard
 export default function MobileAdminPage() {
@@ -202,7 +203,7 @@ function MobileProductsManager() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(`${API_BASE_URL}/api/products`);
       const data = await response.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -214,7 +215,7 @@ function MobileProductsManager() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/categories');
+      const response = await fetch(`${API_BASE_URL}/api/categories`);
       const data = await response.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -275,7 +276,7 @@ function MobileProductsManager() {
                 <div className="w-16 h-16 bg-[#adb8c1]/10 rounded-lg flex-shrink-0 flex items-center justify-center">
                   {product.images && product.images.length > 0 ? (
                     <img
-                      src={`http://localhost:5000${product.images[0]}`}
+                      src={`${API_BASE_URL}${product.images[0]}`}
                       alt={product.name}
                       className="w-full h-full object-cover rounded-lg"
                     />

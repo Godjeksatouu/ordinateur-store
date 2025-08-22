@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/config';
 
 export default function AdminLoginPage() {
   const [productsCreds, setProductsCreds] = useState({ email: '', password: '' });
@@ -23,7 +24,7 @@ export default function AdminLoginPage() {
     setError(prev => ({ ...prev, [key]: '' }));
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: creds.email, password: creds.password }),
@@ -210,8 +211,8 @@ export default function AdminLoginPage() {
               <button
                 onClick={() => loginForRole(superCreds, 'super_admin', 'super')}
                 disabled={loading.super}
-                className="w-full text-white px-6 py-4 rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
-                style={{background: 'linear-gradient(to right, #3a4956, #2a3440)', ':hover': {background: 'linear-gradient(to right, #2a3440, #3a4956)'}}}
+                className="w-full text-white px-6 py-4 rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6 hover:from-[#2a3440] hover:to-[#3a4956]"
+                style={{background: 'linear-gradient(to right, #3a4956, #2a3440)'}}
               >
                 {loading.super ? 'جاري الدخول...' : 'تسجيل الدخول كـ Super Admin'}
               </button>

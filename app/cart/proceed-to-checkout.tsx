@@ -1,5 +1,3 @@
-'use client';
-
 import { ProceedToCheckoutButton } from '@/components/shopping-cart/proceed-to-checkout-button';
 import { toast } from 'sonner';
 

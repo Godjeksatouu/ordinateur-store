@@ -1,6 +1,6 @@
 'use client';
 
-import { removeFromCart } from '@/lib/actions';
+// import { removeFromCart } from '@/lib/actions';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { CartItem } from '@/components/utils/cart-types';
@@ -24,7 +24,7 @@ export function ShoppingCartRemoveButton({ item }: { item: CartItem }) {
       type="button"
       onClick={async () => {
         setIsLoading(true);
-        await removeFromCart(item);
+        // await removeFromCart(item);
         // Only end the spinner if the item is not the last one, as the item
         // unmounts when the last one is removed
         if (item.quantity !== 1) setIsLoading(false);

@@ -7,11 +7,11 @@ export function NavigationSearch() {
   const { t } = useTranslations();
 
   return (
-    <div className="relative">
+    <div className="relative w-full max-w-[20rem] sm:max-w-[24rem] lg:max-w-[28rem]">
       <input
         type="text"
         placeholder={t('search')}
-        className="w-64 px-4 py-3 pr-12 text-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white"
+        className="w-full px-4 py-3 pr-12 text-sm border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-300 bg-gray-50 hover:bg-white"
       />
       <MagnifyingGlassIcon className="absolute right-4 top-3.5 h-5 w-5 text-gray-400" />
     </div>

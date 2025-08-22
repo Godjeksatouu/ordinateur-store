@@ -1,11 +1,20 @@
-const express = require('express');
-const cors = require('cors');
-const mysql = require('mysql2/promise');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const multer = require('multer');
-const path = require('path');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import mysql from 'mysql2/promise';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import path from 'path';
+import crypto from 'crypto';
+
+import sendFactureMail from './utils/mail/templates/send-facture.js';
+import sendOrderMadeMail from './utils/mail/templates/order-made.js';
+import { convertFromDH } from './currency-utils.js';
+
+import dotenv from 'dotenv';
+import sendInformOrderMail from './utils/mail/templates/inform-order-made.js';
+dotenv.config();
+
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 5000;
@@ -204,6 +213,41 @@ async function createTables() {
     `);
     console.log('✅ Created categories table');
 
+    // Accessoires table
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS accessoires (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        old_price DECIMAL(10,2),
+        new_price DECIMAL(10,2) NOT NULL,
+        description TEXT,
+        category_id INT,
+        images JSON,
+        main_images JSON,
+        optional_images JSON,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Created accessoires table');
+
+    // Reviews table
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        order_id INT,
+        product_id INT,
+        client_id INT,
+        rating INT NOT NULL,
+        photos JSON,
+        name VARCHAR(255),
+        comment TEXT,
+        approved BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Created reviews table');
+
     // Clients table
     await db.execute(`
       CREATE TABLE IF NOT EXISTS clients (
@@ -234,11 +278,11 @@ async function createTables() {
         client_id INT NOT NULL,
         product_id INT NOT NULL,
         product_name VARCHAR(255) NOT NULL,
+        product_type ENUM('product', 'accessoire') DEFAULT 'product',
         status ENUM('en_attente', 'confirme', 'declined', 'en_cours', 'livre', 'retour') DEFAULT 'en_attente',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (client_id) REFERENCES clients(id),
-        FOREIGN KEY (product_id) REFERENCES products(id)
+        FOREIGN KEY (client_id) REFERENCES clients(id)
       )
     `);
     // Ensure extra fields on orders
@@ -259,6 +303,26 @@ async function createTables() {
       }
     } catch (e) {
       console.warn('⚠️ Could not ensure orders.payment_method column exists:', e.message || e);
+    }
+
+    // Remove foreign key constraint if it exists
+    try {
+      await db.execute("ALTER TABLE orders DROP FOREIGN KEY orders_ibfk_2");
+      console.log('✅ Removed product_id foreign key constraint from orders');
+    } catch (error) {
+      console.log('⚠️ Foreign key constraint might not exist or already removed');
+    }
+
+    // Add product_type column
+    try {
+      const [productTypeCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'product_type'");
+      // @ts-ignore
+      if (Array.isArray(productTypeCol) && productTypeCol.length === 0) {
+        await db.execute("ALTER TABLE orders ADD COLUMN product_type ENUM('product', 'accessoire') DEFAULT 'product'");
+        console.log('✅ Added product_type column to orders');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.product_type column exists:', e.message || e);
     }
 
     // Add additional order details columns
@@ -330,6 +394,54 @@ async function createTables() {
       }
     } catch (e) {
       console.warn('⚠️ Could not ensure orders.virement_discount column exists:', e.message || e);
+    }
+
+    // Add review token columns to orders
+    try {
+      const [reviewTokenCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'review_token'");
+      // @ts-ignore
+      if (Array.isArray(reviewTokenCol) && reviewTokenCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN review_token VARCHAR(64)');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.review_token column exists:', e.message || e);
+    }
+
+    try {
+      const [reviewUsedCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'review_used'");
+      // @ts-ignore
+      if (Array.isArray(reviewUsedCol) && reviewUsedCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN review_used BOOLEAN DEFAULT FALSE');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.review_used column exists:', e.message || e);
+    }
+
+    // Add slug column to categories
+    try {
+      const [slugCol] = await db.execute("SHOW COLUMNS FROM categories LIKE 'slug'");
+      // @ts-ignore
+      if (Array.isArray(slugCol) && slugCol.length === 0) {
+        await db.execute('ALTER TABLE categories ADD COLUMN slug VARCHAR(255)');
+        // Update existing categories with slugs
+        await db.execute("UPDATE categories SET slug = 'laptops' WHERE name = 'Laptops'");
+        await db.execute("UPDATE categories SET slug = 'accessoires' WHERE name = 'Accesoires'");
+        console.log('✅ Added slug column to categories and updated existing categories');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure categories.slug column exists:', e.message || e);
+    }
+
+    // Add currency column to orders
+    try {
+      const [currencyCol] = await db.execute("SHOW COLUMNS FROM orders LIKE 'currency'");
+      // @ts-ignore
+      if (Array.isArray(currencyCol) && currencyCol.length === 0) {
+        await db.execute('ALTER TABLE orders ADD COLUMN currency VARCHAR(10) DEFAULT "DH"');
+        console.log('✅ Added currency column to orders');
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not ensure orders.currency column exists:', e.message || e);
     }
 
     // Add promo_code and promo_type columns to products table
@@ -598,8 +710,41 @@ app.post('/api/orders', async (req, res) => {
       fullName, phoneNumber, city, address, email,
       productId, productName, paymentMethod, codePromo,
       language = 'ar', finalPrice, originalPrice, discount,
-      quantity = 1, categoryId
+      quantity = 1, categoryId, currency = 'DH'
     } = req.body;
+
+    // Determine if this is a product or accessoire
+    let productType = 'product';
+    let productData = null;
+
+    // First try to find in products table
+    try {
+      const [[product]] = await db.execute('SELECT * FROM products WHERE id = ?', [productId]);
+      if (product) {
+        productData = product;
+        productType = 'product';
+      }
+    } catch (error) {
+      console.log('Product not found in products table, checking accessories...');
+    }
+
+    // If not found in products, try accessories
+    if (!productData) {
+      try {
+        const [[accessoire]] = await db.execute('SELECT * FROM accessoires WHERE id = ?', [productId]);
+        if (accessoire) {
+          productData = accessoire;
+          productType = 'accessoire';
+        }
+      } catch (error) {
+        console.log('Product not found in accessories table either');
+      }
+    }
+
+    // If product/accessoire not found, return error
+    if (!productData) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
 
     // Calculate discounts
     let promoDiscount = 0;
@@ -611,9 +756,9 @@ app.post('/api/orders', async (req, res) => {
       promoDiscount = discount;
     }
 
-    // Calculate Virement bancaire discount
-    if (paymentMethod === 'Virement bancaire') {
-      virementDiscount = 100;
+    // Calculate Virement bancaire discount (100 DH converted to order currency)
+    if (paymentMethod === 'Virement bancaire' || paymentMethod === 'تحويل بنكي') {
+      virementDiscount = convertFromDH(100, currency || 'DH');
     }
 
     totalDiscount = promoDiscount + virementDiscount;
@@ -629,18 +774,55 @@ app.post('/api/orders', async (req, res) => {
     // Insert order with all details
     const [orderResult] = await db.execute(
       `INSERT INTO orders (
-        client_id, product_id, product_name, status, payment_method, code_promo,
+        client_id, product_id, product_name, product_type, status, payment_method, code_promo,
         quantity, category_id, original_price, final_price, discount_amount,
-        promo_discount, virement_discount
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        promo_discount, virement_discount, currency
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        clientId, productId, productName, 'en_attente', paymentMethod || null, codePromo || null,
+        clientId, productId, productName, productType, 'en_attente', paymentMethod || null, codePromo || null,
         quantity, categoryId || null, originalPrice || null, finalPrice || null, totalDiscount,
-        promoDiscount, virementDiscount
+        promoDiscount, virementDiscount, currency || 'DH'
       ]
     );
 
-    // Order created successfully - email functionality removed
+    const [[order]] = await db.execute(
+      `SELECT * FROM orders WHERE id = ${Number(orderResult.insertId)}`,
+    );
+
+    const [[client]] = await db.execute(
+      `SELECT * from clients WHERE id = ${order.client_id}`,
+    );
+
+    // Fetch product from correct table based on product_type
+    let product;
+    if (order.product_type === 'accessoire') {
+      const [[accessoire]] = await db.execute(
+        `SELECT * from accessoires WHERE id = ${order.product_id}`,
+      );
+      product = accessoire;
+    } else {
+      const [[productData]] = await db.execute(
+        `SELECT * from products WHERE id = ${order.product_id}`,
+      );
+      product = productData;
+    }
+
+    // Try to send email, but don't fail the order if email fails
+    try {
+      await sendOrderMadeMail(client, order, product);
+      console.log('✅ Order confirmation email sent successfully');
+    } catch (emailError) {
+      console.warn('⚠️ Failed to send order confirmation email:', emailError.message);
+      // Continue with order creation even if email fails
+    }
+    // Try to inform admin with the order, but don't fail the order if email fails
+    try {
+      await sendInformOrderMail(client, order, product);
+      console.log('✅ Order confirmation email sent successfully');
+    } catch (emailError) {
+      console.warn('⚠️ Failed to inform the admin: ', emailError.message);
+      // Continue with order creation even if email fails
+    }
 
     res.json({
       success: true,
@@ -653,19 +835,139 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-// Get all orders (for admin)
+// Get all orders (for admin) with pagination and filters
 app.get('/api/orders', authenticateToken, requireRole(['gestion_commandes', 'super_admin']), async (req, res) => {
   try {
-    const [orders] = await db.execute(`
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    const { status, dateFrom, dateTo, promoCode } = req.query;
+
+    let whereConditions = [];
+    let queryParams = [];
+
+    // Add status filter
+    if (status && status !== 'all') {
+      whereConditions.push('o.status = ?');
+      queryParams.push(status);
+    }
+
+    // Add date range filter
+    if (dateFrom) {
+      whereConditions.push('DATE(o.created_at) >= ?');
+      queryParams.push(dateFrom);
+    }
+
+    if (dateTo) {
+      whereConditions.push('DATE(o.created_at) <= ?');
+      queryParams.push(dateTo);
+    }
+
+    // Add promo code filter
+    if (promoCode && promoCode !== 'all') {
+      whereConditions.push('o.code_promo = ?');
+      queryParams.push(promoCode);
+    }
+
+    const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
+
+    // Get total count for pagination
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM orders o
+      JOIN clients c ON o.client_id = c.id
+      ${whereClause}
+    `;
+
+    const [countResult] = await db.execute(countQuery, queryParams);
+    const total = countResult[0].total;
+
+    // Get orders with pagination
+    const ordersQuery = `
       SELECT o.*, c.full_name, c.phone, c.city, c.address, c.email
       FROM orders o
       JOIN clients c ON o.client_id = c.id
+      ${whereClause}
       ORDER BY o.created_at DESC
-    `);
-    res.json(orders);
+      LIMIT ? OFFSET ?
+    `;
+
+    const [orders] = await db.execute(ordersQuery, [...queryParams, limit, offset]);
+
+    res.json({
+      orders,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error('Get orders error:', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+app.post('/api/orders/:id/facture', authenticateToken, requireRole(['gestion_commandes', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [[order]] = await db.execute(
+      `SELECT * FROM orders WHERE id = ${Number(id)}`,
+    );
+
+    const [[client]] = await db.execute(
+      `SELECT * from clients WHERE id = ${order.client_id}`,
+    );
+
+    // Fetch product from correct table based on product_type
+    let product;
+    console.log(`📄 Fetching product for order ${order.id}, product_id: ${order.product_id}, product_type: ${order.product_type}`);
+
+    if (order.product_type === 'accessoire') {
+      const [[accessoire]] = await db.execute(
+        `SELECT * from accessoires WHERE id = ${order.product_id}`,
+      );
+      product = accessoire;
+      console.log('📄 Found accessoire:', accessoire ? accessoire.name : 'NOT FOUND');
+    } else {
+      const [[productData]] = await db.execute(
+        `SELECT * from products WHERE id = ${order.product_id}`,
+      );
+      product = productData;
+      console.log('📄 Found product:', productData ? productData.name : 'NOT FOUND');
+    }
+
+    if (!product) {
+      console.error('❌ Product not found for facture generation');
+      return res.json({ success: false, message: 'المنتج غير موجود. لا يمكن إنشاء الفاتورة.' });
+    }
+
+    // Generate unique review token if not already generated
+    let reviewToken = order.review_token;
+    if (!reviewToken) {
+      reviewToken = crypto.randomBytes(32).toString('hex');
+      await db.execute('UPDATE orders SET review_token = ? WHERE id = ?', [reviewToken, id]);
+    }
+
+    // Create review link
+    const reviewLink = `${process.env.FRONTEND_URL}/review/${reviewToken}`;
+
+    // Try to send facture email with PDF, but don't fail the request if email fails
+    try {
+      console.log('📄 Generating PDF invoice and sending email...');
+      await sendFactureMail(client, order, product, reviewLink);
+      console.log('✅ PDF invoice generated and email sent successfully');
+      res.json({ success: true, message: 'تم إرسال الفاتورة بنجاح!' });
+    } catch (emailError) {
+      console.warn('⚠️ Failed to generate PDF or send facture email:', emailError.message);
+      res.json({ success: false, message: 'فشل في إرسال الفاتورة. يرجى المحاولة مرة أخرى.' });
+    }
+  } catch (error) {
+    console.error('Update order status error:', error);
+    res.status(500).json({ error: 'Failed to update order status' });
   }
 });
 
@@ -723,7 +1025,7 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
   { name: 'images', maxCount: 5 } // Keep for backward compatibility
 ]), async (req, res) => {
   try {
-    let { name, ram, storage, graphics, os, processor, old_price, new_price, description, promo_code, promo_type } = req.body;
+    let { name, ram, storage, graphics, os, processor, old_price, new_price, description, category_id, promo_code, promo_type } = req.body;
 
     // Handle different image types
     const mainImages = req.files?.mainImages ? req.files.mainImages.map(file => `/uploads/${file.filename}`) : [];
@@ -748,13 +1050,14 @@ app.post('/api/products', authenticateToken, requireRole(['product_manager', 'su
       JSON.stringify(finalMainImages),
       JSON.stringify(finalOptionalImages),
       description || null,
+      category_id ? parseInt(category_id) : null,
       promo_code || null,
       promo_type || null
     ];
 
     const [result] = await db.execute(
-      `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, main_images, optional_images, description, promo_code, promo_type)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO products (name, ram, storage, graphics, os, processor, old_price, new_price, images, main_images, optional_images, description, category_id, promo_code, promo_type)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       params
     );
 
@@ -772,7 +1075,7 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
 ]), async (req, res) => {
   try {
     const { id } = req.params;
-    let { name, ram, storage, graphics, os, processor, old_price, new_price, description, promo_code, promo_type } = req.body;
+    let { name, ram, storage, graphics, os, processor, old_price, new_price, description, category_id, promo_code, promo_type } = req.body;
 
     // Handle different image types for update
     let mainImages = [];
@@ -816,13 +1119,14 @@ app.put('/api/products/:id', authenticateToken, requireRole(['product_manager', 
       JSON.stringify(finalMainImages),
       JSON.stringify(finalOptionalImages),
       description || null,
+      category_id ? parseInt(category_id) : null,
       promo_code || null,
       promo_type || null,
       id
     ];
 
     await db.execute(
-      `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, main_images=?, optional_images=?, description=?, promo_code=?, promo_type=? WHERE id=?`,
+      `UPDATE products SET name=?, ram=?, storage=?, graphics=?, os=?, processor=?, old_price=?, new_price=?, images=?, main_images=?, optional_images=?, description=?, category_id=?, promo_code=?, promo_type=? WHERE id=?`,
       params
     );
 
@@ -869,6 +1173,357 @@ app.delete('/api/products/:id', authenticateToken, requireRole(['product_manager
   } catch (error) {
     console.error('Delete product error:', error);
     res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
+// Accessoires management routes
+app.get('/api/accessoires', async (req, res) => {
+  try {
+    const [accessoires] = await db.execute('SELECT * FROM accessoires ORDER BY created_at DESC');
+
+    // Parse JSON images for each accessoire
+    const accessoiresWithParsedImages = accessoires.map(accessoire => {
+      if (accessoire.images) {
+        try {
+          accessoire.images = JSON.parse(accessoire.images);
+        } catch (e) {
+          console.error('Error parsing images for accessoire', accessoire.id, e);
+          accessoire.images = [];
+        }
+      } else {
+        accessoire.images = [];
+      }
+      return accessoire;
+    });
+
+    res.json(accessoiresWithParsedImages);
+  } catch (error) {
+    console.error('Get accessoires error:', error);
+    res.status(500).json({ error: 'Failed to fetch accessoires' });
+  }
+});
+
+app.post('/api/accessoires', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.fields([
+  { name: 'mainImages', maxCount: 3 },
+  { name: 'optionalImages', maxCount: 5 },
+  { name: 'images', maxCount: 5 } // Keep for backward compatibility
+]), async (req, res) => {
+  try {
+    let { name, old_price, new_price, description, category_id } = req.body;
+
+    // Handle different image types
+    const mainImages = req.files?.mainImages ? req.files.mainImages.map(file => `/uploads/${file.filename}`) : [];
+    const optionalImages = req.files?.optionalImages ? req.files.optionalImages.map(file => `/uploads/${file.filename}`) : [];
+    const legacyImages = req.files?.images ? req.files.images.map(file => `/uploads/${file.filename}`) : [];
+
+    // For backward compatibility, if no main/optional images but legacy images exist, use legacy
+    const finalMainImages = mainImages.length > 0 ? mainImages : legacyImages;
+    const finalOptionalImages = optionalImages;
+
+    // Convert undefined values to null for MySQL compatibility
+    const params = [
+      name || null,
+      old_price ? parseFloat(old_price) : null,
+      new_price ? parseFloat(new_price) : null,
+      description || null,
+      category_id ? parseInt(category_id) : null,
+      JSON.stringify([...finalMainImages, ...finalOptionalImages]), // Combined for legacy images field
+      JSON.stringify(finalMainImages),
+      JSON.stringify(finalOptionalImages)
+    ];
+
+    const [result] = await db.execute(
+      `INSERT INTO accessoires (name, old_price, new_price, description, category_id, images, main_images, optional_images)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      params
+    );
+
+    res.json({ success: true, accessoireId: result.insertId, message: 'Accessoire created successfully' });
+  } catch (error) {
+    console.error('Create accessoire error:', error);
+    res.status(500).json({ error: 'Failed to create accessoire' });
+  }
+});
+
+app.put('/api/accessoires/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), upload.fields([
+  { name: 'mainImages', maxCount: 3 },
+  { name: 'optionalImages', maxCount: 5 },
+  { name: 'images', maxCount: 5 } // Keep for backward compatibility
+]), async (req, res) => {
+  try {
+    const { id } = req.params;
+    let { name, old_price, new_price, description, category_id } = req.body;
+
+    // Handle different image types for update
+    let mainImages = [];
+    let optionalImages = [];
+    let legacyImages = [];
+
+    if (req.files?.mainImages) {
+      mainImages = req.files.mainImages.map(file => `/uploads/${file.filename}`);
+    } else if (req.body.existing_main_images) {
+      mainImages = JSON.parse(req.body.existing_main_images);
+    }
+
+    if (req.files?.optionalImages) {
+      optionalImages = req.files.optionalImages.map(file => `/uploads/${file.filename}`);
+    } else if (req.body.existing_optional_images) {
+      optionalImages = JSON.parse(req.body.existing_optional_images);
+    }
+
+    if (req.files?.images) {
+      legacyImages = req.files.images.map(file => `/uploads/${file.filename}`);
+    } else if (req.body.existing_images) {
+      legacyImages = JSON.parse(req.body.existing_images);
+    }
+
+    // For backward compatibility
+    const finalMainImages = mainImages.length > 0 ? mainImages : legacyImages;
+    const finalOptionalImages = optionalImages;
+
+    const params = [
+      name || null,
+      old_price ? parseFloat(old_price) : null,
+      new_price ? parseFloat(new_price) : null,
+      description || null,
+      category_id ? parseInt(category_id) : null,
+      JSON.stringify([...finalMainImages, ...finalOptionalImages]),
+      JSON.stringify(finalMainImages),
+      JSON.stringify(finalOptionalImages),
+      id
+    ];
+
+    await db.execute(
+      `UPDATE accessoires SET name = ?, old_price = ?, new_price = ?, description = ?, category_id = ?, images = ?, main_images = ?, optional_images = ? WHERE id = ?`,
+      params
+    );
+
+    res.json({ success: true, message: 'Accessoire updated successfully' });
+  } catch (error) {
+    console.error('Update accessoire error:', error);
+    res.status(500).json({ error: 'Failed to update accessoire' });
+  }
+});
+
+app.delete('/api/accessoires/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.execute('DELETE FROM accessoires WHERE id = ?', [id]);
+    res.json({ success: true, message: 'Accessoire deleted successfully' });
+  } catch (error) {
+    console.error('Delete accessoire error:', error);
+    res.status(500).json({ error: 'Failed to delete accessoire' });
+  }
+});
+
+// Get single accessoire by ID
+app.get('/api/accessoires/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [accessoires] = await db.execute('SELECT * FROM accessoires WHERE id = ?', [id]);
+
+    if (accessoires.length === 0) {
+      return res.status(404).json({ error: 'Accessoire not found' });
+    }
+
+    const accessoire = accessoires[0];
+    if (accessoire.images) {
+      try {
+        accessoire.images = JSON.parse(accessoire.images);
+      } catch (e) {
+        console.error('Error parsing images for accessoire', accessoire.id, e);
+        accessoire.images = [];
+      }
+    } else {
+      accessoire.images = [];
+    }
+
+    res.json(accessoire);
+  } catch (error) {
+    console.error('Get accessoire error:', error);
+    res.status(500).json({ error: 'Failed to fetch accessoire' });
+  }
+});
+
+// Reviews management routes
+// Get approved reviews for a product (public)
+app.get('/api/reviews', async (req, res) => {
+  try {
+    const { product_id } = req.query;
+    let query = 'SELECT * FROM reviews WHERE approved = TRUE';
+    let params = [];
+
+    if (product_id) {
+      query += ' AND product_id = ?';
+      params.push(product_id);
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    const [reviews] = await db.execute(query, params);
+
+    // Parse photos JSON for each review
+    const reviewsWithParsedPhotos = reviews.map(review => {
+      if (review.photos) {
+        try {
+          review.photos = JSON.parse(review.photos);
+        } catch (e) {
+          console.error('Error parsing photos for review', review.id, e);
+          review.photos = [];
+        }
+      } else {
+        review.photos = [];
+      }
+      return review;
+    });
+
+    res.json(reviewsWithParsedPhotos);
+  } catch (error) {
+    console.error('Get reviews error:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+});
+
+// Get all reviews for admin
+app.get('/api/reviews/admin', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const [reviews] = await db.execute(`
+      SELECT r.*, p.name as product_name, c.full_name as client_name
+      FROM reviews r
+      LEFT JOIN products p ON r.product_id = p.id
+      LEFT JOIN clients c ON r.client_id = c.id
+      ORDER BY r.created_at DESC
+    `);
+
+    // Parse photos JSON for each review
+    const reviewsWithParsedPhotos = reviews.map(review => {
+      if (review.photos) {
+        try {
+          review.photos = JSON.parse(review.photos);
+        } catch (e) {
+          console.error('Error parsing photos for review', review.id, e);
+          review.photos = [];
+        }
+      } else {
+        review.photos = [];
+      }
+      return review;
+    });
+
+    res.json(reviewsWithParsedPhotos);
+  } catch (error) {
+    console.error('Get admin reviews error:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+});
+
+// Validate review token (check if token is valid and not used)
+app.get('/api/reviews/validate', async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ error: 'Token is required' });
+    }
+
+    const [orders] = await db.execute(`
+      SELECT o.*, p.name as product_name, c.full_name as client_name
+      FROM orders o
+      LEFT JOIN products p ON o.product_id = p.id
+      LEFT JOIN clients c ON o.client_id = c.id
+      WHERE o.review_token = ? AND o.review_used = FALSE
+    `, [token]);
+
+    if (orders.length === 0) {
+      return res.status(404).json({ error: 'Invalid or expired review link' });
+    }
+
+    const order = orders[0];
+    res.json({
+      valid: true,
+      order_id: order.id,
+      product_id: order.product_id,
+      product_name: order.product_name,
+      client_id: order.client_id,
+      client_name: order.client_name
+    });
+  } catch (error) {
+    console.error('Validate review token error:', error);
+    res.status(500).json({ error: 'Failed to validate review token' });
+  }
+});
+
+// Submit review (with token)
+app.post('/api/reviews/submit', upload.fields([
+  { name: 'photos', maxCount: 5 }
+]), async (req, res) => {
+  try {
+    const { token, rating, name, comment } = req.body;
+
+    if (!token || !rating) {
+      return res.status(400).json({ error: 'Token and rating are required' });
+    }
+
+    // Validate token and get order info
+    const [orders] = await db.execute(`
+      SELECT * FROM orders WHERE review_token = ? AND review_used = FALSE
+    `, [token]);
+
+    if (orders.length === 0) {
+      return res.status(404).json({ error: 'Invalid or expired review link' });
+    }
+
+    const order = orders[0];
+
+    // Handle photo uploads
+    const photos = req.files?.photos ? req.files.photos.map(file => `/uploads/${file.filename}`) : [];
+
+    // Insert review
+    const [result] = await db.execute(
+      `INSERT INTO reviews (order_id, product_id, client_id, rating, photos, name, comment)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        order.id,
+        order.product_id,
+        order.client_id,
+        parseInt(rating),
+        JSON.stringify(photos),
+        name || null,
+        comment || null
+      ]
+    );
+
+    // Mark token as used
+    await db.execute('UPDATE orders SET review_used = TRUE WHERE id = ?', [order.id]);
+
+    res.json({ success: true, reviewId: result.insertId, message: 'Review submitted successfully' });
+  } catch (error) {
+    console.error('Submit review error:', error);
+    res.status(500).json({ error: 'Failed to submit review' });
+  }
+});
+
+// Approve review (admin only)
+app.patch('/api/reviews/:id/approve', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.execute('UPDATE reviews SET approved = TRUE WHERE id = ?', [id]);
+    res.json({ success: true, message: 'Review approved successfully' });
+  } catch (error) {
+    console.error('Approve review error:', error);
+    res.status(500).json({ error: 'Failed to approve review' });
+  }
+});
+
+// Delete review (admin only)
+app.delete('/api/reviews/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.execute('DELETE FROM reviews WHERE id = ?', [id]);
+    res.json({ success: true, message: 'Review deleted successfully' });
+  } catch (error) {
+    console.error('Delete review error:', error);
+    res.status(500).json({ error: 'Failed to delete review' });
   }
 });
 
@@ -1024,6 +1679,7 @@ app.delete('/api/users/:id', authenticateToken, requireRole(['super_admin']), as
 app.get('/api/stats', authenticateToken, requireRole(['super_admin']), async (req, res) => {
   try {
     const [productCount] = await db.execute('SELECT COUNT(*) as count FROM products');
+    const [accessoireCount] = await db.execute('SELECT COUNT(*) as count FROM accessoires');
     const [orderCount] = await db.execute('SELECT COUNT(*) as count FROM orders');
     const [clientCount] = await db.execute('SELECT COUNT(*) as count FROM clients');
     const [confirmedOrders] = await db.execute('SELECT COUNT(*) as count FROM orders WHERE status = "confirme"');
@@ -1034,7 +1690,7 @@ app.get('/api/stats', authenticateToken, requireRole(['super_admin']), async (re
     const [returnedOrders] = await db.execute('SELECT COUNT(*) as count FROM orders WHERE status = "retour"');
 
     res.json({
-      products: productCount[0].count,
+      products: productCount[0].count + accessoireCount[0].count, // Combined total
       orders: orderCount[0].count,
       clients: clientCount[0].count,
       confirmed: confirmedOrders[0].count,
@@ -1060,6 +1716,23 @@ app.get('/api/promos', authenticateToken, requireRole(['product_manager', 'super
   } catch (error) {
     console.error('Get promos error:', error);
     res.status(500).json({ error: 'Failed to fetch promo codes' });
+  }
+});
+
+// Get promo codes used in orders (for order filtering)
+app.get('/api/orders/promo-codes', authenticateToken, requireRole(['gestion_commandes', 'super_admin']), async (req, res) => {
+  try {
+    const [promoCodes] = await db.execute(`
+      SELECT DISTINCT code_promo as code, COUNT(*) as usage_count
+      FROM orders
+      WHERE code_promo IS NOT NULL AND code_promo != ''
+      GROUP BY code_promo
+      ORDER BY usage_count DESC
+    `);
+    res.json(promoCodes);
+  } catch (error) {
+    console.error('Get order promo codes error:', error);
+    res.status(500).json({ error: 'Failed to fetch order promo codes' });
   }
 });
 

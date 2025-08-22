@@ -161,7 +161,7 @@ export const translations = {
 };
 
 export function getTranslation(locale: string, key: string): string {
-  const lang = locale in translations ? locale as keyof typeof translations : 'ar';
+  const lang = locale in translations ? locale as keyof typeof translations : 'fr';
   const t = translations[lang];
-  return (t as any)[key] || translations.ar[key as keyof typeof translations.ar] || key;
+  return (t as any)[key] || translations.fr[key as keyof typeof translations.fr] || key;
 }

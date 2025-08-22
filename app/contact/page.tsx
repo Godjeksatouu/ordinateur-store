@@ -18,7 +18,7 @@ export default function ContactPage() {
             {t('contactUs')}
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            نحن هنا لمساعدتك في العثور على الجهاز المثالي لاحتياجاتك
+            {t('weAreHereToHelp')}
           </p>
           <div className="w-32 h-1 mx-auto mt-8" style={{background: 'linear-gradient(to right, #3a4956, #3a4956)'}}></div>
         </div>
@@ -51,7 +51,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">{t('email')}</p>
-                      <p className="text-blue-600 font-medium">info@laptopstore.ma</p>
+                      <p className="text-blue-600 font-medium">ordinateurstore.contact@gmail.com</p>
                     </div>
                   </div>
 

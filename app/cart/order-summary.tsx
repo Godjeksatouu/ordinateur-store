@@ -1,3 +1,4 @@
+'use client';
 import { OrderSummarySection } from '@/components/shopping-cart/order-summary-section';
 import { ProceedToCheckout } from './proceed-to-checkout';
 
