@@ -82,7 +82,18 @@ export default function LocalizedProductDetailsPage() {
     if (productId) {
       loadProduct();
     }
-  }, [productId, currency]);
+  }, [productId]); // Remove currency dependency to avoid reloading product
+
+  // Recalculate final price when currency changes
+  useEffect(() => {
+    if (product) {
+      const promoDiscount = promoValidation?.isValid ?
+        (promoValidation.discountType === 'percentage' ?
+          product.new_price * (promoValidation.discount / 100) :
+          promoValidation.discount) : 0;
+      calculateFinalPrice(product.new_price, promoDiscount, orderForm.paymentMethod);
+    }
+  }, [currency, product, promoValidation, orderForm.paymentMethod]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -313,7 +324,7 @@ export default function LocalizedProductDetailsPage() {
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/20">
       <Main>
         <div className="py-12">
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
@@ -406,34 +417,34 @@ export default function LocalizedProductDetailsPage() {
 
               {/* Technical Specifications - Hidden for accessories */}
               {!isAccessory && (
-                <div className="bg-white rounded-2xl p-6 shadow-lg">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <span className="w-1 h-6 rounded-full mr-3" style={{background: 'linear-gradient(to bottom, #3a4956, #3a4956)'}}></span>
+                <div className="bg-white rounded-2xl p-6 shadow-xl border border-[#adb8c1]/20">
+                  <h2 className="text-2xl font-bold text-[#262a2f] mb-6 flex items-center">
+                    <span className="w-1 h-6 rounded-full mr-3 bg-gradient-to-b from-[#6188a4] to-[#262a2f]"></span>
                     {t('technicalSpecs')}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {product.ram && (
-                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                        <span className="text-sm text-gray-600 block">{t('ram')}</span>
-                        <span className="text-lg font-semibold text-gray-900">{product.ram}</span>
+                      <div className="bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-[#adb8c1]/20">
+                        <span className="text-sm text-[#adb8c1] block">{t('ram')}</span>
+                        <span className="text-lg font-semibold text-[#262a2f]">{product.ram}</span>
                       </div>
                     )}
                     {product.storage && (
-                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                        <span className="text-sm text-gray-600 block">{t('storage')}</span>
-                        <span className="text-lg font-semibold text-gray-900">{product.storage}</span>
+                      <div className="bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-[#adb8c1]/20">
+                        <span className="text-sm text-[#adb8c1] block">{t('storage')}</span>
+                        <span className="text-lg font-semibold text-[#262a2f]">{product.storage}</span>
                       </div>
                     )}
                     {product.screen && (
-                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                        <span className="text-sm text-gray-600 block">{t('screen')}</span>
-                        <span className="text-lg font-semibold text-gray-900">{product.screen}</span>
+                      <div className="bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-[#adb8c1]/20">
+                        <span className="text-sm text-[#adb8c1] block">{t('screen')}</span>
+                        <span className="text-lg font-semibold text-[#262a2f]">{product.screen}</span>
                       </div>
                     )}
                     {product.processor && (
-                      <div className="bg-gray-50 rounded-xl p-4 hover:bg-slate-50 transition-colors duration-300">
-                        <span className="text-sm text-gray-600 block">{t('graphics')}</span>
-                        <span className="text-lg font-semibold text-gray-900">{product.processor}</span>
+                      <div className="bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-[#adb8c1]/20">
+                        <span className="text-sm text-[#adb8c1] block">{t('graphics')}</span>
+                        <span className="text-lg font-semibold text-[#262a2f]">{product.processor}</span>
                       </div>
                     )}
                     {product.os && (

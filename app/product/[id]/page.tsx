@@ -90,7 +90,18 @@ export default function ProductDetailsPage() {
     if (productId) {
       loadProduct();
     }
-  }, [productId, currency]);
+  }, [productId]); // Remove currency dependency to avoid reloading product
+
+  // Recalculate final price when currency changes
+  useEffect(() => {
+    if (product) {
+      const promoDiscount = promoValidation?.isValid ?
+        (promoValidation.discountType === 'percentage' ?
+          product.new_price * (promoValidation.discount / 100) :
+          promoValidation.discount) : 0;
+      calculateFinalPrice(product.new_price, promoDiscount, orderForm.paymentMethod);
+    }
+  }, [currency, product, promoValidation, orderForm.paymentMethod]);
 
   useEffect(() => {
     const loadPaymentMethods = async () => {
@@ -374,7 +385,7 @@ export default function ProductDetailsPage() {
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="min-h-screen bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/20">
       <Main>
         <HydrationSafe>
           <div className="py-12">

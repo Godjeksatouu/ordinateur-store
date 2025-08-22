@@ -270,12 +270,16 @@ export default function Page() {
         </div>
 
         {/* Categories Section */}
-        <section className="py-6 bg-gray-50">
+        <section className="py-12 bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/20">
           <div className="px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" suppressHydrationWarning>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-[#262a2f] mb-4">تصفح الفئات</h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-[#6188a4] to-[#262a2f] mx-auto rounded-full"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" suppressHydrationWarning>
               {/* Laptops Card */}
               <Link href="/categories/laptops" className="group block">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" suppressHydrationWarning>
+                <div className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-[#adb8c1]/20" suppressHydrationWarning>
                   <div className="aspect-[3/2] relative" suppressHydrationWarning>
                     <img
                       src="/images/c1.png"
@@ -293,7 +297,7 @@ export default function Page() {
 
               {/* Accessoires Card */}
               <Link href="/categories/accessoires" className="group block">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" suppressHydrationWarning>
+                <div className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-[#adb8c1]/20" suppressHydrationWarning>
                   <div className="aspect-[3/2] relative" suppressHydrationWarning>
                     <img
                       src="/images/c2.png"
@@ -313,21 +317,32 @@ export default function Page() {
         </section>
 
         {/* Featured Products Section */}
-        <section id="products-section" className="py-12 bg-white">
+        <section id="products-section" className="py-16 bg-white">
           <Main>
-            <div className="text-center mb-8" suppressHydrationWarning>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+            <div className="text-center mb-12" suppressHydrationWarning>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#6188a4] to-[#262a2f] rounded-full mb-6">
+                <span className="text-2xl text-white">⭐</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#262a2f] mb-3 tracking-tight">
                 {t('featuredCollection')}
               </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-4">
+              <p className="text-lg text-[#adb8c1] max-w-2xl mx-auto mb-4">
                 {t('featuredCollectionDesc')}
               </p>
-              <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto rounded-full" suppressHydrationWarning></div>
+              <div className="w-24 h-1 bg-gradient-to-r from-[#6188a4] to-[#262a2f] mx-auto rounded-full" suppressHydrationWarning></div>
             </div>
             {loading ? (
-              <div className="text-center py-12" suppressHydrationWarning>
-                <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" suppressHydrationWarning></div>
-                <p className="mt-4 text-gray-600 text-lg">{t('loading')}</p>
+              <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl border border-gray-200 bg-white p-3">
+                    <div className="skeleton rounded-xl h-48 mb-4" />
+                    <div className="space-y-2">
+                      <div className="skeleton h-4 rounded w-3/4" />
+                      <div className="skeleton h-4 rounded w-1/2" />
+                      <div className="skeleton h-6 rounded w-1/3" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : allItems.length > 0 ? (
               <>

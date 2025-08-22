@@ -116,21 +116,24 @@ export function Footer() {
             <div className="flex space-x-6 text-sm">
               <Link
                 href={locale === 'ar' ? '/confidentiality' : `/${locale}/confidentiality`}
-                className="text-gray-400 hover:text-amber-400 transition-colors duration-300"
+                className="relative text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6188a4]/50 px-1 group"
               >
                 {t('privacyPolicy')}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#6188a4] to-[#262a2f] rounded-full transition-all duration-300 group-hover:w-full" />
               </Link>
               <Link
                 href={locale === 'ar' ? '/terms-and-conditions' : `/${locale}/terms-and-conditions`}
-                className="text-gray-400 hover:text-amber-400 transition-colors duration-300"
+                className="relative text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6188a4]/50 px-1 group"
               >
                 {t('termsConditions')}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#6188a4] to-[#262a2f] rounded-full transition-all duration-300 group-hover:w-full" />
               </Link>
               <Link
                 href={locale === 'ar' ? '/return-policy' : `/${locale}/return-policy`}
-                className="text-gray-400 hover:text-amber-400 transition-colors duration-300"
+                className="relative text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#6188a4]/50 px-1 group"
               >
                 {t('returnPolicy')}
+                <span className="absolute -bottom-1 left-0 w-0.5 h-0.5 bg-gradient-to-r from-[#6188a4] to-[#262a2f] rounded-full transition-all duration-300 group-hover:w-full" />
               </Link>
             </div>
           </div>
