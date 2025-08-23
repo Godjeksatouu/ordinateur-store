@@ -855,6 +855,11 @@ app.get('/api/orders', authenticateToken, requireRole(['gestion_commandes', 'sup
     const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
 
+    // Ensure page and limit are valid positive integers
+    if (page < 1 || limit < 1 || limit > 100) {
+      return res.status(400).json({ error: 'Invalid pagination parameters' });
+    }
+
     const { status, dateFrom, dateTo, promoCode } = req.query;
 
     let whereConditions = [];
@@ -907,8 +912,39 @@ app.get('/api/orders', authenticateToken, requireRole(['gestion_commandes', 'sup
     `;
 
     // Create a new array for the orders query parameters
-    const ordersQueryParams = [...queryParams, limit, offset];
-    const [orders] = await db.execute(ordersQuery, ordersQueryParams);
+    // Ensure limit and offset are integers
+    const limitInt = parseInt(limit);
+    const offsetInt = parseInt(offset);
+
+    // Build parameters array manually to avoid any spread operator issues
+    const ordersQueryParams = [];
+    for (const param of queryParams) {
+      ordersQueryParams.push(param);
+    }
+    ordersQueryParams.push(limitInt);
+    ordersQueryParams.push(offsetInt);
+
+    // Validate parameter count matches placeholders
+    const placeholderCount = (ordersQuery.match(/\?/g) || []).length;
+
+    if (placeholderCount !== ordersQueryParams.length) {
+      console.error('PARAMETER MISMATCH: Expected', placeholderCount, 'parameters but got', ordersQueryParams.length);
+      console.error('Query:', ordersQuery);
+      console.error('Parameters:', ordersQueryParams);
+      return res.status(500).json({ error: 'Internal server error: parameter mismatch' });
+    }
+
+    let orders;
+    try {
+      [orders] = await db.execute(ordersQuery, ordersQueryParams);
+    } catch (queryError) {
+      console.error('Orders query execution failed:');
+      console.error('- Error:', queryError.message);
+      console.error('- Code:', queryError.code);
+      console.error('- SQL:', queryError.sql);
+      console.error('- Parameters:', ordersQueryParams);
+      throw queryError;
+    }
 
     res.json({
       orders,
