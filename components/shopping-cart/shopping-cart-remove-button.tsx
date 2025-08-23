@@ -1,7 +1,7 @@
 'use client';
 
 // import { removeFromCart } from '@/lib/actions';
-import { motion, AnimatePresence } from 'motion';
+// import { motion, AnimatePresence } from 'motion';
 import { useState } from 'react';
 import { CartItem } from '@/components/utils/cart-types';
 
@@ -32,18 +32,8 @@ export function ShoppingCartRemoveButton({ item }: { item: CartItem }) {
       disabled={isLoading}
       className="cursor-pointer font-medium text-blue-600 hover:text-blue-500 disabled:opacity-70 flex items-center gap-2"
     >
-      <AnimatePresence mode="popLayout">
-        {isLoading && <Spinner />}
-        <motion.span
-          layout
-          key="text"
-          initial={{ x: isLoading ? 12 : 0 }}
-          animate={{ x: 0 }}
-          transition={{ type: 'spring', bounce: 0.3 }}
-        >
-          Remove
-        </motion.span>
-      </AnimatePresence>
+      {isLoading && <Spinner />}
+      <span>إزالة</span>
     </button>
   );
 }

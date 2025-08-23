@@ -1,22 +1,12 @@
-// 'use server';
-
 import { CartItem } from "@/components/utils/cart-types";
-
-// import { revalidatePath } from 'next/cache';
-// import { Cart, CartItem } from '@/components/utils/cart-types';
-// import { API_BASE_URL } from './config';
-
-// export async function delay(ms: number) {
-//   return new Promise((resolve) => setTimeout(resolve, ms));
-// }
-
 
 type Cart = {
   items: CartItem[];
   total: number;
 }
 
-export async function getCart(): Promise<Cart> {
+// Client-side cart function - no server action
+export function getCart(): Cart {
   // Return empty cart for now since we're using local backend
   return {
     items: [],
