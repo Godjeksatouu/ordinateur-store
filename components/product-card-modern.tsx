@@ -42,20 +42,38 @@ export default function ProductCardModern({ product, showCTA = true }: Props) {
 
       {/* Image */}
       <div className="relative aspect-[4/3] bg-muted/20">
-        {product.images?.[0] ? (
-          <Image
-            src={`${API_BASE_URL}${product.images[0]}`}
-            alt={product.name}
-            fill
-            className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            unoptimized
-          />
-        ) : (
-          <div className="absolute inset-0 grid place-items-center text-dark/60">
-            <span className="text-sm">{t('imageNotAvailable')}</span>
-          </div>
-        )}
+        {(() => {
+          // Get the first available image from main_images, images, or optional_images
+          const getFirstImage = () => {
+            if (product.main_images && product.main_images.length > 0) {
+              return product.main_images[0];
+            }
+            if (product.images && product.images.length > 0) {
+              return product.images[0];
+            }
+            if (product.optional_images && product.optional_images.length > 0) {
+              return product.optional_images[0];
+            }
+            return null;
+          };
+
+          const firstImage = getFirstImage();
+
+          return firstImage ? (
+            <Image
+              src={`${API_BASE_URL}${firstImage.startsWith('/') ? firstImage : '/' + firstImage}`}
+              alt={product.name}
+              fill
+              className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              unoptimized
+            />
+          ) : (
+            <div className="absolute inset-0 grid place-items-center text-dark/60">
+              <span className="text-sm">{t('imageNotAvailable')}</span>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Body */}

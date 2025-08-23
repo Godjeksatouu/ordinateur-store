@@ -57,6 +57,28 @@ export default function ProductDetailsPage() {
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
+  // Helper function to get all available images
+  const getAllImages = (product: Product): string[] => {
+    const allImages: string[] = [];
+
+    // Add main images first
+    if (product.main_images && Array.isArray(product.main_images)) {
+      allImages.push(...product.main_images);
+    }
+
+    // Add optional images
+    if (product.optional_images && Array.isArray(product.optional_images)) {
+      allImages.push(...product.optional_images);
+    }
+
+    // Fallback to legacy images field if no main/optional images
+    if (allImages.length === 0 && product.images && Array.isArray(product.images)) {
+      allImages.push(...product.images);
+    }
+
+    return allImages;
+  };
+
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -397,20 +419,26 @@ export default function ProductDetailsPage() {
                   <div className="relative h-full w-full">
                     {/* Main Image with Zoom on Hover */}
                     <div className="h-full w-full overflow-hidden">
-                      <Image
-                      src={
-                      product.images && product.images.length > 0
-                      ? `${API_BASE_URL}${product.images[activeIndex].startsWith('/') ? product.images[activeIndex] : '/' + product.images[activeIndex]}`
-                      : '/images/1.png'
-                      }
-                      alt={product.name}
-                      fill
-                      className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      priority
-                      unoptimized
-                      />
+                      {(() => {
+                        const allImages = getAllImages(product);
+                        const currentImage = allImages.length > 0 ? allImages[activeIndex] : null;
 
+                        return (
+                          <Image
+                            src={
+                              currentImage
+                                ? `${API_BASE_URL}${currentImage.startsWith('/') ? currentImage : '/' + currentImage}`
+                                : '/images/1.png'
+                            }
+                            alt={product.name}
+                            fill
+                            className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            priority
+                            unoptimized
+                          />
+                        );
+                      })()}
                     </div>
 
                     {/* Badge */}
@@ -421,31 +449,34 @@ export default function ProductDetailsPage() {
                 </div>
 
                 {/* Thumbnails Slider */}
-                {product.images && product.images.length > 1 && (
-                  <div className="mt-6">
-                    <div className="grid grid-cols-5 gap-3">
-                      {product.images.map((src, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setActiveIndex(i)}
-                          className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-                            activeIndex === i ? 'border-[#6188a4]' : 'border-transparent hover:border-[#adb8c1]'
-                          }`}
-                          aria-label={`صورة ${i + 1}`}
-                        >
-                          <Image
-                            src={`${API_BASE_URL}${src}`}
-                            alt={`صورة ${i + 1}`}
-                            fill
-                            className="object-cover object-center"
-                            sizes="(max-width: 768px) 20vw, 10vw"
-                            unoptimized
-                          />
-                        </button>
-                      ))}
+                {(() => {
+                  const allImages = getAllImages(product);
+                  return allImages.length > 1 && (
+                    <div className="mt-6">
+                      <div className="grid grid-cols-5 gap-3">
+                        {allImages.map((src, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setActiveIndex(i)}
+                            className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 ${
+                              activeIndex === i ? 'border-[#6188a4]' : 'border-transparent hover:border-[#adb8c1]'
+                            }`}
+                            aria-label={`صورة ${i + 1}`}
+                          >
+                            <Image
+                              src={`${API_BASE_URL}${src.startsWith('/') ? src : '/' + src}`}
+                              alt={`صورة ${i + 1}`}
+                              fill
+                              className="object-cover object-center"
+                              sizes="(max-width: 768px) 20vw, 10vw"
+                              unoptimized
+                            />
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             </div>
 
