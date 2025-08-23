@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <head>
-        {/* Facebook Pixel */}
+        {/* Facebook Pixel - Updated to latest version */}
         <Script id="facebook-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -29,8 +29,15 @@ export default function RootLayout({
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '1384749272279226');
+
+            // Initialize with enhanced configuration for Attribution Reporting
+            fbq('init', '1384749272279226', {
+              external_id: 'ordinateur_store_' + Date.now()
+            });
             fbq('track', 'PageView');
+
+            // Enhanced privacy and attribution settings
+            fbq('set', 'autoConfig', false, '1384749272279226');
           `}
         </Script>
         <noscript>

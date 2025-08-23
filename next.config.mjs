@@ -8,7 +8,18 @@ const nextConfig = {
         port: '5000',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ordinateurstore.ma',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'ordinateurstore.ma',
+        pathname: '/uploads/**',
+      },
     ],
+    unoptimized: true, // For better compatibility with production deployments
   },
   // Note: Removed experimental.ppr to fix searchParams._debugInfo hydration error
 };

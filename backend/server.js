@@ -24,9 +24,14 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:3001',
+    'https://ordinateurstore.ma',
+    'http://ordinateurstore.ma',
     process.env.FRONTEND_URL
   ].filter(Boolean),
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200 // For legacy browser support
 }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
@@ -655,9 +660,11 @@ const requireRole = (roles) => {
 // Authentication
 app.post('/api/auth/login', async (req, res) => {
   try {
+    console.log('Login attempt received:', { email: req.body.email, hasPassword: !!req.body.password });
     const { email, password } = req.body;
 
     if (!email || !password) {
+      console.log('Missing email or password');
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
@@ -665,6 +672,12 @@ app.post('/api/auth/login', async (req, res) => {
     if (!process.env.JWT_SECRET) {
       console.error('JWT_SECRET is not set in environment variables');
       return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    // Check database connection
+    if (!db) {
+      console.error('Database connection not available');
+      return res.status(500).json({ error: 'Database connection error' });
     }
 
     // We use the 'username' column to store the email address
