@@ -7,12 +7,13 @@ import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
 
-import sendFactureMail from '../backend/utils/mail/templates/send-facture.js';
-import sendOrderMadeMail from '../backend/utils/mail/templates/order-made.js';
-import { convertFromDH } from '../backend/currency-utils.js';
+import sendFactureMail from './utils/mail/templates/send-facture.js';
+import sendOrderMadeMail from './utils/mail/templates/order-made.js';
+import { convertFromDH } from './currency-utils.js';
 
 import dotenv from 'dotenv';
-import sendInformOrderMail from '../backend/utils/mail/templates/inform-order-made.js';
+dotenv.config({ path: './.env.production' });
+import sendInformOrderMail from './utils/mail/templates/inform-order-made.js';
 dotenv.config();
 
 
@@ -906,9 +907,7 @@ app.get('/api/orders', authenticateToken, requireRole(['gestion_commandes', 'sup
       LIMIT ? OFFSET ?
     `;
 
-    // Create a new array for the orders query parameters
-    const ordersQueryParams = [...queryParams, limit, offset];
-    const [orders] = await db.execute(ordersQuery, ordersQueryParams);
+    const [orders] = await db.execute(ordersQuery, [...queryParams, limit, offset]);
 
     res.json({
       orders,
