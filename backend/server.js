@@ -7,12 +7,12 @@ import multer from 'multer';
 import path from 'path';
 import crypto from 'crypto';
 
-import sendFactureMail from '../backend/utils/mail/templates/send-facture.js';
-import sendOrderMadeMail from '../backend/utils/mail/templates/order-made.js';
-import { convertFromDH } from '../backend/currency-utils.js';
+import sendFactureMail from './utils/mail/templates/send-facture.js';
+import sendOrderMadeMail from './utils/mail/templates/order-made.js';
+import { convertFromDH } from './currency-utils.js';
 
 import dotenv from 'dotenv';
-import sendInformOrderMail from '../backend/utils/mail/templates/inform-order-made.js';
+import sendInformOrderMail from './utils/mail/templates/inform-order-made.js';
 dotenv.config();
 
 
@@ -855,11 +855,6 @@ app.get('/api/orders', authenticateToken, requireRole(['gestion_commandes', 'sup
     const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
 
-    // Ensure page and limit are valid positive integers
-    if (page < 1 || limit < 1 || limit > 100) {
-      return res.status(400).json({ error: 'Invalid pagination parameters' });
-    }
-
     const { status, dateFrom, dateTo, promoCode } = req.query;
 
     let whereConditions = [];
@@ -908,43 +903,10 @@ app.get('/api/orders', authenticateToken, requireRole(['gestion_commandes', 'sup
       JOIN clients c ON o.client_id = c.id
       ${whereClause}
       ORDER BY o.created_at DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${limit} OFFSET ${offset}
     `;
 
-    // Create a new array for the orders query parameters
-    // Ensure limit and offset are integers
-    const limitInt = parseInt(limit);
-    const offsetInt = parseInt(offset);
-
-    // Build parameters array manually to avoid any spread operator issues
-    const ordersQueryParams = [];
-    for (const param of queryParams) {
-      ordersQueryParams.push(param);
-    }
-    ordersQueryParams.push(limitInt);
-    ordersQueryParams.push(offsetInt);
-
-    // Validate parameter count matches placeholders
-    const placeholderCount = (ordersQuery.match(/\?/g) || []).length;
-
-    if (placeholderCount !== ordersQueryParams.length) {
-      console.error('PARAMETER MISMATCH: Expected', placeholderCount, 'parameters but got', ordersQueryParams.length);
-      console.error('Query:', ordersQuery);
-      console.error('Parameters:', ordersQueryParams);
-      return res.status(500).json({ error: 'Internal server error: parameter mismatch' });
-    }
-
-    let orders;
-    try {
-      [orders] = await db.execute(ordersQuery, ordersQueryParams);
-    } catch (queryError) {
-      console.error('Orders query execution failed:');
-      console.error('- Error:', queryError.message);
-      console.error('- Code:', queryError.code);
-      console.error('- SQL:', queryError.sql);
-      console.error('- Parameters:', ordersQueryParams);
-      throw queryError;
-    }
+    const [orders] = await db.execute(ordersQuery, [...queryParams]);
 
     res.json({
       orders,
