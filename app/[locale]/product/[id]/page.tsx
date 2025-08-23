@@ -55,6 +55,16 @@ export default function LocalizedProductDetailsPage() {
   const [finalPrice, setFinalPrice] = useState(0);
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
+    let finalPrice = basePrice - promoDiscount;
+
+    // Apply Virement bancaire discount (always 100 DH, stored in DH)
+    if (paymentMethod === 'Virement bancaire') {
+      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
+    }
+
+    setFinalPrice(finalPrice);
+  };
 
   // Check if this is an accessory (accessories don't have RAM/storage/processor)
   const isAccessory = product && !product.ram && !product.storage && !product.processor;
@@ -203,17 +213,6 @@ export default function LocalizedProductDetailsPage() {
           promoValidation.discount) : 0;
       calculateFinalPrice(product?.new_price || 0, promoDiscount, value);
     }
-  };
-
-  const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
-    let finalPrice = basePrice - promoDiscount;
-
-    // Apply Virement bancaire discount (always 100 DH, stored in DH)
-    if (paymentMethod === 'Virement bancaire') {
-      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
-    }
-
-    setFinalPrice(finalPrice);
   };
 
   const validatePromoCode = async (code: string) => {

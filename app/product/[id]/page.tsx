@@ -56,6 +56,17 @@ export default function ProductDetailsPage() {
   const [finalPrice, setFinalPrice] = useState(0);
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
+    let finalPrice = basePrice - promoDiscount;
+
+    // Apply payment method discount - always 100 DH, stored in DH for "تحويل بنكي"
+    if (paymentMethod === 'تحويل بنكي') {
+      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
+    }
+
+    setFinalPrice(finalPrice);
+  };
+
 
   // Helper function to get all available images
   const getAllImages = (product: Product): string[] => {
@@ -256,17 +267,6 @@ export default function ProductDetailsPage() {
           promoValidation.discount) : 0;
       calculateFinalPrice(product?.new_price || 0, promoDiscount, value);
     }
-  };
-
-  const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
-    let finalPrice = basePrice - promoDiscount;
-
-    // Apply payment method discount - always 100 DH, stored in DH for "تحويل بنكي"
-    if (paymentMethod === 'تحويل بنكي') {
-      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
-    }
-
-    setFinalPrice(finalPrice);
   };
 
   const validatePromoCode = async (code: string) => {
