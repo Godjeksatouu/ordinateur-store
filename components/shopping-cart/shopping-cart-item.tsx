@@ -1,7 +1,7 @@
 'use client';
 import { CartItem } from '@/components/utils/cart-types';
 import { ShoppingBagIcon } from '@heroicons/react/24/outline';
-import { motion } from 'motion/react';
+import { motion } from 'motion';
 import { ShoppingCartRemoveButton } from './shopping-cart-remove-button';
 import Link from 'next/link';
 import { useCurrency } from '@/components/currency-context';

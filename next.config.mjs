@@ -21,6 +21,14 @@ const nextConfig = {
     ],
     unoptimized: true, // For better compatibility with production deployments
   },
+  // Enable strict mode for better error catching
+  reactStrictMode: true,
+
+  // Optimize bundling for production
+  experimental: {
+    optimizePackageImports: ['motion', '@heroicons/react'],
+  },
+
   // Note: Removed experimental.ppr to fix searchParams._debugInfo hydration error
 };
 

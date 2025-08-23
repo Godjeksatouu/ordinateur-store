@@ -23,6 +23,14 @@ const nextConfig = {
     domains: ["localhost", "ordinateurstore.ma"], // Keep for backward compatibility
     unoptimized: true, // For better compatibility with production deployments
   },
+  // Enable strict mode for better error catching
+  reactStrictMode: true,
+
+  // Optimize bundling for production
+  experimental: {
+    optimizePackageImports: ['motion', '@heroicons/react'],
+  },
+
   typescript: {
     // ❌ WARNING: This will allow production builds to succeed even with type errors
     ignoreBuildErrors: true,
