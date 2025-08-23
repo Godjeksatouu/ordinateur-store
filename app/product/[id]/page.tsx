@@ -398,14 +398,19 @@ export default function ProductDetailsPage() {
                     {/* Main Image with Zoom on Hover */}
                     <div className="h-full w-full overflow-hidden">
                       <Image
-                        src={product.images && product.images.length > 0 ? `${API_BASE_URL}${product.images[activeIndex]}` : '/images/1.png'}
-                        alt={product.name}
-                        fill
-                        className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        priority
-                        unoptimized
+                      src={
+                      product.images && product.images.length > 0
+                      ? `${API_BASE_URL}${product.images[activeIndex].startsWith('/') ? product.images[activeIndex] : '/' + product.images[activeIndex]}`
+                      : '/images/1.png'
+                      }
+                      alt={product.name}
+                      fill
+                      className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority
+                      unoptimized
                       />
+
                     </div>
 
                     {/* Badge */}
