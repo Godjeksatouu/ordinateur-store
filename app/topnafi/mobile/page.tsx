@@ -33,7 +33,7 @@ export default function MobileAdminPage() {
     const userData = localStorage.getItem('adminUser');
 
     if (!token || !userData) {
-      router.push('/admin/login');
+      router.push('/topnafi/login');
       return;
     }
 
@@ -42,7 +42,7 @@ export default function MobileAdminPage() {
       setUser(parsedUser);
     } catch (error) {
       console.error('Error parsing user data:', error);
-      router.push('/admin/login');
+      router.push('/topnafi/login');
     }
   }, [router]);
 
@@ -50,12 +50,12 @@ export default function MobileAdminPage() {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     localStorage.removeItem('dashboardVersion');
-    router.push('/admin/login');
+    router.push('/topnafi/login');
   };
 
   const switchToDesktop = () => {
     localStorage.setItem('dashboardVersion', 'desktop');
-    router.push('/admin');
+    router.push('/topnafi');
   };
 
   if (!user) {
@@ -253,7 +253,7 @@ function MobileProductsManager() {
           <button
             onClick={() => {
               localStorage.setItem('dashboardVersion', 'desktop');
-              window.location.href = '/admin';
+              window.location.href = '/topnafi';
             }}
             className="w-full bg-[#6188a4] text-white py-3 rounded-lg font-semibold"
           >

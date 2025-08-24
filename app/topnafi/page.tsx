@@ -46,14 +46,14 @@ export default function AdminPage() {
       const userData = localStorage.getItem('adminUser');
 
       if (!token || !userData) {
-        router.push('/admin/login');
+        router.push('/topnafi/login');
         return;
       }
 
       try {
         setUser(JSON.parse(userData));
       } catch (error) {
-        router.push('/admin/login');
+        router.push('/topnafi/login');
         return;
       }
 
@@ -68,7 +68,7 @@ export default function AdminPage() {
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUser');
     }
-    router.push('/admin/login');
+    router.push('/topnafi/login');
   };
 
   if (!mounted || loading) {

@@ -49,9 +49,9 @@ export default function AdminLoginPage() {
 
       // Redirect based on selected dashboard version
       if (dashboardVersion === 'mobile') {
-        router.push('/admin/mobile');
+        router.push('/topnafi/mobile');
       } else {
-        router.push('/admin');
+        router.push('/topnafi');
       }
     } catch (err) {
       setError(prev => ({ ...prev, [key]: 'خطأ في الاتصال بالخادم' }));
