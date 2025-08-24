@@ -44,6 +44,7 @@ export default function LocalizedProductDetailsPage() {
     paymentMethod: '',
     codePromo: ''
   });
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [promoValidation, setPromoValidation] = useState<{
     isValid: boolean;
@@ -54,16 +55,25 @@ export default function LocalizedProductDetailsPage() {
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   const [finalPrice, setFinalPrice] = useState(0);
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
     let finalPrice = basePrice - promoDiscount;
 
-    // Apply Virement bancaire discount (always 100 DH, stored in DH)
-    if (paymentMethod === 'Virement bancaire') {
-      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
+    // Apply payment method discount if applicable
+    if (paymentMethod) {
+      const selectedMethod = paymentMethods.find(method =>
+        (method.name_en || method.name) === paymentMethod
+      );
+
+      if (selectedMethod && selectedMethod.discount_amount > 0) {
+        const discount = selectedMethod.discount_type === 'percentage'
+          ? (finalPrice * selectedMethod.discount_amount / 100)
+          : selectedMethod.discount_amount;
+        finalPrice = Math.max(0, finalPrice - discount);
+      }
     }
 
     setFinalPrice(finalPrice);
+    return finalPrice;
   };
 
   // Check if this is an accessory (accessories don't have RAM/storage/processor)
@@ -89,6 +99,17 @@ export default function LocalizedProductDetailsPage() {
     }
 
     return allImages;
+  };
+
+  // Helper function to get localized payment method name and description
+  const getLocalizedPaymentMethod = (method: any) => {
+    const nameKey = `name_${locale}` as keyof typeof method;
+    const descKey = `description_${locale}` as keyof typeof method;
+
+    return {
+      name: method[nameKey] || method.name_en || method.name,
+      description: method[descKey] || method.description_en || method.description
+    };
   };
 
   useEffect(() => {
@@ -117,6 +138,21 @@ export default function LocalizedProductDetailsPage() {
       loadProduct();
     }
   }, [productId]); // Remove currency dependency to avoid reloading product
+
+  useEffect(() => {
+    const loadPaymentMethods = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/payment-methods`);
+        const data = await response.json();
+        setPaymentMethods(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error loading payment methods:', error);
+        setPaymentMethods([]);
+      }
+    };
+
+    loadPaymentMethods();
+  }, []);
 
   // Recalculate final price when currency changes
   useEffect(() => {
@@ -657,68 +693,41 @@ export default function LocalizedProductDetailsPage() {
                             {t('paymentMethods')}
                           </label>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cashplus' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Cashplus"
-                                checked={orderForm.paymentMethod === 'Cashplus'}
-                                onChange={() => handleInputChange('paymentMethod', 'Cashplus')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 break-words">Cashplus</div>
-                                <div className="text-sm text-gray-600 break-words">RIB: 123 456 789 000 000 000 12</div>
-                              </div>
-                            </label>
+                            {paymentMethods.map((method) => {
+                              const { name, description } = getLocalizedPaymentMethod(method);
+                              const methodValue = method.name_en || method.name;
 
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Virement bancaire' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Virement bancaire"
-                                checked={orderForm.paymentMethod === 'Virement bancaire'}
-                                onChange={() => handleInputChange('paymentMethod', 'Virement bancaire')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 break-words">Virement bancaire</div>
-                                <div className="text-sm text-gray-600 break-words">RIB: 987 654 321 000 000 000 34</div>
-                                <div className="text-xs text-green-700 mt-1 break-words">{t('automaticDiscount')}</div>
-                              </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Retrait au Magasin' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Retrait au Magasin"
-                                checked={orderForm.paymentMethod === 'Retrait au Magasin'}
-                                onChange={() => handleInputChange('paymentMethod', 'Retrait au Magasin')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 break-words">Retrait au Magasin</div>
-                                <div className="text-sm text-gray-600 break-words">{t('pickupFromStore')}</div>
-                                <div className="text-xs text-blue-700 mt-1 break-words">{t('payOnPickup')}</div>
-                              </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'Cash on Delivery' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="Cash on Delivery"
-                                checked={orderForm.paymentMethod === 'Cash on Delivery'}
-                                onChange={() => handleInputChange('paymentMethod', 'Cash on Delivery')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 break-words">{t('cashOnDeliveryShort')}</div>
-                                <div className="text-sm text-gray-600 break-words">{t('cashOnDeliveryDesc2') || 'الدفع نقداً عند التوصيل'}</div>
-                                <div className="text-xs text-purple-700 mt-1 break-words">💵 {t('securePayment') || 'دفع آمن'}</div>
-                              </div>
-                            </label>
+                              return (
+                                <label
+                                  key={method.id}
+                                  className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${
+                                    orderForm.paymentMethod === methodValue
+                                      ? 'border-[#6188a4] bg-[#adb8c1]/20'
+                                      : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    value={methodValue}
+                                    checked={orderForm.paymentMethod === methodValue}
+                                    onChange={() => handleInputChange('paymentMethod', methodValue)}
+                                    className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-gray-900 break-words">{name}</div>
+                                    {description && (
+                                      <div className="text-sm text-gray-600 break-words">{description}</div>
+                                    )}
+                                    {method.discount_amount > 0 && (
+                                      <div className="text-xs text-green-700 mt-1 break-words">
+                                        {t('discount')}: -{method.discount_amount} {method.discount_type === 'percentage' ? '%' : 'DH'}
+                                      </div>
+                                    )}
+                                  </div>
+                                </label>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -762,16 +771,44 @@ export default function LocalizedProductDetailsPage() {
                               </div>
                             )}
 
-                            {/* Virement Bancaire Discount */}
-                            {orderForm.paymentMethod === 'Virement bancaire' && (
-                              <div className="flex justify-between items-center text-green-600">
-                                <span className="text-sm">{t('bankTransferDiscount')}</span>
-                                <span className="text-sm font-medium">-{format(100)}</span>
-                              </div>
-                            )}
+                            {/* Payment Method Discount */}
+                            {(() => {
+                              if (!orderForm.paymentMethod) return null;
+
+                              const selectedMethod = paymentMethods.find(method =>
+                                (method.name_en || method.name) === orderForm.paymentMethod
+                              );
+
+                              if (!selectedMethod || selectedMethod.discount_amount <= 0) return null;
+
+                              const basePrice = product.new_price - (promoValidation?.isValid ?
+                                (promoValidation.discountType === 'percentage' ?
+                                  (product.new_price * promoValidation.discount / 100) :
+                                  promoValidation.discount) : 0);
+
+                              const discount = selectedMethod.discount_type === 'percentage'
+                                ? (basePrice * selectedMethod.discount_amount / 100)
+                                : selectedMethod.discount_amount;
+
+                              const { name } = getLocalizedPaymentMethod(selectedMethod);
+
+                              return (
+                                <div className="flex justify-between items-center text-green-600">
+                                  <span className="text-sm">{name} {t('discount')}</span>
+                                  <span className="text-sm font-medium">
+                                    -{format(discount)}
+                                  </span>
+                                </div>
+                              );
+                            })()}
 
                             {/* Divider */}
-                            {(promoValidation?.isValid || orderForm.paymentMethod === 'Virement bancaire') && (
+                            {(promoValidation?.isValid || (() => {
+                              const selectedMethod = paymentMethods.find(method =>
+                                (method.name_en || method.name) === orderForm.paymentMethod
+                              );
+                              return selectedMethod && selectedMethod.discount_amount > 0;
+                            })()) && (
                               <hr className="border-gray-200" />
                             )}
 
