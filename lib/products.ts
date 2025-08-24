@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './config';
+ import { API_BASE_URL } from './config';
 
 // Cache for failed product requests to avoid repeated 404s
 const failedProductCache = new Set<string>();
@@ -30,11 +30,20 @@ export interface Product {
 // API functions to fetch products from backend
 export async function fetchProducts(): Promise<Product[]> {
   try {
+    console.log('Fetching products from:', `${API_BASE_URL}/api/products`);
     const response = await fetch(`${API_BASE_URL}/api/products`);
+
+    console.log('Products response status:', response.status);
+
     if (!response.ok) {
-      throw new Error('Failed to fetch products');
+      const errorText = await response.text();
+      console.error('Products fetch error:', response.status, errorText);
+      throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`);
     }
+
     const data = await response.json();
+    console.log('Products data received:', data?.length || 0, 'items');
+
     // Normalize numeric fields and arrays
     return (data || []).map((p: any) => ({
       ...p,
