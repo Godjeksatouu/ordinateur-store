@@ -83,20 +83,21 @@ export default function LocalizedCategoryPage() {
               <div className="w-24 h-1 bg-gradient-to-r from-[#6188a4] to-[#262a2f] mx-auto rounded-full"></div>
             </div>
             {loading ? (
-              <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-[#adb8c1]/20 bg-white p-3 shadow-sm">
-                    <div className="skeleton rounded-xl h-48 mb-4" />
-                    <div className="space-y-2">
+                  <div key={i} className="rounded-xl border border-gray-100 bg-white overflow-hidden">
+                    <div className="skeleton aspect-square" />
+                    <div className="p-3 space-y-2">
                       <div className="skeleton h-4 rounded w-3/4" />
-                      <div className="skeleton h-4 rounded w-1/2" />
-                      <div className="skeleton h-6 rounded w-1/3" />
+                      <div className="skeleton h-3 rounded w-1/2" />
+                      <div className="skeleton h-5 rounded w-2/3" />
+                      <div className="skeleton h-8 rounded" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : products.length > 0 || accessoires.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {products.map((product) => (
                   <ProductCard key={`product-${product.id}`} product={product} />
                 ))}
