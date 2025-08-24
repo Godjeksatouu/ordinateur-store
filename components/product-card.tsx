@@ -17,6 +17,7 @@ interface ProductCardProps {
 export function ProductCard({ product, showPrice = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const { t, locale } = useTranslations();
   const { format } = useCurrency();
 
@@ -51,117 +52,91 @@ export function ProductCard({ product, showPrice = false }: ProductCardProps) {
 
   return (
     <div
-      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-200 hover:border-[#6188a4]/40 h-full flex flex-col p-3"
+      className="group relative bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 hover:border-[#6188a4]/30 h-full flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Discount Badge */}
       {hasDiscount && (
-        <div className="absolute top-3 right-3 z-10">
-          <div className="bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-[#fdfefd] px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+        <div className="absolute top-2 left-2 z-10">
+          <div className="bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold shadow-sm">
             -{discountPercentage}%
           </div>
         </div>
       )}
 
-      {/* Product Image */}
-      <div className="relative h-48 bg-gradient-to-br from-[#fdfefd] to-[#adb8c1]/10 overflow-hidden">
+      {/* Product Image Container - Fixed aspect ratio */}
+      <div className="relative aspect-square bg-gray-50 overflow-hidden">
+        {/* Image Loading Skeleton */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+            <ShoppingBagIcon className="h-8 w-8 text-gray-400" />
+          </div>
+        )}
         {firstImage ? (
-          <>
-            {/* Image skeleton while loading */}
-            <div className="absolute inset-0 skeleton" aria-hidden />
-            <Image
-              src={`${API_BASE_URL}${firstImage}`}
-              alt={product.name}
-              fill
-              className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              unoptimized
-              onLoad={(e) => {
-                // Hide skeleton when image loads
-                const skeleton = (e.currentTarget.parentElement as HTMLElement)?.querySelector('.skeleton') as HTMLElement | null;
-                if (skeleton) skeleton.style.display = 'none';
-              }}
-              onError={(e) => {
-                // Hide the broken image and show fallback
-                e.currentTarget.style.display = 'none';
-                const skeleton = (e.currentTarget.parentElement as HTMLElement)?.querySelector('.skeleton') as HTMLElement | null;
-                if (skeleton) skeleton.style.display = 'none';
-                const fallback = e.currentTarget.parentElement?.querySelector('.image-fallback');
-                if (fallback) {
-                  (fallback as HTMLElement).style.display = 'flex';
-                }
-              }}
-            />
-            {/* Fallback for broken images */}
-            <div className="image-fallback absolute inset-0 flex-col items-center justify-center text-center p-4 hidden">
-              <ShoppingBagIcon className="h-12 w-12 text-[#adb8c1] mb-2" />
-              <div className="text-sm text-[#262a2f] font-medium">{product.name}</div>
-              <div className="text-xs text-[#adb8c1] mt-1">{t('imageNotAvailable')}</div>
-            </div>
-          </>
+          <Image
+            src={`${API_BASE_URL}${firstImage}`}
+            alt={product.name}
+            fill
+            className={`object-cover object-center transition-all duration-300 group-hover:scale-105 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+            unoptimized
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(true)}
+            priority={false}
+            loading="lazy"
+          />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-            <ShoppingBagIcon className="h-12 w-12 text-[#adb8c1] group-hover:text-[#6188a4] transition-all duration-300 transform group-hover:scale-110 mb-2" />
-            <div className="text-sm text-[#262a2f] font-medium">{product.name}</div>
-            <div className="text-xs text-[#adb8c1] mt-1">{t('imageNotAvailable')}</div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-3">
+            <ShoppingBagIcon className="h-8 w-8 text-gray-400 mb-2" />
+            <div className="text-xs text-gray-600 font-medium line-clamp-2">{product.name}</div>
           </div>
         )}
       </div>
 
-      <div className="p-5 flex-1 flex flex-col">
+      {/* Card Content */}
+      <div className="p-3 flex-1 flex flex-col">
         {/* Product Title */}
-        <h3 className="text-lg font-bold text-[#262a2f] mb-3 group-hover:text-[#6188a4] transition-colors duration-300 leading-tight line-clamp-2 min-h-[3.5rem]">
+        <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 leading-tight min-h-[2.5rem]">
           {product.name}
         </h3>
 
-        {/* Specifications - Hidden on mobile, visible on larger screens, and hidden for accessories */}
+        {/* Compact Specifications - Only show key specs on mobile */}
         {!isAccessory && (
-          <div className="hidden sm:grid grid-cols-2 gap-2 mb-4 text-sm">
-            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
-              <div className="text-[#adb8c1] text-xs font-medium">{t('ram')}</div>
-              <div className="font-bold text-[#262a2f] text-sm">{product.ram}</div>
-            </div>
-            <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2">
-              <div className="text-[#adb8c1] text-xs font-medium">{t('storage')}</div>
-              <div className="font-bold text-[#262a2f] text-sm">{product.storage}</div>
-            </div>
-            {product.processor && (
-              <div className="bg-[#fdfefd] border border-[#adb8c1]/20 rounded-lg p-2 col-span-2">
-                <div className="text-[#adb8c1] text-xs font-medium">{t('processor')}</div>
-                <div className="font-bold text-[#262a2f] text-xs leading-tight">{product.processor}</div>
-              </div>
+          <div className="hidden sm:flex flex-wrap gap-1 mb-2">
+            {product.ram && (
+              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                {product.ram}
+              </span>
+            )}
+            {product.storage && (
+              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                {product.storage}
+              </span>
             )}
           </div>
         )}
 
         {/* Price Section */}
-        <div className="mt-auto">
-          <div className="mb-4">
+        <div className="mt-auto space-y-2">
+          {/* Price Display */}
+          <div className="space-y-1">
             {hasDiscount && (
-              <div className="flex items-center justify-between mb-1">
-                <div className="text-sm text-[#adb8c1] line-through">
-                  {mounted ? format(product.old_price) : `${product.old_price.toLocaleString()} DH`}
-                </div>
-                <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                  -{discountPercentage}%
-                </div>
+              <div className="text-xs text-gray-500 line-through">
+                {mounted ? format(product.old_price) : `${product.old_price.toLocaleString()} DH`}
               </div>
             )}
-            <div className="text-2xl font-bold text-[#6188a4]">
+            <div className="text-lg font-bold text-[#6188a4]">
               {mounted ? format(product.new_price) : `${product.new_price.toLocaleString()} DH`}
             </div>
-            {hasDiscount && (
-              <div className="text-xs text-green-600 font-medium mt-1">
-                {t('youSaved')}: {mounted ? format(product.old_price - product.new_price) : `${(product.old_price - product.new_price).toLocaleString()} DH`}
-              </div>
-            )}
           </div>
 
-          {/* Action Button */}
+          {/* Action Button - Compact for mobile */}
           <Link
             href={locale === 'ar' ? `/product/${product.id}` : `/${locale}/product/${product.id}`}
-            className="w-full bg-gradient-to-r from-[#6188a4] to-[#262a2f] text-[#fdfefd] hover:from-[#262a2f] hover:to-[#6188a4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6188a4] focus:ring-offset-[#fdfefd] px-6 py-3 rounded-xl font-bold text-center block transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl cursor-pointer"
+            className="w-full bg-[#6188a4] hover:bg-[#262a2f] text-white text-sm font-semibold py-2 px-3 rounded-lg transition-colors duration-200 text-center block"
             prefetch={true}
           >
             {showPrice ? t('orderNow') : t('buyNow')}
