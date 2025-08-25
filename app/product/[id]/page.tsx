@@ -56,15 +56,36 @@ export default function ProductDetailsPage() {
   const [finalPrice, setFinalPrice] = useState(0);
   const [promoDebounceTimer, setPromoDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+
+  // Helper function to get localized payment method name and description
+  const getLocalizedPaymentMethod = (method: any) => {
+    // For Arabic page, use Arabic fields first, then fallback to English
+    return {
+      name: method.name_ar || method.name_en || method.name,
+      description: method.description_ar || method.description_en || method.description
+    };
+  };
+
   const calculateFinalPrice = (basePrice: number, promoDiscount: number, paymentMethod?: string) => {
     let finalPrice = basePrice - promoDiscount;
 
-    // Apply payment method discount - always 100 DH, stored in DH for "تحويل بنكي"
-    if (paymentMethod === 'تحويل بنكي') {
-      finalPrice = Math.max(0, finalPrice - 100); // Keep in DH, format() will convert for display
+    // Apply payment method discount if applicable
+    if (paymentMethod) {
+      const selectedMethod = paymentMethods.find(method =>
+        (method.name_en || method.name) === paymentMethod ||
+        (method.name_ar || method.name) === paymentMethod
+      );
+
+      if (selectedMethod && selectedMethod.discount_amount > 0) {
+        const discount = selectedMethod.discount_type === 'percentage'
+          ? (finalPrice * selectedMethod.discount_amount / 100)
+          : selectedMethod.discount_amount;
+        finalPrice = Math.max(0, finalPrice - discount);
+      }
     }
 
     setFinalPrice(finalPrice);
+    return finalPrice;
   };
 
 
@@ -714,69 +735,42 @@ export default function ProductDetailsPage() {
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             طرق الدفع
                           </label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'كاش بلوس' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="كاش بلوس"
-                                checked={orderForm.paymentMethod === 'كاش بلوس'}
-                                onChange={() => handleInputChange('paymentMethod', 'كاش بلوس')}
-                                className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 break-words">كاش بلوس</div>
-                                <div className="text-sm text-gray-600 break-words">RIB: 123 456 789 000 000 000 12</div>
-                              </div>
-                            </label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {paymentMethods.map((method) => {
+                              const { name, description } = getLocalizedPaymentMethod(method);
+                              const methodValue = method.name_en || method.name;
 
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'تحويل بنكي' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="تحويل بنكي"
-                                checked={orderForm.paymentMethod === 'تحويل بنكي'}
-                                onChange={() => handleInputChange('paymentMethod', 'تحويل بنكي')}
-                                className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 break-words">تحويل بنكي</div>
-                                <div className="text-sm text-gray-600 break-words">RIB: 987 654 321 000 000 000 34</div>
-                                <div className="text-xs text-green-700 mt-1 break-words">
-                                  خصم تلقائي: -100 درهم
-                                </div>
-                              </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'استلام من المتجر' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="استلام من المتجر"
-                                checked={orderForm.paymentMethod === 'استلام من المتجر'}
-                                onChange={() => handleInputChange('paymentMethod', 'استلام من المتجر')}
-                                className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 break-words">استلام من المتجر</div>
-                                <div className="text-sm text-gray-600 break-words">ادفع مباشرة في متجرنا عند الاستلام</div>
-                              </div>
-                            </label>
-
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'الدفع عند الاستلام' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="الدفع عند الاستلام"
-                                checked={orderForm.paymentMethod === 'الدفع عند الاستلام'}
-                                onChange={() => handleInputChange('paymentMethod', 'الدفع عند الاستلام')}
-                                className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 break-words">الدفع عند الاستلام</div>
-                                <div className="text-sm text-gray-600 break-words">ادفع عند استلام طلبك في منزلك</div>
-                              </div>
-                            </label>
+                              return (
+                                <label
+                                  key={method.id}
+                                  className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${
+                                    orderForm.paymentMethod === methodValue
+                                      ? 'border-blue-600 bg-blue-50'
+                                      : 'border-gray-300 bg-white hover:bg-gray-50'
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    value={methodValue}
+                                    checked={orderForm.paymentMethod === methodValue}
+                                    onChange={() => handleInputChange('paymentMethod', methodValue)}
+                                    className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-gray-900 break-words">{name}</div>
+                                    {description && (
+                                      <div className="text-sm text-gray-600 break-words">{description}</div>
+                                    )}
+                                    {method.discount_amount > 0 && (
+                                      <div className="text-xs text-green-700 mt-1 break-words">
+                                        خصم: -{method.discount_amount} {method.discount_type === 'percentage' ? '%' : 'درهم'}
+                                      </div>
+                                    )}
+                                  </div>
+                                </label>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -824,17 +818,45 @@ export default function ProductDetailsPage() {
                             })()}
 
                             {/* Payment Method Discount */}
-                            {orderForm.paymentMethod === 'تحويل بنكي' && (
-                              <div className="flex justify-between items-center text-green-600">
-                                <span className="text-sm">خصم تحويل بنكي:</span>
-                                <span className="text-sm font-medium">
-                                  -{format(100)}
-                                </span>
-                              </div>
-                            )}
+                            {(() => {
+                              if (!orderForm.paymentMethod) return null;
+
+                              const selectedMethod = paymentMethods.find(method =>
+                                (method.name_en || method.name) === orderForm.paymentMethod ||
+                                (method.name_ar || method.name) === orderForm.paymentMethod
+                              );
+
+                              if (!selectedMethod || selectedMethod.discount_amount <= 0) return null;
+
+                              const basePrice = product.new_price - (promoValidation?.isValid ?
+                                (promoValidation.discountType === 'percentage' ?
+                                  (product.new_price * promoValidation.discount / 100) :
+                                  promoValidation.discount) : 0);
+
+                              const discount = selectedMethod.discount_type === 'percentage'
+                                ? (basePrice * selectedMethod.discount_amount / 100)
+                                : selectedMethod.discount_amount;
+
+                              const { name } = getLocalizedPaymentMethod(selectedMethod);
+
+                              return (
+                                <div className="flex justify-between items-center text-green-600">
+                                  <span className="text-sm">خصم {name}:</span>
+                                  <span className="text-sm font-medium">
+                                    -{format(discount)}
+                                  </span>
+                                </div>
+                              );
+                            })()}
 
                             {/* Divider */}
-                            {(promoValidation?.isValid || orderForm.paymentMethod === 'تحويل بنكي') && (
+                            {(promoValidation?.isValid || (() => {
+                              const selectedMethod = paymentMethods.find(method =>
+                                (method.name_en || method.name) === orderForm.paymentMethod ||
+                                (method.name_ar || method.name) === orderForm.paymentMethod
+                              );
+                              return selectedMethod && selectedMethod.discount_amount > 0;
+                            })()) && (
                               <hr className="border-gray-200" />
                             )}
 
