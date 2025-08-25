@@ -470,32 +470,7 @@ export default function Page(props: {
           </div>
         </section>
 
-        {/* Location Section */}
-        <section className="bg-white py-16 lg:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
-                {t('ourLocation')}
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
-                {t('visitUsHelp')}
-              </p>
-              <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto rounded-full"></div>
-            </div>
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3326.6504174004017!2d-7.646460524306609!3d33.510471273365795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzPCsDMwJzM3LjciTiA3wrAzOCczOC4wIlc!5e0!3m2!1sen!2sma!4v1755531883255!5m2!1sen!2sma"
-                width="100%"
-                height="500"
-                style={{border:0}}
-                allowFullScreen={true}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="w-full h-80 md:h-[500px] lg:h-[600px]"
-              />
-            </div>
-          </div>
-        </section>
+
       </div>
     </PublicLayout>
   );

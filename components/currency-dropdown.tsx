@@ -18,7 +18,7 @@ export function CurrencyDropdown({ className = "" }: { className?: string }) {
 
   if (!mounted) {
     return (
-      <select className={`bg-white border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}>
+      <select className={`h-11 bg-white border border-gray-200 rounded-xl px-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 min-w-[80px] ${className}`}>
         <option value="DH">DH</option>
       </select>
     );
@@ -29,10 +29,10 @@ export function CurrencyDropdown({ className = "" }: { className?: string }) {
       value={currency}
       onChange={onChange}
       className={
-        "px-3 py-2 rounded-lg border-2 border-gray-200 text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all " +
+        "h-11 px-3 rounded-xl border border-gray-200 text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all min-w-[80px] " +
         className
       }
-      aria-label="Currency selector"
+      aria-label="Select currency"
     >
       <option value="DH">DH</option>
       <option value="EUR">EUR</option>

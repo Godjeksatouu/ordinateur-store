@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /topnafi/
+Disallow: /admin/
+Disallow: /api/
+
+# Allow important pages
+Allow: /
+Allow: /en/
+Allow: /fr/
+Allow: /es/
+Allow: /ar/
+Allow: /contact
+Allow: /product/
+Allow: /categories/
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml

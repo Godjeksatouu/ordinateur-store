@@ -480,7 +480,7 @@ export default function LocalizedProductDetailsPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="text-3xl font-bold text-[#6188a4]">
+                    <div className="text-3xl font-bold text-blue-700">
                       {format(finalPrice)}
                     </div>
                   )}

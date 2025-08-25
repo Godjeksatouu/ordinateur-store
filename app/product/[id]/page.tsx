@@ -503,7 +503,7 @@ export default function ProductDetailsPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="text-3xl font-bold text-[#6188a4]">
+                    <div className="text-3xl font-bold text-blue-700">
                       {format(finalPrice)}
                     </div>
                   )}
@@ -715,14 +715,14 @@ export default function ProductDetailsPage() {
                             طرق الدفع
                           </label>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'كاش بلوس' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'كاش بلوس' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
                               <input
                                 type="radio"
                                 name="paymentMethod"
                                 value="كاش بلوس"
                                 checked={orderForm.paymentMethod === 'كاش بلوس'}
                                 onChange={() => handleInputChange('paymentMethod', 'كاش بلوس')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                                className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-gray-900 break-words">كاش بلوس</div>
@@ -730,14 +730,14 @@ export default function ProductDetailsPage() {
                               </div>
                             </label>
 
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'تحويل بنكي' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'تحويل بنكي' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
                               <input
                                 type="radio"
                                 name="paymentMethod"
                                 value="تحويل بنكي"
                                 checked={orderForm.paymentMethod === 'تحويل بنكي'}
                                 onChange={() => handleInputChange('paymentMethod', 'تحويل بنكي')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                                className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-gray-900 break-words">تحويل بنكي</div>
@@ -748,31 +748,33 @@ export default function ProductDetailsPage() {
                               </div>
                             </label>
 
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'استلام من المتجر' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'استلام من المتجر' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
                               <input
                                 type="radio"
                                 name="paymentMethod"
                                 value="استلام من المتجر"
                                 checked={orderForm.paymentMethod === 'استلام من المتجر'}
                                 onChange={() => handleInputChange('paymentMethod', 'استلام من المتجر')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                                className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-gray-900 break-words">استلام من المتجر</div>
+                                <div className="text-sm text-gray-600 break-words">ادفع مباشرة في متجرنا عند الاستلام</div>
                               </div>
                             </label>
 
-                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'الدفع عند الاستلام' ? 'border-[#6188a4] bg-[#adb8c1]/20' : 'border-[#adb8c1] bg-[#fdfefd] hover:bg-white'}`}>
+                            <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${orderForm.paymentMethod === 'الدفع عند الاستلام' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 bg-white hover:bg-gray-50'}`}>
                               <input
                                 type="radio"
                                 name="paymentMethod"
                                 value="الدفع عند الاستلام"
                                 checked={orderForm.paymentMethod === 'الدفع عند الاستلام'}
                                 onChange={() => handleInputChange('paymentMethod', 'الدفع عند الاستلام')}
-                                className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] focus:ring-[#6188a4]"
+                                className="mt-1 h-5 w-5 text-blue-600 border-gray-400 focus:ring-blue-600"
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-gray-900 break-words">الدفع عند الاستلام</div>
+                                <div className="text-sm text-gray-600 break-words">ادفع عند استلام طلبك في منزلك</div>
                               </div>
                             </label>
                           </div>
@@ -786,7 +788,7 @@ export default function ProductDetailsPage() {
                             type="checkbox"
                             checked={orderForm.marketingConsent || false}
                             onChange={(e) => handleInputChange('marketingConsent', e.target.checked)}
-                            className="mt-1 h-5 w-5 text-[#6188a4] border-[#adb8c1] rounded focus:ring-[#6188a4]"
+                            className="mt-1 h-5 w-5 text-blue-600 border-gray-400 rounded focus:ring-blue-600"
                             required
                           />
                           <label htmlFor="marketingConsent" className="text-gray-700">
@@ -839,7 +841,7 @@ export default function ProductDetailsPage() {
                             {/* Final Price */}
                             <div className="flex justify-between items-center">
                               <span className="text-lg font-semibold text-gray-900">المجموع النهائي:</span>
-                              <span className="text-xl font-bold text-[#6188a4]">
+                              <span className="text-xl font-bold text-blue-700">
                                 {format(finalPrice)}
                               </span>
                             </div>

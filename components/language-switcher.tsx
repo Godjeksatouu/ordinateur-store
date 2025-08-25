@@ -42,19 +42,25 @@ export function LanguageSwitcher() {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm text-gray-700 shadow-sm"
+        className="inline-flex items-center gap-2 h-11 px-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm text-gray-800 min-w-[100px] transition-colors"
+        aria-label="Select language"
+        aria-expanded={open}
+        aria-haspopup="listbox"
       >
         <span>{languages.find(l => l.code === current)?.label}</span>
         <span className="text-gray-500">▾</span>
       </button>
       {open && (
-        <div className="absolute left-0 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg z-50">
+        <div className="absolute left-0 mt-2 w-40 rounded-xl border border-gray-200 bg-white shadow-lg z-50" role="listbox">
           {languages.map(l => (
             <button
               key={l.code}
               onClick={() => onSelect(l.code)}
-              className={`w-full text-right px-3 py-2 text-sm hover:bg-gray-50 ${current === l.code ? 'font-semibold' : 'text-gray-700'}`}
-              style={current === l.code ? {color: '#3a4956'} : {}}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors first:rounded-t-xl last:rounded-b-xl ${
+                current === l.code ? 'font-semibold text-gray-900 bg-gray-50' : 'text-gray-700'
+              }`}
+              role="option"
+              aria-selected={current === l.code}
             >
               {l.label}
             </button>
