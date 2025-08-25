@@ -92,6 +92,7 @@ function generateInvoiceHTML(client, order, product) {
     <!-- Client & Order Info -->
     <div class="flex justify-between mb-6 text-gray-700 text-sm">
       <div>
+        <p>logo url: ${process.env.FRONTEND_URL}/images/logo.png</p>
         <p>Client: <span class="font-medium">${client.full_name}</span></p>
         <p>Facture n°: <span class="font-medium">${order.id}</span></p>
         <p>Date: <span class="font-medium">${new Intl.DateTimeFormat(["ban", "id"]).format(order.created_at)}</span></p>
