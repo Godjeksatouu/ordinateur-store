@@ -45,6 +45,7 @@ const CURRENCY_NAMES = {
 // Format currency amount with proper symbol and locale
 // Amount should be in DH, will be converted to target currency
 function formatCurrency(amountInDH, currency = 'DH', locale = 'ar') {
+  console.log('formatting currency with : ', amountInDH, currency, locale, typeof amountInDH, typeof currency, typeof locale)
   const symbol = CURRENCY_SYMBOLS[currency] || 'DH';
 
   // Convert from DH to target currency
