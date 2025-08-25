@@ -2298,6 +2298,27 @@ function PaymentMethodsManager() {
               className="w-full border rounded px-3 py-2"
               rows={3}
             />
+            <textarea
+              placeholder="Description in english"
+              value={formData.description_en}
+              onChange={(e) => setFormData({ ...formData, description_en: e.target.value })}
+              className="w-full border rounded px-3 py-2"
+              rows={3}
+            />
+            <textarea
+              placeholder="Description in spanish"
+              value={formData.description_es}
+              onChange={(e) => setFormData({ ...formData, description_es: e.target.value })}
+              className="w-full border rounded px-3 py-2"
+              rows={3}
+            />
+            <textarea
+              placeholder="Description en francais"
+              value={formData.description_fr}
+              onChange={(e) => setFormData({ ...formData, description_fr: e.target.value })}
+              className="w-full border rounded px-3 py-2"
+              rows={3}
+            />
             <div className="flex gap-2">
               <button
                 type="submit"
