@@ -1,14 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/config';
+import { useCheckAdminSlugPage } from '@/hooks/use-check-admin-slug-page';
 
 // Mobile-optimized admin dashboard
 export default function MobileAdminPage() {
+  const params = useParams();
+  const pageSlug = params.pageSlug;
   const [user, setUser] = useState<any>(null);
   const [activeRole, setActiveRole] = useState('products');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { loading: checking, isValid }= useCheckAdminSlugPage();
   const router = useRouter();
 
   const roles = [
@@ -33,7 +37,7 @@ export default function MobileAdminPage() {
     const userData = localStorage.getItem('adminUser');
 
     if (!token || !userData) {
-      router.push('/topnafi/login');
+      router.push(`/admin/${pageSlug}/login`);
       return;
     }
 
@@ -42,7 +46,7 @@ export default function MobileAdminPage() {
       setUser(parsedUser);
     } catch (error) {
       console.error('Error parsing user data:', error);
-      router.push('/topnafi/login');
+      router.push(`/admin/${pageSlug}/login`);
     }
   }, [router]);
 
@@ -50,15 +54,15 @@ export default function MobileAdminPage() {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     localStorage.removeItem('dashboardVersion');
-    router.push('/topnafi/login');
+    router.push(`/admin/${pageSlug}/login`);
   };
 
   const switchToDesktop = () => {
     localStorage.setItem('dashboardVersion', 'desktop');
-    router.push('/topnafi');
+    router.push(`/admin/${pageSlug}`);
   };
 
-  if (!user) {
+  if ((!user) || checking) {
     return (
       <div className="min-h-screen bg-[#fdfefd] flex items-center justify-center">
         <div className="text-center">
@@ -191,6 +195,8 @@ export default function MobileAdminPage() {
 
 // Mobile-optimized components
 function MobileProductsManager() {
+  const params = useParams();
+  const pageSlug = params.pageSlug;
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -253,7 +259,7 @@ function MobileProductsManager() {
           <button
             onClick={() => {
               localStorage.setItem('dashboardVersion', 'desktop');
-              window.location.href = '/topnafi';
+              window.location.href = `/admin/${pageSlug}`;
             }}
             className="w-full bg-[#6188a4] text-white py-3 rounded-lg font-semibold"
           >

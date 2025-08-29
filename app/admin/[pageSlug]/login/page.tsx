@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/config';
+import { useCheckAdminSlugPage } from '@/hooks/use-check-admin-slug-page';
 
 export default function AdminLoginPage() {
+  const params = useParams();
+  const pageSlug = params.pageSlug;
   const [productsCreds, setProductsCreds] = useState({ email: '', password: '' });
   const [ordersCreds, setOrdersCreds] = useState({ email: '', password: '' });
   const [superCreds, setSuperCreds] = useState({ email: '', password: '' });
@@ -12,6 +15,7 @@ export default function AdminLoginPage() {
 
   const [loading, setLoading] = useState<{[k:string]: boolean}>({ products: false, orders: false, super: false });
   const [error, setError] = useState<{[k:string]: string}>({ products: '', orders: '', super: '' });
+  const { loading: checking, isValid }= useCheckAdminSlugPage();
 
   const router = useRouter();
 
@@ -49,9 +53,9 @@ export default function AdminLoginPage() {
 
       // Redirect based on selected dashboard version
       if (dashboardVersion === 'mobile') {
-        router.push('/topnafi/mobile');
+        router.push('/admin/${pageSlug}/mobile');
       } else {
-        router.push('/topnafi');
+        router.push(`/admin/${pageSlug}`);
       }
     } catch (err) {
       setError(prev => ({ ...prev, [key]: 'خطأ في الاتصال بالخادم' }));
@@ -60,7 +64,7 @@ export default function AdminLoginPage() {
     }
   };
 
-  return (
+  return !checking && isValid && (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center" suppressHydrationWarning={true}>
       <div className="max-w-7xl w-full p-6 md:p-8" suppressHydrationWarning={true}>
         <div className="text-center mb-12" suppressHydrationWarning={true}>

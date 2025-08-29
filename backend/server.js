@@ -2176,6 +2176,64 @@ app.put('/api/admin/payment-methods/:id/toggle', authenticateToken, requireRole(
   }
 });
 
+
+// check admin-page route validity
+app.get('/api/admin/settings/admin-page', async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      'SELECT `admin-page` AS adminPage FROM settings LIMIT 1'
+    );
+
+    const validPage = rows?.[0].adminPage?.trim().toLowerCase();
+    const p = ((req.query?.page) ?? "").trim().toLowerCase();
+
+    if (!p || p !== validPage) {
+      return res.status(404).json();
+    }
+
+    return res.json({ pageSlug: rows[0].adminPage });
+
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to check page/route validity' });
+  }
+});
+
+app.put(
+  '/api/admin/settings/admin-page',
+  authenticateToken,
+  requireRole(['product_manager', 'super_admin']),
+  async (req, res) => {
+    try {
+      let { pageSlug } = req.body;
+
+      if (!pageSlug || !pageSlug.trim()) {
+        return res.status(400).json({ error: 'Page slug is required' });
+      }
+
+      // ✅ sanitize: lowercase, trim, replace spaces, remove invalid chars
+      pageSlug = pageSlug
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-')      // spaces → dash
+        .replace(/[^a-z0-9-]/g, ''); // remove anything not a-z, 0-9, -
+
+      if (!pageSlug) {
+        return res.status(400).json({ error: 'Page slug is invalid' });
+      }
+
+      await db.execute(
+        'UPDATE settings SET `admin-page` = ?',
+        [pageSlug]
+      );
+
+      return res.json({ success: true, pageSlug });
+    } catch (error) {
+      console.error('Update admin page error:', error);
+      return res.status(500).json({ error: 'Failed to update admin page' });
+    }
+  }
+);
+
 // Delete payment method (admin only)
 app.delete('/api/admin/payment-methods/:id', authenticateToken, requireRole(['product_manager', 'super_admin']), async (req, res) => {
   try {
